@@ -1,0 +1,11 @@
+/* Kanagawa semantic roles — GTK CSS named colors
+ * Source of truth: ~/lab/dotfiles/kanagawa-palette.md
+ *
+ * Imported from waybar/style.css via `@import "../kanagawa/roles.css";`.
+ * Reference with @content / @chrome / @focus_accent / @dim_accent.
+ */
+
+@define-color content      #1F1F28;
+@define-color chrome       #16161D;
+@define-color focus_accent #2D4F67;
+@define-color dim_accent   #2A2A37;

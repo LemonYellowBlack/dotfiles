@@ -1,0 +1,17 @@
+{
+  "layer": "top",
+  "position": "bottom",
+  "height": 30,
+  "modules-left": ["battery"],
+  "modules-center": [],
+  "modules-right": ["clock"],
+  "battery": {
+    "format": "{icon}",
+    "format-icons": ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"],
+    "tooltip-format": "{capacity}% — {timeTo}"
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "tooltip-format": "{:%A, %B %d}"
+  }
+}

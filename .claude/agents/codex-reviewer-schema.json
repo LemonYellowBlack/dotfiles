@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+          "category": { "type": "string" },
+          "file": { "type": "string", "description": "path/to/file.ext:line_number" },
+          "finding": { "type": "string" },
+          "recommendation": { "type": "string" },
+          "effort": { "type": "string", "enum": ["trivial", "small", "medium", "large"] }
+        },
+        "required": ["severity", "category", "file", "finding", "recommendation", "effort"]
+      }
+    }
+  },
+  "required": ["findings"]
+}

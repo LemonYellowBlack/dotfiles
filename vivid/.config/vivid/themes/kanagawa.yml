@@ -1,0 +1,176 @@
+#
+# Kanagawa (Wave) theme for vivid
+#
+# Palette reference: ~/lab/dotfiles/kanagawa-palette.md
+# Upstream: https://github.com/rebelot/kanagawa.nvim
+#
+
+colors:
+  fujiWhite:      "DCD7BA" # default fg
+  oldWhite:       "C8C093"
+  sumiInk3:       "1F1F28" # default bg
+  sumiInk4:       "2A2A37"
+  sumiInk5:       "363646"
+  fujiGray:       "727169" # comments
+  katanaGray:     "717C7C"
+
+  crystalBlue:    "7E9CD8" # functions (primary blue)
+  springBlue:     "7FB4CA" # specials
+  springViolet2:  "9CABCA" # brackets
+  lightBlue:      "A3D4D5"
+  dragonBlue:     "658594" # info
+  waveAqua1:      "6A9589" # hint
+  waveAqua2:      "7AA89F" # types
+  springGreen:    "98BB6C" # strings
+
+  oniViolet:      "957FB8" # statements
+  oniViolet2:     "B8B4D0"
+  sakuraPink:     "D27E99"
+
+  carpYellow:     "E6C384" # identifiers
+  surimiOrange:   "FFA066" # constants, params
+  boatYellow2:    "C0A36E"
+
+  waveRed:        "E46876" # standout
+  peachRed:       "FF5D62"
+  samuraiRed:     "E82424" # error
+  roninYellow:    "FF9E3B" # warning
+
+  winterRed:      "43242B" # diff delete bg
+  winterYellow:   "49443C" # diff change bg
+  winterGreen:    "2B3328" # diff add bg
+  winterBlue:     "252535" # diff line bg
+
+core: # See `dircolors -p` for explanations
+  normal_text:
+    foreground: fujiGray
+
+  regular_file: {}
+
+  reset_to_normal:
+    foreground: fujiGray
+
+  directory:
+    foreground: crystalBlue
+    font-style: bold
+
+  executable_file:
+    foreground: springGreen
+    font-style: bold
+
+  file_with_capability:
+    background: sumiInk4
+
+  setuid:
+    background: sumiInk4
+
+  setgid:
+    background: sumiInk4
+
+  sticky:
+    background: sumiInk4
+
+  sticky_other_writable:
+    foreground: sumiInk3
+    background: crystalBlue
+    font-style: bold
+
+  other_writable:
+    foreground: crystalBlue
+    background: sumiInk4
+    font-style: bold
+
+  symlink:
+    foreground: springBlue
+    font-style: italic
+
+  broken_symlink:
+    foreground: sumiInk3
+    background: samuraiRed
+
+  missing_symlink_target:
+    foreground: samuraiRed
+
+  multi_hard_link: {}
+
+  socket:
+    foreground: waveAqua1
+    background: winterBlue
+    font-style: bold
+
+  fifo:
+    foreground: surimiOrange
+    background: winterYellow
+    font-style: bold
+
+  door:
+    foreground: springGreen
+    background: winterGreen
+    font-style: bold
+
+  block_device:
+    foreground: waveRed
+    background: winterRed
+    font-style: bold
+
+  character_device:
+    foreground: carpYellow
+    background: winterYellow
+    font-style: bold
+
+executable: # Libs and binaries without exec bit
+  foreground: waveAqua1
+
+archives:
+  foreground: waveRed
+  font-style: bold
+
+media:
+  audio:
+    foreground: dragonBlue
+    font-style: bold
+  image:
+    foreground: oniViolet
+    font-style: bold
+  video:
+    foreground: waveAqua2
+    font-style: bold
+  fonts:
+    foreground: waveAqua1
+    font-style: bold
+  3d:
+    foreground: oniViolet
+    font-style: bold
+
+office:
+  foreground: oniViolet2
+  font-style: bold
+
+text:
+  foreground: fujiWhite
+  configuration:
+    foreground: surimiOrange
+    dockerfile:
+      foreground: waveAqua2
+  licenses:
+    foreground: fujiWhite
+    font-style: bold
+  special:
+    foreground: springBlue
+    font-style: bold
+  todo:
+    foreground: lightBlue
+    font-style: bold
+
+markup:
+  foreground: fujiWhite
+
+programming:
+  foreground: carpYellow
+  tooling:
+    foreground: dragonBlue
+    continuous-integration:
+      foreground: waveAqua2
+
+unimportant:
+  foreground: sumiInk5

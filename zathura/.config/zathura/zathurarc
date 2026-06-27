@@ -1,0 +1,37 @@
+# Kanagawa (Wave) — see ~/lab/dotfiles/kanagawa-palette.md
+
+set default-bg              "#1F1F28"
+set default-fg              "#DCD7BA"
+
+set statusbar-bg            "#16161D"
+set statusbar-fg            "#C8C093"
+
+set inputbar-bg             "#1F1F28"
+set inputbar-fg             "#DCD7BA"
+
+set notification-bg         "#1F1F28"
+set notification-fg         "#DCD7BA"
+set notification-error-bg   "#1F1F28"
+set notification-error-fg   "#E82424"
+set notification-warning-bg "#1F1F28"
+set notification-warning-fg "#FF9E3B"
+
+set highlight-color         "#2D4F67"
+set highlight-active-color  "#7E9CD8"
+
+set completion-bg           "#1F1F28"
+set completion-fg           "#DCD7BA"
+set completion-highlight-bg "#2A2A37"
+set completion-highlight-fg "#7E9CD8"
+
+set index-bg                "#1F1F28"
+set index-fg                "#DCD7BA"
+set index-active-bg         "#2A2A37"
+set index-active-fg         "#7E9CD8"
+
+set recolor-lightcolor      "#1F1F28"
+set recolor-darkcolor       "#DCD7BA"
+set recolor                 true
+
+set render-loading-bg       "#1F1F28"
+set render-loading-fg       "#DCD7BA"

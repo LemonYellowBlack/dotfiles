@@ -1,0 +1,37 @@
+# Kanagawa (Wave) — see ~/lab/dotfiles/kanagawa-palette.md
+
+format = """$directory$git_branch$git_status$python$cmd_duration$status$character"""
+
+[character]
+success_symbol = "[❯](fg:#E6C384)"
+error_symbol = "[❯](fg:#FF5D62)"
+
+[status]
+disabled = false
+symbol = "✗ "
+format = '[$symbol$status]($style) '
+style = "fg:#FF5D62"
+
+[directory]
+style = "fg:#7E9CD8"
+truncation_length = 3
+truncate_to_repo = true
+
+[git_branch]
+symbol = ""
+style = "fg:#957FB8"
+format = '[$symbol$branch]($style) '
+
+[git_status]
+style = "fg:#FFA066"
+format = '([$all_status$ahead_behind]($style) )'
+
+[cmd_duration]
+min_time = 2_000
+style = "fg:#727169"
+format = "[$duration]($style) "
+
+[python]
+format = '[($virtualenv )]($style)'
+style = "fg:#7E9CD8"
+python_binary = []

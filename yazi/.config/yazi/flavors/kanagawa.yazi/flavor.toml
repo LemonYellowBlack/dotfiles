@@ -1,0 +1,125 @@
+# Kanagawa (Wave) — see ~/lab/dotfiles/kanagawa-palette.md
+# Upstream: https://github.com/rebelot/kanagawa.nvim
+
+[mgr]
+marker_copied = { fg = "#98BB6C", bg = "#98BB6C" }
+marker_cut = { fg = "#E46876", bg = "#E46876" }
+marker_marked = { fg = "#957FB8", bg = "#957FB8" }
+marker_selected = { fg = "#FFA066", bg = "#FFA066" }
+
+cwd = { fg = "#E6C384" }
+
+find_keyword = { fg = "#FFA066", bg = "#1F1F28" }
+find_position = {}
+
+count_copied = { fg = "#1F1F28", bg = "#98BB6C" }
+count_cut = { fg = "#1F1F28", bg = "#E46876" }
+count_selected = { fg = "#1F1F28", bg = "#FFA066" }
+
+border_symbol = "│"
+border_style = { fg = "#DCD7BA" }
+
+[indicator]
+parent = { reversed = true }
+current = { reversed = true }
+preview = { reversed = true }
+
+[tabs]
+active = { fg = "#1F1F28", bg = "#7E9CD8" }
+inactive = { fg = "#7E9CD8", bg = "#2A2A37" }
+
+sep_inner = { open = "", close = "" }
+sep_outer = { open = "", close = "" }
+
+
+[mode]
+normal_main = { fg = "#1F1F28", bg = "#7E9CD8" }
+normal_alt = { fg = "#7E9CD8", bg = "#2A2A37" }
+select_main = { fg = "#1F1F28", bg = "#957FB8" }
+select_alt = { fg = "#957FB8", bg = "#2A2A37" }
+unset_main = { fg = "#1F1F28", bg = "#E6C384" }
+unset_alt = { fg = "#E6C384", bg = "#2A2A37" }
+
+
+[status]
+sep_left = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+overall = { fg = "#C8C093", bg = "#16161D" }
+
+progress_label = { fg = "#7E9CD8", bold = true }
+progress_normal = { fg = "#2A2A37", bg = "#1F1F28" }
+progress_error = { fg = "#2A2A37", bg = "#1F1F28" }
+
+perm_type = { fg = "#98BB6C" }
+perm_read = { fg = "#E6C384" }
+perm_write = { fg = "#FF5D62" }
+perm_exec = { fg = "#7AA89F" }
+perm_sep = { fg = "#957FB8" }
+
+
+[pick]
+border = { fg = "#7E9CD8" }
+active = { fg = "#957FB8", bold = true }
+inactive = {}
+
+[input]
+border = { fg = "#7E9CD8" }
+title = {}
+value = {}
+selected = { reversed = true }
+
+[completion]
+border = { fg = "#7E9CD8" }
+active = { reversed = true }
+inactive = {}
+
+[tasks]
+border = { fg = "#7E9CD8" }
+title = {}
+hovered = { fg = "#957FB8" }
+
+[which]
+cols = 2
+separator = " - "
+separator_style = { fg = "#727169" }
+mask = { bg = "#16161D" }
+rest = { fg = "#727169" }
+cand = { fg = "#7E9CD8" }
+desc = { fg = "#54546D" }
+
+[help]
+on = { fg = "#7AA89F" }
+run = { fg = "#957FB8" }
+desc = {}
+hovered = { reversed = true, bold = true }
+footer = { fg = "#1F1F28", bg = "#DCD7BA" }
+
+[notify]
+title_info = { fg = "#98BB6C" }
+title_warn = { fg = "#E6C384" }
+title_error = { fg = "#E82424" }
+
+[filetype]
+rules = [
+    # images
+    { mime = "image/*", fg = "#E6C384" },
+
+    # media
+    { mime = "{audio,video}/*", fg = "#957FB8" },
+
+    # archives
+    { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "#E46876" },
+
+    # documents
+    { mime = "application/{pdf,doc,rtf,vnd.*}", fg = "#6A9589" },
+
+    # broken links
+    { url = "*", is = "orphan", fg = "#C34043" },
+
+    # executables
+    { url = "*", is = "exec", fg = "#76946A" },
+
+    # fallback
+    { url = "*", fg = "#DCD7BA" },
+    { url = "*/", fg = "#7E9CD8" },
+]

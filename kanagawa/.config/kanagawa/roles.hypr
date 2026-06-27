@@ -1,0 +1,9 @@
+# Kanagawa semantic roles — hyprland variables
+# Source of truth: ~/lab/dotfiles/kanagawa-palette.md
+#
+# Sourced from hyprland.conf via `source = ~/.config/kanagawa/roles.hypr`.
+
+$content      = rgba(1F1F28ff)
+$chrome       = rgba(16161Dff)
+$focus_accent = rgba(2D4F67ff)
+$dim_accent   = rgba(2A2A37ff)

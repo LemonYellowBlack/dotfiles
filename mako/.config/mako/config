@@ -1,0 +1,13 @@
+# Kanagawa (Wave) — see ~/lab/dotfiles/kanagawa-palette.md
+font=Maple Mono NF 10
+background-color=#1F1F28ee
+text-color=#DCD7BAff
+border-color=#2D4F67ff
+border-size=1
+border-radius=4
+padding=10
+margin=10
+width=200
+default-timeout=4000
+anchor=top-right
+text-alignment=center

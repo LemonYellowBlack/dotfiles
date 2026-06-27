@@ -1,0 +1,26 @@
+# Kanagawa (Wave) — palette from ~/lab/dotfiles/kanagawa-palette.md
+# general
+background = '#1F1F28'           # sumiInk3
+border_fg = '#54546D'            # sumiInk6
+text_fg = '#DCD7BA'              # fujiWhite
+dimmed_text_fg = '#727169'       # fujiGray
+# input
+input_text_fg = '#E6C384'        # carpYellow
+result_count_fg = '#7FB4CA'      # springBlue
+# results
+result_name_fg = '#9CABCA'       # springViolet2
+result_line_number_fg = '#DCA561' # autumnYellow
+result_value_fg = '#C8C093'      # oldWhite
+selection_fg = '#DCD7BA'         # fujiWhite
+selection_bg = '#2D4F67'         # waveBlue2 (matches kitty selection_background)
+match_fg = '#FFA066'             # surimiOrange
+# preview
+preview_title_fg = '#957FB8'     # oniViolet
+# modes
+channel_mode_fg = '#1F1F28'
+channel_mode_bg = '#98BB6C'      # springGreen
+remote_control_mode_fg = '#1F1F28'
+remote_control_mode_bg = '#E6C384' # carpYellow
+action_picker_mode_fg = '#1F1F28'
+action_picker_mode_bg = '#D27E99' # sakuraPink
+send_to_channel_mode_fg = '#7FB4CA' # springBlue

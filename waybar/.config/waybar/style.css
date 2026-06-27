@@ -1,0 +1,19 @@
+@import "../kanagawa/roles.css";
+
+* {
+  font-family: monospace, "Symbols Nerd Font";
+  font-size: 14px;
+}
+
+window#waybar {
+  background: alpha(@content, 0.78);
+  color: #DCD7BA;
+}
+
+#battery {
+  padding: 0 0 0 22px;
+}
+
+#clock {
+  padding: 0 22px 0 0;
+}

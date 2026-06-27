@@ -1,0 +1,38 @@
+[user]
+	email = rwszymczak@proton.me
+	name = lemonyellowblack
+[pull]
+	rebase = false
+	ff = only
+[core]
+	hooksPath = ~/.config/git/hooks
+	pager = delta
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	# Kanagawa (Wave) — see ~/lab/dotfiles/kanagawa-palette.md
+	navigate = true
+	light = false
+	line-numbers = true
+	syntax-theme = kanagawa
+	minus-style = syntax "#43242B"
+	minus-emph-style = syntax "#5E2E2B"
+	plus-style = syntax "#2B3328"
+	plus-emph-style = syntax "#3E5232"
+	line-numbers-minus-style = "#E46876"
+	line-numbers-plus-style = "#98BB6C"
+	line-numbers-zero-style = "#54546D"
+	line-numbers-left-style = "#54546D"
+	line-numbers-right-style = "#54546D"
+	file-style = "#7E9CD8" bold
+	file-decoration-style = "#54546D"
+	hunk-header-style = "#E6C384" bold
+	hunk-header-file-style = "#7E9CD8"
+	hunk-header-line-number-style = "#727169"
+	hunk-header-decoration-style = "#54546D" box
+	commit-decoration-style = "#658594" box ul
+	blame-palette = "#1F1F28" "#2A2A37" "#363646"
+[merge]
+	conflictstyle = zdiff3
+[init]
+	defaultBranch = main

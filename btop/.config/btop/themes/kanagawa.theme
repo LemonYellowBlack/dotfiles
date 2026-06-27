@@ -1,0 +1,94 @@
+#-------------------------------------#
+# Kanagawa (Wave) — see ~/lab/dotfiles/kanagawa-palette.md
+# Upstream palette: https://github.com/rebelot/kanagawa.nvim
+#-------------------------------------#
+
+# Main background. Empty for terminal default.
+theme[main_bg]="#1F1F28"
+
+# Main text color
+theme[main_fg]="#DCD7BA"
+
+# Title color for boxes
+theme[title]="#E6C384"
+
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="#7E9CD8"
+
+# Background color of selected items
+theme[selected_bg]="#2D4F67"
+
+# Foreground color of selected items
+theme[selected_fg]="#DCD7BA"
+
+# Color of inactive/disabled text
+theme[inactive_fg]="#727169"
+
+# Color of text appearing on top of graphs (i.e. cpu and mem graphs)
+theme[graph_text]="#727169"
+
+# Background color of meters/bars
+theme[meter_bg]="#363646"
+
+# Misc box colors and process box accents
+theme[proc_misc]="#7AA89F"
+
+# CPU box outline color
+theme[cpu_box]="#2A2A37"
+
+# Memory/disks box outline color
+theme[mem_box]="#2A2A37"
+
+# Net box outline color
+theme[net_box]="#2A2A37"
+
+# Processes box outline color
+theme[proc_box]="#2A2A37"
+
+# Box divider line and small boxes line color
+theme[div_line]="#2A2A37"
+
+# Temperature graph colors (low -> high)
+theme[temp_start]="#98BB6C"
+theme[temp_mid]="#E6C384"
+theme[temp_end]="#E82424"
+
+# CPU graph colors (low -> high)
+theme[cpu_start]="#98BB6C"
+theme[cpu_mid]="#7E9CD8"
+theme[cpu_end]="#957FB8"
+
+# Memory/Disk free meter colors
+theme[free_start]="#76946A"
+theme[free_mid]="#98BB6C"
+theme[free_end]="#7AA89F"
+
+# Memory/Disk cached meter colors
+theme[cached_start]="#658594"
+theme[cached_mid]="#7E9CD8"
+theme[cached_end]="#7FB4CA"
+
+# Memory/Disk available meter colors
+theme[available_start]="#C0A36E"
+theme[available_mid]="#E6C384"
+theme[available_end]="#FFA066"
+
+# Memory/Disk used meter colors
+theme[used_start]="#C34043"
+theme[used_mid]="#E46876"
+theme[used_end]="#E82424"
+
+# Download speed graph colors
+theme[download_start]="#658594"
+theme[download_mid]="#7E9CD8"
+theme[download_end]="#7FB4CA"
+
+# Upload speed graph colors
+theme[upload_start]="#C34043"
+theme[upload_mid]="#E46876"
+theme[upload_end]="#FFA066"
+
+# Process box graph colors
+theme[process_start]="#76946A"
+theme[process_mid]="#E6C384"
+theme[process_end]="#FFA066"
