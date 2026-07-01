@@ -182,8 +182,16 @@ vim.keymap.set("n", "-", "<cmd>Oil<cr>", {})
 -- blink.cmp
 ----------------------------------------------------------------------
 require("blink.cmp").setup({
-  keymap = { preset = "default" },
+  keymap = {
+    preset = "default",
+    ["<CR>"] = {},
+  },
   sources = { default = { "lsp", "path", "snippets", "buffer" } },
+  completion = {
+    list = {
+      selection = { preselect = true, auto_insert = false },
+    },
+  },
 })
 
 ----------------------------------------------------------------------
