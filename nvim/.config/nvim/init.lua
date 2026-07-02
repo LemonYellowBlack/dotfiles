@@ -120,9 +120,11 @@ vim.lsp.config("clangd", {})
 --   vim.lsp.config("ols", { init_options = { checker_args = "-strict-style" } })
 vim.lsp.enable({ "gopls", "clangd", "ols" })
 
--- Diagnostics: 0.11 ships only underline + signs by default; enable inline text.
+-- Diagnostics: keep underline + gutter signs (0.11 defaults) but disable inline
+-- virtual_text, which doesn't wrap and runs off-screen for long messages.
+-- Read the full message on the current line via <leader>e (open_float, below).
 vim.diagnostic.config({
-  virtual_text = { spacing = 2, prefix = "●" },
+  virtual_text = false,
   severity_sort = true,
   float = { border = "rounded", source = true },
 })
