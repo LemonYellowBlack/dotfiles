@@ -1,6 +1,6 @@
 # Kanagawa (Wave) — see ~/lab/dotfiles/kanagawa-palette.md
 
-format = """$directory$git_branch$git_status$python$cmd_duration$status$character"""
+format = """${env_var.WSL_DISTRO_NAME}$hostname$directory$git_branch$git_status$python$cmd_duration$status$line_break$character"""
 
 [character]
 success_symbol = "[❯](fg:#E6C384)"
@@ -18,9 +18,10 @@ truncation_length = 3
 truncate_to_repo = true
 
 [git_branch]
-symbol = ""
+# symbol = " "
 style = "fg:#957FB8"
-format = '[$symbol$branch]($style) '
+#format = '[$symbol$branch]($style) '
+format = '[$branch]($style) '
 
 [git_status]
 style = "fg:#FFA066"
@@ -35,3 +36,15 @@ format = "[$duration]($style) "
 format = '[($virtualenv )]($style)'
 style = "fg:#7E9CD8"
 python_binary = []
+
+# Environment indicator: WSL distro name (csc/archlinux) when in WSL,
+# remote hostname when SSH'd into a box. Neither shows on a plain local Linux box.
+[env_var.WSL_DISTRO_NAME]
+variable = "WSL_DISTRO_NAME"
+format = "[$env_value]($style) "
+style = "fg:#7AA89F"
+
+[hostname]
+ssh_only = true
+format = "[$hostname]($style) "
+style = "fg:#7AA89F"
