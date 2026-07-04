@@ -17,6 +17,8 @@ compinit
 # End of lines added by compinstall
 
 alias ls='ls -aF'
+# clear also resets the first-prompt flag so a cleared screen has no top gap
+alias clear='command clear; unset _PROMPT_NEWLINE_READY'
 alias zload='source ~/.zshrc'
 alias bwsesh='export BW_SESSION=$(bw unlock --raw)'
 alias vlt='cd ~/.vlt-mnt && ls'
@@ -41,6 +43,18 @@ function y() {
 }
 
 eval "$(starship init zsh)"
+
+autoload -Uz add-zsh-hook
+# Blank line between prompts for breathing room, but not before the
+# first prompt of the session (avoids a gap at the top of a fresh terminal).
+_prompt_newline() {
+	if [[ -n $_PROMPT_NEWLINE_READY ]]; then
+		print
+	fi
+	_PROMPT_NEWLINE_READY=1
+}
+add-zsh-hook precmd _prompt_newline
+
 eval "$(zoxide init zsh)"
 eval "$(direnv hook zsh)"
 

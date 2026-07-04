@@ -2,6 +2,8 @@
 
 format = """${env_var.WSL_DISTRO_NAME}$hostname$directory$git_branch$git_status$python$cmd_duration$status$line_break$character"""
 
+add_newline = false
+
 [character]
 success_symbol = "[❯](fg:#E6C384)"
 error_symbol = "[❯](fg:#FF5D62)"
@@ -45,6 +47,6 @@ format = "[$env_value]($style) "
 style = "fg:#7AA89F"
 
 [hostname]
-ssh_only = true
+ssh_only = false
 format = "[$hostname]($style) "
 style = "fg:#7AA89F"
