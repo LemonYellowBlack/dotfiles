@@ -1,0 +1,12 @@
+#!/bin/zsh
+# Move all windows from one Hyprland workspace to another.
+# Usage: move-workspace-contents <source> <destination>
+
+source=${1:?usage: move-workspace-contents <source> <destination>}
+destination=${2:?usage: move-workspace-contents <source> <destination>}
+
+hyprctl clients -j | jq -r --argjson ws "$source" \
+  '.[] | select(.workspace.id == $ws) | .address' |
+while read addr; do
+  hyprctl dispatch movetoworkspacesilent "$destination,address:$addr"
+done

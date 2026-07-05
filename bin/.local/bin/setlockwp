@@ -1,0 +1,20 @@
+#!/bin/bash
+WALLDIR="$HOME/Pictures/Wallpapers"
+CONF="$HOME/.config/hypr/hyprlock.conf"
+
+if [[ -n "$1" ]]; then
+  IMG="$WALLDIR/$1"
+else
+  IMG=$(find "$WALLDIR" -type f \( -name '*.jpg' -o -name '*.png' -o -name '*.webp' \) | sort | fzf --prompt="lock wallpaper> ")
+fi
+
+if [[ -z "$IMG" || ! -f "$IMG" ]]; then
+  echo "No wallpaper selected or file not found."
+  exit 1
+fi
+
+REPLACEMENT="    # setlockwp START\n    path = $IMG\n    # setlockwp END"
+
+sed -i "/# setlockwp START/,/# setlockwp END/c\\$REPLACEMENT" "$CONF"
+
+echo "Lock wallpaper set to $(basename "$IMG")"

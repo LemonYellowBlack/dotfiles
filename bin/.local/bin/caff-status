@@ -1,0 +1,12 @@
+#!/bin/sh
+PIDFILE="${XDG_RUNTIME_DIR:-/tmp}/caff.pid"
+
+if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+    notify-send -t 3000 \
+        -h string:x-canonical-private-synchronous:caff-status \
+        "☕ Caffeine On" ""
+else
+    notify-send -t 3000 \
+        -h string:x-canonical-private-synchronous:caff-status \
+        "☕ Caffeine Off" ""
+fi

@@ -1,0 +1,23 @@
+#!/bin/zsh
+PIDFILE="${XDG_RUNTIME_DIR:-/tmp}/caff.pid"
+HYPRIDLE_PIDFILE="${XDG_RUNTIME_DIR:-/tmp}/hypridle-stopped.flag"
+
+if [[ -f "$PIDFILE" ]] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+    kill "$(cat "$PIDFILE")"
+    rm "$PIDFILE"
+    systemctl --user start hypridle.service 2>/dev/null
+    hyprctl dispatch exec hypridle 2>/dev/null
+    rm -f "$HYPRIDLE_PIDFILE"
+    notify-send -t 3000 \
+        -h string:x-canonical-private-synchronous:caff \
+        "☕ Caffeine Off" ""
+else
+    # Inhibit lid switch and system idle suspend
+    systemd-inhibit --what=handle-lid-switch:idle --who="caff" --why="Keep machine awake" sleep infinity &
+    echo $! > "$PIDFILE"
+    # Stop hypridle so it doesn't fire the 30-min suspend
+    pkill -x hypridle && touch "$HYPRIDLE_PIDFILE"
+    notify-send -t 3000 \
+        -h string:x-canonical-private-synchronous:caff \
+        "☕ Caffeine On" ""
+fi

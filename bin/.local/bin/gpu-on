@@ -1,0 +1,35 @@
+#!/bin/bash
+# Load NVIDIA modules and verify the dGPU is available.
+# Usage: sudo gpu-on
+
+set -euo pipefail
+
+if [[ $EUID -ne 0 ]]; then
+    echo "error: must run as root (sudo gpu-on)" >&2
+    exit 1
+fi
+
+if grep -q '^nvidia ' /proc/modules; then
+    echo "nvidia modules already loaded"
+    nvidia-smi --query-gpu=name,power.draw,pstate --format=csv,noheader
+    exit 0
+fi
+
+echo "Loading nvidia modules..."
+modprobe nvidia_drm modeset=1
+# nvidia, nvidia_modeset, nvidia_uvm are pulled in as dependencies
+
+# Thermal tuning. The chassis can't dissipate the GTX 1650's 50W default —
+# previous sessions hit ~97C and tripped HW Thermal Slowdown. See thermals.md.
+# Persistence mode keeps the limits applied even when no client is attached.
+nvidia-smi -pm 1 >/dev/null
+nvidia-smi -pl 25 >/dev/null         # 25W power cap (down from 50W default / 30W EC cap)
+nvidia-smi -lgc 300,1500 >/dev/null  # cap boost at 1500 MHz (max is 2100)
+
+echo "Verifying..."
+if nvidia-smi --query-gpu=name,power.draw,power.limit,clocks.max.gr,pstate --format=csv,noheader; then
+    echo "dGPU is ready"
+else
+    echo "error: nvidia-smi failed — modules loaded but GPU not responding" >&2
+    exit 1
+fi

@@ -1,0 +1,33 @@
+#!/bin/bash
+# Unload NVIDIA modules to save power.
+# Usage: sudo gpu-off
+#
+# Will fail if any process is using the GPU (check nvidia-smi first).
+
+set -euo pipefail
+
+if [[ $EUID -ne 0 ]]; then
+    echo "error: must run as root (sudo gpu-off)" >&2
+    exit 1
+fi
+
+if ! grep -q '^nvidia ' /proc/modules; then
+    echo "nvidia modules not loaded — nothing to do"
+    exit 0
+fi
+
+# Check for GPU processes
+if nvidia-smi --query-compute-apps=pid,name --format=csv,noheader 2>/dev/null | grep -q .; then
+    echo "error: processes are using the GPU:" >&2
+    nvidia-smi --query-compute-apps=pid,name --format=csv,noheader >&2
+    echo "Stop them first, then retry." >&2
+    exit 1
+fi
+
+echo "Unloading nvidia modules..."
+for mod in nvidia_drm nvidia_uvm nvidia_modeset nvidia; do
+    if grep -q "^$mod " /proc/modules; then
+        rmmod "$mod"
+    fi
+done
+echo "nvidia modules unloaded — dGPU is off"

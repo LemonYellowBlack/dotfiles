@@ -1,0 +1,35 @@
+#!/bin/sh
+
+LOCK="/tmp/batterypopup-persist"
+
+if [ "$1" = "--persist" ]; then
+    if [ -f "$LOCK" ]; then
+        makoctl dismiss -n "$(cat "$LOCK")" 2>/dev/null
+        rm -f "$LOCK"
+        exit 0
+    fi
+    timeout=0
+    category=persist
+else
+    rm -f "$LOCK"
+    timeout=5000
+    category=
+fi
+
+bat_cap=$(cat /sys/class/power_supply/BAT0/capacity)
+bat_status=$(cat /sys/class/power_supply/BAT0/status)
+
+case "$bat_status" in
+    Charging)    icon="󰂄" ;;
+    Discharging) icon="󰁹" ;;
+    Full)        icon="󰁹" ;;
+    *)           icon="󰂑" ;;
+esac
+
+notify-send -t "$timeout" -p -c "$category" \
+    -h string:x-canonical-private-synchronous:batterypopup \
+    "$icon $bat_cap% · $bat_status" "" > /tmp/batterypopup-id
+
+if [ "$1" = "--persist" ]; then
+    mv /tmp/batterypopup-id "$LOCK"
+fi

@@ -1,0 +1,78 @@
+#!/bin/bash
+# cpu-templog — log CPU thermals, fan RPMs, package power, and throttle counters
+# to a daily CSV. Parallel to gpu-templog; runs unconditionally since the CPU is
+# always present. Reads the current workload tag (set via the `tag` shell
+# function) and appends it to each row.
+
+set -u
+
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/cpu-templog"
+TAG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/templog/tag"
+mkdir -p "$LOG_DIR" "$(dirname "$TAG_FILE")"
+
+INTERVAL="${CPU_TEMPLOG_INTERVAL:-10}"
+HEADER="timestamp,pkg_temp_c,fan1_rpm,fan2_rpm,pkg_power_w,core_throttle_total,pkg_throttle_total,tag"
+
+# hwmon ordinals aren't stable across reboots — resolve by `name` once at startup.
+hwmon_by_name() {
+    local target=$1 d
+    for d in /sys/class/hwmon/hwmon*; do
+        [[ -r "$d/name" && "$(cat "$d/name" 2>/dev/null)" == "$target" ]] && { echo "$d"; return; }
+    done
+}
+
+CORETEMP="$(hwmon_by_name coretemp)"
+DELLSMM="$(hwmon_by_name dell_smm)"
+PKG_TEMP_FILE="${CORETEMP:-/nonexistent}/temp1_input"   # coretemp temp1 = "Package id 0"
+FAN1_FILE="${DELLSMM:-/nonexistent}/fan1_input"
+FAN2_FILE="${DELLSMM:-/nonexistent}/fan2_input"
+ENERGY_FILE="/sys/class/powercap/intel-rapl:0/energy_uj"
+
+read_or_empty() { [[ -r $1 ]] && cat "$1" 2>/dev/null || echo ""; }
+
+sum_core_throttle() {
+    local total=0 v f
+    for f in /sys/devices/system/cpu/cpu*/thermal_throttle/core_throttle_count; do
+        v=$(read_or_empty "$f")
+        [[ -n $v ]] && total=$((total + v))
+    done
+    echo "$total"
+}
+
+current_tag() {
+    # Strip newlines and commas to keep the CSV column safe.
+    [[ -r $TAG_FILE ]] && tr -d '\n,' < "$TAG_FILE" || true
+}
+
+prev_energy=$(read_or_empty "$ENERGY_FILE")
+prev_time=$(date +%s.%N)
+
+while true; do
+    sleep "$INTERVAL"
+
+    log="$LOG_DIR/$(date +%Y-%m-%d).csv"
+    [[ -f $log ]] || echo "$HEADER" > "$log"
+
+    ts=$(date '+%Y/%m/%d %H:%M:%S.%3N')
+    pkg_temp_mC=$(read_or_empty "$PKG_TEMP_FILE")
+    pkg_temp=$(( ${pkg_temp_mC:-0} / 1000 ))
+    fan1=$(read_or_empty "$FAN1_FILE")
+    fan2=$(read_or_empty "$FAN2_FILE")
+
+    cur_energy=$(read_or_empty "$ENERGY_FILE")
+    cur_time=$(date +%s.%N)
+    pkg_power=""
+    if [[ -n $cur_energy && -n $prev_energy ]]; then
+        # microjoules delta / seconds / 1e6 = watts. Suppress wrap / suspend artifacts.
+        pkg_power=$(awk -v ce="$cur_energy" -v pe="$prev_energy" -v ct="$cur_time" -v pt="$prev_time" \
+            'BEGIN { d=ce-pe; t=ct-pt; w=(t>0)?d/t/1e6:-1; if (d>=0 && t>0 && w<200) printf "%.2f", w }')
+    fi
+    prev_energy=$cur_energy
+    prev_time=$cur_time
+
+    core_thr=$(sum_core_throttle)
+    pkg_thr=$(read_or_empty /sys/devices/system/cpu/cpu0/thermal_throttle/package_throttle_count)
+    tag=$(current_tag)
+
+    echo "$ts,$pkg_temp,$fan1,$fan2,$pkg_power,$core_thr,$pkg_thr,$tag" >> "$log"
+done

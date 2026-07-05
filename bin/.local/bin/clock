@@ -1,0 +1,3 @@
+#!/bin/zsh
+printf "\n"
+printf "  %-10s %s\n" "time" "$(date '+%a %b %d  %H:%M')"

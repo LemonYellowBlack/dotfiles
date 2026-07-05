@@ -1,0 +1,32 @@
+#!/bin/bash
+WALLDIR="$HOME/Pictures/Wallpapers"
+CONF="$HOME/.config/hypr/hyprpaper.conf"
+
+if [[ -n "$1" ]]; then
+  IMG="$WALLDIR/$1"
+else
+  IMG=$(find "$WALLDIR" -type f \( -name '*.jpg' -o -name '*.png' -o -name '*.webp' \) | sort | fzf --prompt="wallpaper> ")
+fi
+
+if [[ -z "$IMG" || ! -f "$IMG" ]]; then
+  echo "No wallpaper selected or file not found."
+  exit 1
+fi
+
+cat > "$CONF" <<EOF
+preload = $IMG
+
+wallpaper {
+  monitor = eDP-1
+  path = $IMG
+  fit_mode = cover
+}
+
+splash = false
+EOF
+
+hyprctl hyprpaper unload all
+hyprctl hyprpaper preload "$IMG"
+hyprctl hyprpaper wallpaper "eDP-1,$IMG"
+
+echo "Wallpaper set to $(basename "$IMG")"

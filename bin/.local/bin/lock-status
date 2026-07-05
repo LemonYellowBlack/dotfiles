@@ -1,0 +1,14 @@
+#!/bin/sh
+# Show whether automatic screen locking is enabled.
+# Bound to SUPER+F9 in Hyprland.
+FLAG="${XDG_RUNTIME_DIR:-/tmp}/hypr-nolock"
+
+if [ -f "$FLAG" ]; then
+    notify-send -t 3000 \
+        -h string:x-canonical-private-synchronous:lock \
+        " Auto-Lock Off" "Idle & lid close won't lock"
+else
+    notify-send -t 3000 \
+        -h string:x-canonical-private-synchronous:lock \
+        " Auto-Lock On" "Idle & lid close will lock"
+fi

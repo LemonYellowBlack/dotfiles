@@ -1,0 +1,46 @@
+#!/bin/bash
+# gpu-templog — log NVIDIA dGPU thermals to a daily CSV while modules are loaded.
+# Sleeps quietly when modules aren't loaded so it can run as a long-lived user service.
+
+set -u
+
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/gpu-templog"
+TAG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/templog/tag"
+mkdir -p "$LOG_DIR" "$(dirname "$TAG_FILE")"
+
+INTERVAL="${GPU_TEMPLOG_INTERVAL:-10}"
+HEADER="timestamp,temp_c,power_w,power_limit_w,gpu_util,mem_util,clk_gr,clk_sm,pstate,event_reasons,fan1_rpm,fan2_rpm,tag"
+QUERY="timestamp,temperature.gpu,power.draw,power.limit,utilization.gpu,utilization.memory,clocks.gr,clocks.sm,pstate,clocks_event_reasons.active"
+
+# Probe the dell_smm hwmon directory once at start — hwmonN index can shift between boots.
+FAN_DIR=""
+for h in /sys/class/hwmon/hwmon*; do
+    [[ -r "$h/name" ]] || continue
+    if [[ "$(cat "$h/name" 2>/dev/null)" == "dell_smm" ]]; then
+        FAN_DIR="$h"
+        break
+    fi
+done
+
+read_fan() {
+    local f="$1"
+    [[ -n "$FAN_DIR" && -r "$FAN_DIR/$f" ]] && cat "$FAN_DIR/$f" 2>/dev/null || echo ""
+}
+
+current_tag() {
+    [[ -r $TAG_FILE ]] && tr -d '\n,' < "$TAG_FILE" || true
+}
+
+while true; do
+    if lsmod | grep -q '^nvidia '; then
+        log="$LOG_DIR/$(date +%Y-%m-%d).csv"
+        if [[ ! -f "$log" ]]; then
+            echo "$HEADER" > "$log"
+        fi
+        sample=$(nvidia-smi --query-gpu="$QUERY" --format=csv,noheader,nounits 2>/dev/null) || sample=""
+        if [[ -n $sample ]]; then
+            echo "$sample, $(read_fan fan1_input), $(read_fan fan2_input), $(current_tag)" >> "$log"
+        fi
+    fi
+    sleep "$INTERVAL"
+done

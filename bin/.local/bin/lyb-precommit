@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Pre-commit checks for lyb monorepo.
+# Runs linters/tests only for projects with staged changes.
+set -euo pipefail
+
+cd /home/robbie/lyb
+staged=$(git diff --cached --name-only 2>/dev/null || true)
+[ -z "$staged" ] && exit 0
+
+errors=0
+
+# Go projects: run tests if any .go files staged
+run_go_checks() {
+    local dir="$1"
+    if echo "$staged" | grep -q "^${dir}/.*\.go$"; then
+        echo "==> go test ${dir}"
+        if ! (cd "$dir" && go test ./... -short -count=1 2>&1 | tail -20); then
+            errors=1
+        fi
+    fi
+}
+
+run_go_checks velur-proj
+run_go_checks llmkit
+run_go_checks agent-bench
+run_go_checks exoclimate/go
+
+# Python: ruff in trawl
+if echo "$staged" | grep -q "^trawl/.*\.py$"; then
+    echo "==> ruff check trawl"
+    if ! (cd trawl && .venv/bin/ruff check . 2>&1 | head -20); then
+        errors=1
+    fi
+fi
+
+# Julia: tests in exoclimate
+if echo "$staged" | grep -q "^exoclimate/julia/.*\.jl$"; then
+    echo "==> julia test exoclimate"
+    if ! (cd exoclimate/julia && julia --project=. -e 'using Pkg; Pkg.test()' 2>&1 | tail -30); then
+        errors=1
+    fi
+fi
+
+if [ "$errors" -ne 0 ]; then
+    echo "Pre-commit checks failed"
+    exit 1
+fi

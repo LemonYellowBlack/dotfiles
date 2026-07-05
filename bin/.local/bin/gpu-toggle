@@ -1,0 +1,21 @@
+#!/bin/sh
+# Toggle NVIDIA GPU modules on/off with a notification.
+# Bound to SUPER+SHIFT+N in Hyprland.
+
+if lsmod | grep -q '^nvidia '; then
+    if output=$(sudo /home/robbie/.local/bin/gpu-off 2>&1); then
+        notify-send -t 3000 -h string:x-canonical-private-synchronous:gpu-toggle \
+            "󰍹 GPU Off" "NVIDIA modules unloaded"
+    else
+        notify-send -t 5000 -h string:x-canonical-private-synchronous:gpu-toggle \
+            "󰍹 GPU Off Failed" "$output"
+    fi
+else
+    if output=$(sudo /home/robbie/.local/bin/gpu-on 2>&1); then
+        notify-send -t 3000 -h string:x-canonical-private-synchronous:gpu-toggle \
+            "󰍺 GPU On" "NVIDIA modules loaded"
+    else
+        notify-send -t 5000 -h string:x-canonical-private-synchronous:gpu-toggle \
+            "󰍺 GPU On Failed" "$output"
+    fi
+fi

@@ -1,0 +1,11 @@
+#!/bin/sh
+# Show NVIDIA GPU status as a mako notification.
+# Bound to SUPER+N in Hyprland.
+
+if lsmod | grep -q '^nvidia '; then
+    notify-send -t 3000 -h string:x-canonical-private-synchronous:gpu-status \
+        "󰍺 GPU On" "NVIDIA modules loaded"
+else
+    notify-send -t 3000 -h string:x-canonical-private-synchronous:gpu-status \
+        "󰍹 GPU Off" "NVIDIA modules not loaded"
+fi

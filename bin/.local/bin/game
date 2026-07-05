@@ -1,0 +1,21 @@
+#!/bin/bash
+# game — load NVIDIA on demand, run with PRIME offload, unload after.
+# Steam launch options: game %command%
+# Standalone:           game ./gamebinary [args...]
+set -u
+
+if ! lsmod | grep -q '^nvidia '; then
+    if ! sudo /home/robbie/.local/bin/gpu-on >/dev/null; then
+        notify-send -t 5000 -h string:x-canonical-private-synchronous:gpu-toggle \
+            "󰍺 GPU On Failed" "Cannot start game"
+        exit 1
+    fi
+fi
+
+gamemoderun mangohud prime-run "$@"
+status=$?
+
+# gpu-off refuses if other games still hold the GPU — leave it on in that case.
+sudo /home/robbie/.local/bin/gpu-off >/dev/null 2>&1 || true
+
+exit $status

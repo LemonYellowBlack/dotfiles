@@ -1,0 +1,26 @@
+#!/bin/bash
+# Generate a solid-color wallpaper PNG in ~/Pictures/Wallpapers/
+# Usage: mksolid <name> <hex>
+#   e.g. mksolid sumiInk0 '#16161D'
+
+WALLDIR="$HOME/Pictures/Wallpapers"
+RES="3840x2160"
+
+if [[ $# -lt 2 ]]; then
+  echo "Usage: mksolid <name> <hex-color>"
+  echo "  e.g. mksolid sumiInk0 '#16161D'"
+  exit 1
+fi
+
+NAME="$1"
+COLOR="$2"
+OUT="$WALLDIR/solid-${NAME}.png"
+
+if ! command -v magick &>/dev/null; then
+  echo "imagemagick not found — install with: paru -S imagemagick"
+  exit 1
+fi
+
+mkdir -p "$WALLDIR"
+magick -size "$RES" "xc:${COLOR}" "$OUT"
+echo "Created $OUT"

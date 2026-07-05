@@ -1,0 +1,23 @@
+#!/bin/zsh
+
+bat_pct=$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null)
+bat_status=$(cat /sys/class/power_supply/BAT0/status 2>/dev/null)
+wifi_info=$(nmcli -t -f active,ssid,freq dev wifi 2>/dev/null | grep '^yes')
+wifi=$(echo "$wifi_info" | cut -d: -f2)
+wifi_freq=$(echo "$wifi_info" | cut -d: -f3)
+vol=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{printf "%.0f%%", $2*100}')
+bright=$(awk 'NR==1{b=$1} NR==2{printf "%.0f%%", b/$1*100}' /sys/class/backlight/intel_backlight/brightness /sys/class/backlight/intel_backlight/max_brightness 2>/dev/null)
+mem=$(free -h | awk '/Mem:/{print $3"/"$2}')
+load=$(awk -v cores=$(nproc) '{printf "%.0f%%", $1*100/cores}' /proc/loadavg)
+ip=$(ip -4 -o addr show dev wlp59s0 2>/dev/null | awk '{print $4}' | cut -d/ -f1)
+
+printf "\n"
+printf "  %-10s %s\n" "time" "$(date '+%a %b %d  %H:%M')"
+printf "  %-10s %s (%s)\n" "battery" "$bat_pct%" "$bat_status"
+printf "  %-10s %s (%s)\n" "wifi" "$wifi" "$wifi_freq"
+printf "  %-10s %s\n" "vol" "$vol"
+printf "  %-10s %s\n" "bright" "$bright"
+printf "  %-10s %s\n" "ram" "$mem"
+printf "  %-10s %s\n" "cpu" "$load"
+printf "  %-10s %s\n" "ip" "$ip"
+printf "\n"

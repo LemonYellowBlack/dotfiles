@@ -1,0 +1,7 @@
+#!/bin/sh
+# Lock the session unless the "no-lock" flag is set (see lock-toggle).
+# Called from hypridle's idle timeout, hypridle's before_sleep_cmd, and the
+# Hyprland lid-switch bind so every automatic lock trigger honors the toggle.
+# The flag lives in XDG_RUNTIME_DIR, so it clears on reboot (fail-safe: locked).
+[ -f "${XDG_RUNTIME_DIR:-/tmp}/hypr-nolock" ] && exit 0
+exec loginctl lock-session

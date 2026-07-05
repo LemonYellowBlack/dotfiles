@@ -1,0 +1,16 @@
+#!/bin/sh
+# Toggle automatic screen locking (idle + lid close) on/off.
+# Bound to SUPER+SHIFT+F9 in Hyprland. Manual SUPER+L always locks regardless.
+FLAG="${XDG_RUNTIME_DIR:-/tmp}/hypr-nolock"
+
+if [ -f "$FLAG" ]; then
+    rm -f "$FLAG"
+    notify-send -t 3000 \
+        -h string:x-canonical-private-synchronous:lock \
+        " Auto-Lock On" "Idle & lid close will lock"
+else
+    touch "$FLAG"
+    notify-send -t 3000 \
+        -h string:x-canonical-private-synchronous:lock \
+        " Auto-Lock Off" "Idle & lid close won't lock"
+fi

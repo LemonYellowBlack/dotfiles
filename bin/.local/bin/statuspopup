@@ -1,0 +1,27 @@
+#!/bin/sh
+
+LOCK="/tmp/statuspopup-persist"
+
+if [ "$1" = "--persist" ]; then
+    if [ -f "$LOCK" ]; then
+        makoctl dismiss -n "$(cat "$LOCK")" 2>/dev/null
+        rm -f "$LOCK"
+        exit 0
+    fi
+    timeout=0
+    category=persist
+else
+    rm -f "$LOCK"
+    timeout=5000
+    category=
+fi
+
+time=$(date '+%a %b %d  %H:%M')
+
+notify-send -t "$timeout" -p -c "$category" \
+    -h string:x-canonical-private-synchronous:statuspopup \
+    "$time" "" > /tmp/statuspopup-id
+
+if [ "$1" = "--persist" ]; then
+    mv /tmp/statuspopup-id "$LOCK"
+fi

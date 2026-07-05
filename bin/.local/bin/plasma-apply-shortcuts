@@ -1,0 +1,118 @@
+#!/usr/bin/env zsh
+# Apply a Hyprland-style keyboard layout to KDE Plasma 6.
+#
+# Idempotent: re-run safely. Edits ~/.config/kglobalshortcutsrc and
+# ~/.config/kwinrc, and creates small launcher .desktop files in
+# ~/.local/share/applications/.
+#
+# Takes effect on next Plasma session start. To apply to a running session
+# without re-logging, run from a Plasma terminal:
+#     kquitapp6 kglobalaccel && kstart kglobalaccel
+#
+# Run with --print to see what would be written without modifying anything.
+
+set -euo pipefail
+
+DRY=0
+[[ "${1:-}" == "--print" || "${1:-}" == "-n" ]] && DRY=1
+
+APPS_DIR="$HOME/.local/share/applications"
+KGS="$HOME/.config/kglobalshortcutsrc"
+KWINRC="$HOME/.config/kwinrc"
+
+run() {
+    if (( DRY )); then
+        printf '%s\n' "$*"
+    else
+        "$@"
+    fi
+}
+
+# -------- launcher .desktop files --------
+# Each entry: <basename> | <display name> | <exec command>
+LAUNCHERS=(
+    "hypr-launch-kitty|Launch kitty|kitty"
+    "hypr-launch-fuzzel|Launch fuzzel|fuzzel"
+    "hypr-launch-cliphist|Clipboard history|zsh -c 'cliphist list | fuzzel -d | cliphist decode | wl-copy'"
+)
+
+mkdir -p "$APPS_DIR"
+for entry in "${LAUNCHERS[@]}"; do
+    IFS='|' read -r name display cmd <<<"$entry"
+    # Avoid `path` — zsh ties it to $PATH, which would clobber PATH mid-loop.
+    dest="$APPS_DIR/$name.desktop"
+    if (( DRY )); then
+        echo "# would write $dest"
+    else
+        cat >"$dest" <<EOF
+[Desktop Entry]
+Type=Application
+Name=$display
+Exec=$cmd
+NoDisplay=true
+EOF
+    fi
+done
+
+# -------- helper: write a single shortcut line --------
+# Plasma 6 format: <keys>,<defaultKeys>,<displayName>
+# Use "none" for defaultKeys when there is no Plasma default.
+set_shortcut() {  # group key value
+    run kwriteconfig6 --file "$KGS" --group "$1" --key "$2" "$3"
+}
+
+set_service_shortcut() {  # desktopfile keys displayname
+    local df="$1" keys="$2" disp="$3"
+    run kwriteconfig6 --file "$KGS" --group services --group "$df" --key _launch "$keys,none,$disp"
+    run kwriteconfig6 --file "$KGS" --group services --group "$df" --key _k_friendly_name "$disp"
+}
+
+# -------- disable bare-Meta opens application menu --------
+run kwriteconfig6 --file "$KWINRC" --group ModifierOnlyShortcuts --key Meta ""
+
+# -------- KWin window-management shortcuts --------
+# component group is "kwin"
+
+# Close / fullscreen
+set_shortcut kwin "Window Close"              "Meta+Q,Alt+F4,Close Window"
+set_shortcut kwin "Window Fullscreen"         "Meta+F,none,Make Window Fullscreen"
+
+# Workspace switching: Meta+1..0 -> desktop 1..10
+for i in {1..9}; do
+    set_shortcut kwin "Switch to Desktop $i"  "Meta+$i,Ctrl+F$i,Switch to Desktop $i"
+    set_shortcut kwin "Window to Desktop $i"  "Meta+Shift+$i,none,Window to Desktop $i"
+done
+set_shortcut kwin "Switch to Desktop 10"      "Meta+0,none,Switch to Desktop 10"
+set_shortcut kwin "Window to Desktop 10"      "Meta+Shift+0,none,Window to Desktop 10"
+
+# Focus by direction (Meta+arrows)
+set_shortcut kwin "Switch Window Up"          "Meta+Up,none,Switch Window Up"
+set_shortcut kwin "Switch Window Down"        "Meta+Down,none,Switch Window Down"
+set_shortcut kwin "Switch Window Left"        "Meta+Left,none,Switch Window Left"
+set_shortcut kwin "Switch Window Right"       "Meta+Right,none,Switch Window Right"
+
+# Window move (Meta+Shift+arrows). No exact "swap window" in vanilla KWin;
+# Quick Tile is the closest builtin. Replace with a KWin tiling script's
+# action if you install one (Polonium, Karousel, etc.).
+set_shortcut kwin "Window Quick Tile Top"     "Meta+Shift+Up,none,Quick Tile Up"
+set_shortcut kwin "Window Quick Tile Bottom"  "Meta+Shift+Down,none,Quick Tile Down"
+set_shortcut kwin "Window Quick Tile Left"    "Meta+Shift+Left,none,Quick Tile Left"
+set_shortcut kwin "Window Quick Tile Right"   "Meta+Shift+Right,none,Quick Tile Right"
+
+# -------- ksmserver: lock --------
+set_shortcut ksmserver "Lock Session"         "Meta+L,Screensaver,Lock Session"
+
+# -------- Service launches --------
+set_service_shortcut hypr-launch-kitty.desktop    "Meta+Return"  "Launch kitty"
+set_service_shortcut zen.desktop                  "Meta+B"       "Launch Zen Browser"
+set_service_shortcut hypr-launch-fuzzel.desktop   "Meta+D"       "Launch fuzzel"
+set_service_shortcut hypr-launch-cliphist.desktop "Meta+C"       "Clipboard history"
+
+if (( DRY )); then
+    echo
+    echo "# dry-run: no files were modified."
+else
+    echo "Plasma shortcuts written. Restart Plasma session (or run:"
+    echo "    kquitapp6 kglobalaccel && kstart kglobalaccel"
+    echo "from inside a Plasma terminal) to apply."
+fi

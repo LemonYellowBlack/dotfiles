@@ -1,0 +1,18 @@
+#!/bin/sh
+
+FLAG="/tmp/touchpad-disabled"
+DEVICE="syna2393:00-06cb:7a13-touchpad"
+
+if [ -f "$FLAG" ]; then
+    hyprctl keyword "device[$DEVICE]:enabled" true
+    rm -f "$FLAG"
+    notify-send -t 3000 \
+        -h string:x-canonical-private-synchronous:touchpad \
+        "Touchpad On" ""
+else
+    hyprctl keyword "device[$DEVICE]:enabled" false
+    touch "$FLAG"
+    notify-send -t 3000 \
+        -h string:x-canonical-private-synchronous:touchpad \
+        "Touchpad Off" ""
+fi
