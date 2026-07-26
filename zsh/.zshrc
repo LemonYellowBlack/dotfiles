@@ -53,7 +53,7 @@ _prompt_newline() {
 	fi
 	_PROMPT_NEWLINE_READY=1
 }
-add-zsh-hook precmd _prompt_newline
+#add-zsh-hook precmd _prompt_newline
 
 eval "$(zoxide init zsh)"
 eval "$(direnv hook zsh)"

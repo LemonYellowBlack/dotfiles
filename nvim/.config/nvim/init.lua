@@ -103,7 +103,7 @@ end
 -- Install parsers: :TSInstall odin go lua markdown yaml json bash
 ----------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "odin", "go", "c", "cpp", "lua", "markdown", "yaml", "json", "bash" },
+  pattern = { "odin", "go", "c", "cpp", "lua", "markdown", "yaml", "json", "bash", "python" },
   callback = function()
     pcall(vim.treesitter.start)
   end,
@@ -118,7 +118,25 @@ vim.lsp.config("clangd", {})
 -- ols config (cmd/filetypes/root_dir) ships in nvim-lspconfig's lsp/ols.lua.
 -- Add init_options here if you want strict checking or custom collections:
 --   vim.lsp.config("ols", { init_options = { checker_args = "-strict-style" } })
-vim.lsp.enable({ "gopls", "clangd", "ols" })
+
+-- Python: basedpyright for types/hover/completion, ruff for lint/format.
+-- Both cmd/filetypes/root_markers ship in nvim-lspconfig's lsp/*.lua.
+-- basedpyright auto-detects the project's .venv (uv), so imports like
+-- `anthropic` and `pydantic` resolve. Defers import-sorting to ruff.
+vim.lsp.config("basedpyright", {
+  settings = {
+    basedpyright = {
+      analysis = {
+        typeCheckingMode = "standard",   -- default "recommended" is very noisy
+        diagnosticMode = "openFilesOnly",
+      },
+      disableOrganizeImports = true,     -- ruff owns import sorting
+    },
+  },
+})
+vim.lsp.config("ruff", {})               -- format-on-save handled by LspAttach below
+
+vim.lsp.enable({ "gopls", "clangd", "ols", "basedpyright", "ruff" })
 
 -- Diagnostics: keep underline + gutter signs (0.11 defaults) but disable inline
 -- virtual_text, which doesn't wrap and runs off-screen for long messages.
@@ -241,5 +259,15 @@ local Terminal = require("toggleterm.terminal").Terminal
 vim.keymap.set("n", "<leader>tt", function()
   Terminal:new({ dir = vim.fn.expand("%:p:h"), direction = "float" }):toggle()
 end, { desc = "Float terminal at file dir" })
+
+-- Lazygit in a float, scoped to the current file's git repo root
+local lazygit = Terminal:new({
+  cmd = "lazygit",
+  dir = "git_dir",                 -- toggleterm-special: resolves to the repo root
+  direction = "float",
+  float_opts = { border = "curved" },
+})
+vim.keymap.set("n", "<leader>gg", function() lazygit:toggle() end,
+  { desc = "Lazygit" })
 
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
