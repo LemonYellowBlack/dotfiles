@@ -23,6 +23,7 @@ vim.opt.updatetime = 250      -- snappier CursorHold / diagnostics / gitsigns
 vim.opt.splitright = true     -- vertical splits open to the right
 vim.opt.splitbelow = true     -- horizontal splits open below
 vim.opt.confirm = true        -- prompt to save instead of erroring on :q
+vim.opt.autoread = true       -- reloads buffer when a file changes externally
 
 -- General editor keymaps
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<cr>", { desc = "Clear search highlight" })
@@ -103,12 +104,43 @@ end
 -- Install parsers: :TSInstall odin go lua markdown yaml json bash
 ----------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "odin", "go", "c", "cpp", "lua", "markdown", "yaml", "json", "bash", "python" },
+  pattern = { "odin", "go", "c", "cpp", "lua", "markdown", "yaml", "json", "bash", "python", "toml", "sql", "dockerfile" },
   callback = function()
     pcall(vim.treesitter.start)
   end,
 })
 
+
+----------------------------------------------------------------------
+-- Spell — prose filetypes only.
+-- 'spell' is window-local and 'spelllang'/'spellfile'/'spelloptions' are
+-- buffer-local, so all four must be set per-buffer here rather than globally.
+--
+-- 'spellfile' is a LIST and the zg count picks the target:
+--   zg  -> project dictionary  (<project>/.spell/en.utf-8.add, committed)
+--   2zg -> personal global     (~/.local/share/nvim/site/spell/en.utf-8.add)
+-- Project first, because inside a lore repo "this is canon" is the common case.
+--
+-- The project entry is found by walking up from the buffer for a .spell/ dir,
+-- so any repo gets a private dictionary just by creating one. Anchored to the
+-- buffer, not getcwd(), so it survives :cd and subdirectory launches.
+----------------------------------------------------------------------
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "markdown", "gitcommit", "text" },
+  callback = function(ev)
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = "en_us"
+    vim.opt_local.spelloptions = "camel"
+
+    local global = vim.fn.stdpath("data") .. "/site/spell/en.utf-8.add"
+    local root = vim.fs.root(ev.buf, ".spell")
+    if root then
+      vim.opt_local.spellfile = { root .. "/.spell/en.utf-8.add", global }
+    else
+      vim.opt_local.spellfile = global
+    end
+  end,
+})
 
 ----------------------------------------------------------------------
 -- LSP
@@ -134,9 +166,11 @@ vim.lsp.config("basedpyright", {
     },
   },
 })
-vim.lsp.config("ruff", {})               -- format-on-save handled by LspAttach below
+-- basedpyright does not format, so ruff is what the BufWritePre format-on-save
+-- uses for Python.
+vim.lsp.config("ruff", {})
 
-vim.lsp.enable({ "gopls", "clangd", "ols", "basedpyright", "ruff" })
+vim.lsp.enable({ "gopls", "clangd", "ols", "basedpyright", "ruff", "marksman" })
 
 -- Diagnostics: keep underline + gutter signs (0.11 defaults) but disable inline
 -- virtual_text, which doesn't wrap and runs off-screen for long messages.
