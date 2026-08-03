@@ -1,0 +1,50 @@
+template = 24
+template_menu = 17
+
+background = Default, Default
+data = White, Default
+label = Blue, Default, bold
+border = Gray, Default
+footer = Gray, Default
+row_number = Gray, Black
+record_number = Gray, Default
+selected_area = Black, BrightCyan
+
+data* = White, Black
+label* = Blue, Black, bold
+border* = Gray, Black
+
+cursor_data = Black, Blue
+cursor_label = Black, Blue, bold
+cursor_border = Black, Blue
+cursor_footer = Black, Blue
+cursor_row_number = Black, Blue
+cursor_record_number = Black, Blue
+cursor_selected_area = Black, BrightCyan, bold
+
+cross_cursor = Black, Yellow, bold
+cross_cursor_border = Black, Yellow
+
+status_bar = LightGray, Black
+title = Yellow, Black
+prompt_bar = White, Black
+info_bar = BrightGreen, Black
+input_bar = White, Black
+error_bar = White, Red, bold
+error = BrightRed, Default
+
+matched_pattern = Black, BrightGreen, bold
+matched_pattern_cursor = Black, BrightRed, bold
+matched_line = White, Black
+matched_line_border = Gray, Black
+matched_line_vertical_cursor = White, Black, bold
+matched_line_vertical_cursor_border = Gray, Black
+
+bookmark = Black, Brown, bold
+bookmark_border = Brown, Brown
+cursor_bookmark = Black, Yellow, bold
+
+scrollbar_arrows = Gray, Default
+scrollbar_background = Black, Default
+scrollbar_slider = Gray, Black
+scrollbar_active_slider = Blue, Black

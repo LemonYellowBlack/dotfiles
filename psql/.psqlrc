@@ -1,0 +1,17 @@
+\set QUIET on
+
+\setenv PSQL_PAGER 'pspg --custom-style=kanagawa -X'
+\pset pager always
+\pset border 2
+\pset linestyle unicode
+\pset null '∅'
+
+\set PROMPT1 '%[%033[38;2;126;156;216m%]%/%[%033[0m%] %[%033[38;2;114;113;105m%]➜%[%033[0m%] '
+\set PROMPT2 '%[%033[38;2;114;113;105m%]  ..%[%033[0m%] '
+
+\set HISTFILE ~/.local/state/psql/history-:DBNAME
+\set HISTSIZE 5000
+\set COMP_KEYWORD_CASE upper
+\timing on
+
+\set QUIET off
