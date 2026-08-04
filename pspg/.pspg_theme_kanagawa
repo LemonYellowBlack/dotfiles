@@ -1,50 +1,48 @@
-template = 24
-template_menu = 17
+template = 16
+template_menu = 16
 
-background = Default, Default
+background = White, Default
 data = White, Default
+data* = White, Black
 label = Blue, Default, bold
 border = Gray, Default
 footer = Gray, Default
 row_number = Gray, Black
-record_number = Gray, Default
-selected_area = Black, BrightCyan
-
-data* = White, Black
-label* = Blue, Black, bold
-border* = Gray, Black
+record_number = Gray, Black
 
 cursor_data = Black, Blue
-cursor_label = Black, Blue, bold
 cursor_border = Black, Blue
-cursor_footer = Black, Blue
+cursor_label = Black, Blue, bold
 cursor_row_number = Black, Blue
 cursor_record_number = Black, Blue
-cursor_selected_area = Black, BrightCyan, bold
+cursor_footer = Black, Blue
 
-cross_cursor = Black, Yellow, bold
-cross_cursor_border = Black, Yellow
-
-status_bar = LightGray, Black
-title = Yellow, Black
-prompt_bar = White, Black
-info_bar = BrightGreen, Black
+title = Yellow, Default, bold
+status_bar = White, Black
+prompt_bar = Black, BrightCyan
+info_bar = Black, BrightCyan
 input_bar = White, Black
-error_bar = White, Red, bold
-error = BrightRed, Default
+error_bar = White, BrightRed, bold
+error = BrightRed, Default, bold
 
-matched_pattern = Black, BrightGreen, bold
-matched_pattern_cursor = Black, BrightRed, bold
+matched_pattern = Black, Brown, bold
 matched_line = White, Black
 matched_line_border = Gray, Black
-matched_line_vertical_cursor = White, Black, bold
+matched_pattern_cursor = Black, Yellow, bold
+matched_line_vertical_cursor = White, Black
 matched_line_vertical_cursor_border = Gray, Black
 
-bookmark = Black, Brown, bold
-bookmark_border = Brown, Brown
-cursor_bookmark = Black, Yellow, bold
+selected_area = Black, BrightCyan
+cursor_selected_area = Black, BrightCyan, bold
 
-scrollbar_arrows = Gray, Default
-scrollbar_background = Black, Default
-scrollbar_slider = Gray, Black
-scrollbar_active_slider = Blue, Black
+cross_cursor = Black, BrightBlue, bold
+cross_cursor_border = Black, BrightBlue
+
+bookmark = Black, Red, bold
+bookmark_border = Red, Default
+cursor_bookmark = Black, Red, bold
+
+scrollbar_background = Gray, Default
+scrollbar_arrows = Blue, Default
+scrollbar_slider = Black, Gray
+scrollbar_active_slider = Black, Blue

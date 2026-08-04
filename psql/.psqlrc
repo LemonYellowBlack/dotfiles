@@ -1,17 +1,46 @@
+-- ~/.psqlrc — Kanagawa Wave
+-- Palette: https://github.com/rebelot/kanagawa.nvim
+-- Prompt colors use truecolor SGR escapes wrapped in %[ ... %] so psql does
+-- not miscount their width. \001/\002 are readline's non-printing markers.
+
 \set QUIET on
 
-\setenv PSQL_PAGER 'pspg --custom-style=kanagawa -X'
-\pset pager always
-\pset border 2
+-- ── output defaults ────────────────────────────────────────────
 \pset linestyle unicode
+\pset border 2
 \pset null '∅'
-
-\set PROMPT1 '%[%033[38;2;126;156;216m%]%/%[%033[0m%] %[%033[38;2;114;113;105m%]➜%[%033[0m%] '
-\set PROMPT2 '%[%033[38;2;114;113;105m%]  ..%[%033[0m%] '
-
-\set HISTFILE ~/.local/state/psql/history-:DBNAME
-\set HISTSIZE 5000
-\set COMP_KEYWORD_CASE upper
+\x auto
 \timing on
+
+-- pspg does the paging/coloring.
+--   --quit-if-one-screen  short results don't trap you in the pager, which is
+--                         what makes `\pset pager always` bearable.
+--   --reprint-on-exit     last result stays in the scrollback after quitting.
+--   --no-mouse            leave selection and copy to the terminal.
+-- PSQL_PAGER, not PAGER: this is scoped to query output only. PAGER would also
+-- be inherited by \! shell escapes and by \e.
+\setenv PSQL_PAGER 'pspg --custom-style=kanagawa --quit-if-one-screen --reprint-on-exit --no-mouse'
+\pset pager always
+
+-- History: per-database files under XDG state, no dupes, generous size.
+-- psql will not create this directory — mkdir -p it when setting up a new box.
+\set HISTFILE ~/.local/state/psql/history-:DBNAME
+\set HISTCONTROL ignoredups
+\set HISTSIZE 5000
+
+-- Autocomplete keywords in UPPER.
+\set COMP_KEYWORD_CASE upper
+-- A failed statement inside an interactive transaction rolls back to an
+-- implicit savepoint instead of poisoning the whole block.
+\set ON_ERROR_ROLLBACK interactive
+
+-- ── prompt ─────────────────────────────────────────────────────
+-- PROMPT1: user@host colored crystalBlue, db in carpYellow, then a
+-- springGreen chevron. %x shows *-marked transaction state in waveRed.
+\set PROMPT1 '%[%033[38;2;126;156;216m%]%n@%m%[%033[0m%] %[%033[38;2;230;195;132m%]%/%[%033[0m%]%[%033[38;2;228;104;118m%]%x%[%033[0m%]\n%[%033[38;2;152;187;108m%]❯%[%033[0m%] '
+-- PROMPT2 (continuation) — muted fujiGray marker.
+\set PROMPT2 '%[%033[38;2;114;113;105m%]%/%R%#%[%033[0m%] '
+-- PROMPT3 (COPY prompt).
+\set PROMPT3 '%[%033[38;2;114;113;105m%]»%[%033[0m%] '
 
 \set QUIET off
