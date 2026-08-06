@@ -1,30 +1,6 @@
 template = 16
 template_menu = 16
 
-# Kanagawa Wave for pspg, using only the 16 base color names.
-#
-# Why names and not hex: pspg renders hex colors by reassigning 256-color
-# palette slots from 64 up, via the terminfo `initc` capability (an OSC 4
-# sequence). Nvim's built-in terminal does not implement OSC 4 and only lets
-# indices 0-15 be set (`g:terminal_color_0`..`15`), so a hex theme leaves those
-# slots at their default xterm-cube values -- which are almost all greens.
-# Sticking to 0-15 means the terminal supplies the palette, and kanagawa.nvim
-# already sets those 16 to Kanagawa values. Same file renders correctly in
-# kitty and inside nvim.
-#
-# Name to index, as pspg resolves them:
-#   Black 0   Red 1     Green 2    Brown 3     Blue 4      Magenta 5
-#   Cyan 6    LightGray 7          Gray 8      BrightRed 9 BrightGreen 10
-#   Yellow 11 BrightBlue 12        BrightMagenta 13        BrightCyan 14
-#   White 15
-# Note: index 8 is spelled `Gray` -- `DarkGray` is not recognised and silently
-# falls back to index 0.
-#
-# `Default` means the terminal's own fg/bg. As a *background* it is exactly
-# sumiInk3 (#1F1F28) in this setup, which no palette index provides, so it
-# stands in for the base background. As a *foreground* it would be fujiWhite,
-# so dark text on a colored cursor uses literal `Black` instead.
-
 background = White, Default
 data = White, Default
 data* = White, Black
@@ -49,10 +25,6 @@ input_bar = White, Black
 error_bar = White, BrightRed, bold
 error = BrightRed, Default, bold
 
-# The hex theme distinguished a plain match (carpYellow) from the match under
-# the cursor (surimiOrange). There is no orange in the 16, so the plain match
-# drops to the dimmer Brown and the cursor match takes Yellow -- preserving
-# "the one you are on is brighter".
 matched_pattern = Black, Brown, bold
 matched_line = White, Black
 matched_line_border = Gray, Black
@@ -60,8 +32,8 @@ matched_pattern_cursor = Black, Yellow, bold
 matched_line_vertical_cursor = White, Black
 matched_line_vertical_cursor_border = Gray, Black
 
-selected_area = Black, Brown
-cursor_selected_area = Black, Yellow
+selected_area = Black, BrightCyan
+cursor_selected_area = Black, BrightCyan, bold
 
 cross_cursor = Black, BrightBlue, bold
 cross_cursor_border = Black, BrightBlue

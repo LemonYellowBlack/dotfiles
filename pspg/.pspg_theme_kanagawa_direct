@@ -1,0 +1,50 @@
+template = 24
+template_menu = 17
+
+background = #DCD7BA, #1F1F28
+data = #DCD7BA, #1F1F28
+label = #7E9CD8, #1F1F28, bold
+border = #54546D, #1F1F28
+footer = #727169, #1F1F28
+row_number = #727169, #16161D
+record_number = #727169, #1F1F28
+selected_area = #DCD7BA, #223249
+
+data* = #DCD7BA, #1a1a22
+label* = #7E9CD8, #1a1a22, bold
+border* = #54546D, #1a1a22
+
+cursor_data = #DCD7BA, #2D4F67
+cursor_label = #E6C384, #2D4F67, bold
+cursor_border = #54546D, #2D4F67
+cursor_footer = #DCD7BA, #2D4F67
+cursor_row_number = #C8C093, #2D4F67
+cursor_record_number = #C8C093, #2D4F67
+cursor_selected_area = #DCD7BA, #223249, bold
+
+cross_cursor = #1F1F28, #7E9CD8, bold
+cross_cursor_border = #223249, #7E9CD8
+
+status_bar = #C8C093, #16161D
+title = #E6C384, #16161D
+prompt_bar = #DCD7BA, #16161D
+info_bar = #98BB6C, #16161D
+input_bar = #DCD7BA, #223249
+error_bar = #DCD7BA, #43242B, bold
+error = #E82424, #1F1F28
+
+matched_pattern = #1F1F28, #E6C384, bold
+matched_pattern_cursor = #1F1F28, #FFA066, bold
+matched_line = #DCD7BA, #252535
+matched_line_border = #54546D, #252535
+matched_line_vertical_cursor = #DCD7BA, #223249
+matched_line_vertical_cursor_border = #54546D, #223249
+
+bookmark = #1F1F28, #FFA066, bold
+bookmark_border = #FFA066, #FFA066
+cursor_bookmark = #1F1F28, #E6C384, bold
+
+scrollbar_arrows = #54546D, #1F1F28
+scrollbar_background = #2A2A37, #1F1F28
+scrollbar_slider = #363646, #2A2A37
+scrollbar_active_slider = #2D4F67, #2A2A37

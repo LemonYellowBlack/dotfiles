@@ -1,0 +1,12 @@
+theme = 24
+border_type = 2
+direct_color = false
+
+bold_labels = true
+vertical_cursor = true
+show_scrollbar = true
+ignore_case = true
+no_sound = true
+force_uniborder = true
+highlight_odd_rec = false
+menu_always = false

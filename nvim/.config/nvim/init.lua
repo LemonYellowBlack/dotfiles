@@ -147,14 +147,6 @@ vim.api.nvim_create_autocmd("FileType", {
 ----------------------------------------------------------------------
 vim.lsp.config("gopls", {})
 vim.lsp.config("clangd", {})
--- ols config (cmd/filetypes/root_dir) ships in nvim-lspconfig's lsp/ols.lua.
--- Add init_options here if you want strict checking or custom collections:
---   vim.lsp.config("ols", { init_options = { checker_args = "-strict-style" } })
-
--- Python: basedpyright for types/hover/completion, ruff for lint/format.
--- Both cmd/filetypes/root_markers ship in nvim-lspconfig's lsp/*.lua.
--- basedpyright auto-detects the project's .venv (uv), so imports like
--- `anthropic` and `pydantic` resolve. Defers import-sorting to ruff.
 vim.lsp.config("basedpyright", {
   settings = {
     basedpyright = {
@@ -172,9 +164,6 @@ vim.lsp.config("ruff", {})
 
 vim.lsp.enable({ "gopls", "clangd", "ols", "basedpyright", "ruff", "marksman" })
 
--- Diagnostics: keep underline + gutter signs (0.11 defaults) but disable inline
--- virtual_text, which doesn't wrap and runs off-screen for long messages.
--- Read the full message on the current line via <leader>e (open_float, below).
 vim.diagnostic.config({
   virtual_text = false,
   severity_sort = true,
@@ -184,9 +173,6 @@ vim.diagnostic.config({
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(ev)
     local opts = { buffer = ev.buf }
-    -- Built-in 0.11 defaults cover the rest: grr (references), grn (rename),
-    -- gra (code action), gri (implementation), K (hover), [d/]d (diagnostics),
-    -- gO (document symbols), CTRL-S (signature help, insert mode).
     vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
     vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, opts)
 

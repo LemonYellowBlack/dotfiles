@@ -12,20 +12,26 @@
 \x auto
 \timing on
 
--- pspg does the paging/coloring. `always` keeps column formatting consistent;
--- --quit-if-one-screen means short results don't trap you in the pager.
--- Scoped to psql via \setenv so the shell's PAGER is untouched.
-\setenv PAGER 'pspg --custom-style=kanagawa --quit-if-one-screen --no-mouse'
+-- pspg does the paging/coloring.
+--   --quit-if-one-screen  short results don't trap you in the pager, which is
+--                         what makes `\pset pager always` bearable.
+--   --reprint-on-exit     last result stays in the scrollback after quitting.
+--   --no-mouse            leave selection and copy to the terminal.
+-- PSQL_PAGER, not PAGER: this is scoped to query output only. PAGER would also
+-- be inherited by \! shell escapes and by \e.
+\setenv PSQL_PAGER 'pspg --custom-style=kanagawa --quit-if-one-screen --reprint-on-exit --no-mouse'
 \pset pager always
 
--- History: per-database files, no dupes, generous size.
-\set HISTFILE ~/.psql_history- :DBNAME
+-- History: per-database files under XDG state, no dupes, generous size.
+-- psql will not create this directory — mkdir -p it when setting up a new box.
+\set HISTFILE ~/.local/state/psql/history-:DBNAME
 \set HISTCONTROL ignoredups
 \set HISTSIZE 5000
 
--- Autocomplete keywords in UPPER, show NULLs distinctly in \x.
+-- Autocomplete keywords in UPPER.
 \set COMP_KEYWORD_CASE upper
-\set VERBOSITY verbose
+-- A failed statement inside an interactive transaction rolls back to an
+-- implicit savepoint instead of poisoning the whole block.
 \set ON_ERROR_ROLLBACK interactive
 
 -- ── prompt ─────────────────────────────────────────────────────

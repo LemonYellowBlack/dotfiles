@@ -2,7 +2,7 @@
 	email = rwszymczak@proton.me
 	name = lemonyellowblack
 [pull]
-	rebase = false
+	rebase = true
 	ff = only
 [core]
 	hooksPath = ~/.config/git/hooks
