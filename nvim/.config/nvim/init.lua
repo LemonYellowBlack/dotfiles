@@ -66,7 +66,7 @@ vim.pack.add({
   "https://github.com/nvim-telescope/telescope.nvim",
   "https://github.com/stevearc/oil.nvim",
   "https://github.com/nvim-tree/nvim-web-devicons",
-  "https://github.com/MeanderingProgrammer/render-markdown.nvim",
+  "https://github.com/OXY2DEV/markview.nvim",
   "https://github.com/Saghen/blink.cmp",
   "https://github.com/lewis6991/gitsigns.nvim",
   "https://github.com/echasnovski/mini.nvim",
@@ -249,9 +249,20 @@ require("blink.cmp").setup({
 })
 
 ----------------------------------------------------------------------
--- Render Markdown
+-- Markview — markdown / latex / inline-html / yaml-frontmatter previewer.
+-- Deliberately NOT lazy-loaded and placed after the colorscheme, per upstream:
+-- it reads highlight groups at setup time to derive its own.
+--
+-- LaTeX math and inline HTML need their own parsers (:TSInstall latex html).
+-- They're injected parsers, so markdown's injection queries pick them up
+-- automatically once the .so exists — no FileType entry needed above.
+--
+-- Upstream recommends 'nowrap'; we keep global wrap = true for prose notes.
+-- Wrap support is limited to quotes/callouts/lists, so long wrapped lines may
+-- render imperfectly. :Markview HybridToggle narrows the un-rendered region to
+-- the cursor's node instead of blanking the buffer while typing.
 ----------------------------------------------------------------------
-require("render-markdown").setup({})
+require("markview").setup({})
 
 ----------------------------------------------------------------------
 -- Gitsigns — gutter signs, hunk staging/preview, inline blame
