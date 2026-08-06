@@ -14,7 +14,7 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 | Terminal / editor | `kitty` `nvim` |
 | Wayland desktop | `hypr` `mako` `fuzzel` `gammastep` `waybar` |
 | Theme | `kanagawa` `vivid` `gtk` |
-| CLI tools | `bat` `bottom` `btop` `television` `yazi` `zathura` |
+| CLI tools | `bat` `bottom` `btop` `lazygit` `television` `yazi` `zathura` |
 | Database | `psql` `pspg` |
 | System | `git` `ssh` `environment.d` `mimeapps` |
 | Scripts | `bin` (→ `~/.local/bin`) |
@@ -28,7 +28,7 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 git clone git@forgejo:lemonyellowblack/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 stow zsh starship kitty nvim hypr mako fuzzel gammastep waybar \
-     kanagawa vivid gtk bat bottom btop television yazi zathura \
+     kanagawa vivid gtk bat bottom btop lazygit television yazi zathura \
      psql pspg git ssh environment.d mimeapps
 stow --no-folding bin
 ```
