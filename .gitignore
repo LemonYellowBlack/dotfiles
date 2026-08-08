@@ -1,2 +1,3 @@
 scripts/wallpapers/
 ssh/.ssh/config
+bin/.local/bin/claude
