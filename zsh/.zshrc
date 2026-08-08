@@ -30,7 +30,6 @@ alias tor='torbrowser-launcher'
 alias srv="ssh thinkcentre"
 alias pwroff='shutdown now'
 alias claude='claude --allow-dangerously-skip-permissions'
-alias prime='__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia'
 
 # Yazi shell wrapper (cd on quit)
 function y() {
@@ -80,10 +79,6 @@ export BEADS_DOLT_SERVER_HOST=thinkcentre
 export BEADS_DOLT_SERVER_PORT=3307
 export BEADS_DOLT_SERVER_USER=root
 
-# disable/enable nvidia drivers, dodges secure_path issue with sudo and bin
-gpu-off() { sudo /home/robbie/.local/bin/gpu-off "$@"; }
-gpu-on()  { sudo /home/robbie/.local/bin/gpu-on  "$@"; }
-
 # Workload tag for cpu-templog / gpu-templog CSVs.
 #   tag <name>   set the current tag (written to each sample row)
 #   tag          print the current tag
@@ -100,3 +95,7 @@ tag() {
 
 # Rust/cargo binaries (tree-sitter CLI, etc.) — needed by nvim-treesitter to build parsers
 export PATH="$HOME/.cargo/bin:$PATH"
+
+# Host-specific settings — keep last so they can override anything above.
+# Provided by the zsh-xps / zsh-hotdog stow packages.
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

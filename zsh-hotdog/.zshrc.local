@@ -1,0 +1,7 @@
+# .zshrc.local — hotdog (desktop)
+# Sourced at the end of zsh/.zshrc.
+
+# Deliberately does NOT define the PRIME helpers from zsh-xps/.zshrc.local.
+# ~/.local/bin/gpu-off exists here (the bin package is shared), but the
+# RTX 4070 Ti is the only GPU driving the display — unbinding it blanks the
+# screen. Keeping the wrappers off this machine removes the foot-gun.
