@@ -3,4 +3,5 @@
 #    "$HOME"/.cache/paru/clone/*) exit 0 ;;
 #esac
 #echo "error: rebase is disabled. Use merge instead." >&2
-exit 1
+#exit 1
+exit 0
