@@ -112,18 +112,7 @@ vim.api.nvim_create_autocmd("FileType", {
 
 
 ----------------------------------------------------------------------
--- Spell — prose filetypes only.
--- 'spell' is window-local and 'spelllang'/'spellfile'/'spelloptions' are
--- buffer-local, so all four must be set per-buffer here rather than globally.
---
--- 'spellfile' is a LIST and the zg count picks the target:
---   zg  -> project dictionary  (<project>/.spell/en.utf-8.add, committed)
---   2zg -> personal global     (~/.local/share/nvim/site/spell/en.utf-8.add)
--- Project first, because inside a lore repo "this is canon" is the common case.
---
--- The project entry is found by walking up from the buffer for a .spell/ dir,
--- so any repo gets a private dictionary just by creating one. Anchored to the
--- buffer, not getcwd(), so it survives :cd and subdirectory launches.
+-- Spell
 ----------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "markdown", "gitcommit", "text" },
@@ -269,11 +258,11 @@ require("mini.surround").setup({})
 -- toggleterm — floating terminal
 ----------------------------------------------------------------------
 require("toggleterm").setup({
-  open_mapping = [[<c-\>]],        -- Ctrl-\ toggles the float from anywhere
+  open_mapping = [[<c-\>]],        
   direction = "float",
   float_opts = { border = "curved" },
   highlights = {
-    FloatBorder = { guifg = "#DCD7BA"},
+    FloatBorder = { guifg = "#727169"},
   },
 })
 

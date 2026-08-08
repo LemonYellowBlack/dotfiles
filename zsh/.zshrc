@@ -68,7 +68,9 @@ source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zs
 export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 export GPG_TTY=$(tty)
-export LS_COLORS="$(vivid generate kanagawa)"
+# Explicit path, not the bare theme name: vivid path-resolves the argument first,
+# so the ~/dotfiles/kanagawa/ stow package shadows the theme in shells started there.
+export LS_COLORS="$(vivid generate "$HOME/.config/vivid/themes/kanagawa.yml")"
 export FZF_DEFAULT_OPTS="--color=fg:#DCD7BA,bg:-1,hl:#E46876,fg+:#DCD7BA,bg+:#2A2A37,hl+:#E46876,info:#658594,prompt:#7E9CD8,pointer:#E46876,marker:#98BB6C,spinner:#957FB8,header:#7AA89F,border:#363646"
 
 # Beads (Dolt server on ThinkCentre)
