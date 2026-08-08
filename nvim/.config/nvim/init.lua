@@ -236,17 +236,6 @@ require("blink.cmp").setup({
 
 ----------------------------------------------------------------------
 -- Markview — markdown / latex / inline-html / yaml-frontmatter previewer.
--- Deliberately NOT lazy-loaded and placed after the colorscheme, per upstream:
--- it reads highlight groups at setup time to derive its own.
---
--- LaTeX math and inline HTML need their own parsers (:TSInstall latex html).
--- They're injected parsers, so markdown's injection queries pick them up
--- automatically once the .so exists — no FileType entry needed above.
---
--- Upstream recommends 'nowrap'; we keep global wrap = true for prose notes.
--- Wrap support is limited to quotes/callouts/lists, so long wrapped lines may
--- render imperfectly. :Markview HybridToggle narrows the un-rendered region to
--- the cursor's node instead of blanking the buffer while typing.
 ----------------------------------------------------------------------
 require("markview").setup({})
 
@@ -283,6 +272,9 @@ require("toggleterm").setup({
   open_mapping = [[<c-\>]],        -- Ctrl-\ toggles the float from anywhere
   direction = "float",
   float_opts = { border = "curved" },
+  highlights = {
+    FloatBorder = { guifg = "#DCD7BA"},
+  },
 })
 
 -- Float terminal opened at the CURRENT FILE's directory

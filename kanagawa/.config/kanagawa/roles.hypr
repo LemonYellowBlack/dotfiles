@@ -5,5 +5,5 @@
 
 $content      = rgba(1F1F28ff)
 $chrome       = rgba(16161Dff)
-$focus_accent = rgba(2D4F67ff)
+$focus_accent = rgba(DCD7BAff)
 $dim_accent   = rgba(2A2A37ff)
