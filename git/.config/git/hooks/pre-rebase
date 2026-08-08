@@ -1,6 +1,6 @@
 #!/bin/bash
-case "$PWD" in
-    "$HOME"/.cache/paru/clone/*) exit 0 ;;
-esac
-echo "error: rebase is disabled. Use merge instead." >&2
+#case "$PWD" in
+#    "$HOME"/.cache/paru/clone/*) exit 0 ;;
+#esac
+#echo "error: rebase is disabled. Use merge instead." >&2
 exit 1
