@@ -147,6 +147,9 @@ hl.config({
         gaps_out    = 0,
         border_size = 1,
 
+        -- Stop at the edge instead of wrapping to the opposite pane.
+        no_focus_fallback = true,
+
         col = {
             active_border   = colors.focus_accent,
             inactive_border = colors.dim_accent,
