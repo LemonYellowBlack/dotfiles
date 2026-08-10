@@ -16,6 +16,9 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
+# dedups PATH
+typeset -U path PATH
+
 alias ls='ls -aF'
 # clear also resets the first-prompt flag so a cleared screen has no top gap
 alias clear='command clear; unset _PROMPT_NEWLINE_READY'
@@ -79,7 +82,9 @@ export BEADS_DOLT_SERVER_HOST=thinkcentre
 export BEADS_DOLT_SERVER_PORT=3307
 export BEADS_DOLT_SERVER_USER=root
 
+# java
 export JAVA_HOME=/usr/lib/jvm/default
+export PATH="$JAVA_HOME/bin:$PATH"
 
 # Workload tag for cpu-templog / gpu-templog CSVs.
 #   tag <name>   set the current tag (written to each sample row)
