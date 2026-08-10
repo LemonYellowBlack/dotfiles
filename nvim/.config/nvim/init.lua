@@ -104,7 +104,7 @@ end
 -- Install parsers: :TSInstall odin go lua markdown yaml json bash
 ----------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "odin", "go", "c", "cpp", "lua", "markdown", "yaml", "json", "bash", "python", "toml", "sql", "dockerfile" },
+  pattern = { "odin", "go", "c", "cpp", "lua", "markdown", "yaml", "json", "bash", "python", "toml", "sql", "dockerfile", "java" },
   callback = function()
     pcall(vim.treesitter.start)
   end,
@@ -151,7 +151,7 @@ vim.lsp.config("basedpyright", {
 -- uses for Python.
 vim.lsp.config("ruff", {})
 
-vim.lsp.enable({ "gopls", "clangd", "ols", "basedpyright", "ruff", "marksman" })
+vim.lsp.enable({ "gopls", "clangd", "ols", "basedpyright", "ruff", "marksman", "jdtls" })
 
 vim.diagnostic.config({
   virtual_text = false,
