@@ -79,6 +79,8 @@ export BEADS_DOLT_SERVER_HOST=thinkcentre
 export BEADS_DOLT_SERVER_PORT=3307
 export BEADS_DOLT_SERVER_USER=root
 
+export JAVA_HOME=/usr/lib/jvm/default
+
 # Workload tag for cpu-templog / gpu-templog CSVs.
 #   tag <name>   set the current tag (written to each sample row)
 #   tag          print the current tag
