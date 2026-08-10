@@ -3,7 +3,7 @@
 	name = lemonyellowblack
 [pull]
 	rebase = true
-	ff = true
+	ff = only
 [core]
 	hooksPath = ~/.config/git/hooks
 	pager = delta
