@@ -1,3 +1,4 @@
 scripts/wallpapers/
 ssh/.ssh/config
 bin/.local/bin/claude
+bin/.local/bin/moshi*
