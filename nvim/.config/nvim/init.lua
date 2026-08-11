@@ -71,6 +71,9 @@ vim.pack.add({
   "https://github.com/lewis6991/gitsigns.nvim",
   "https://github.com/echasnovski/mini.nvim",
   "https://github.com/akinsho/toggleterm.nvim",
+  "https://github.com/stevearc/conform.nvim",
+  "https://github.com/windwp/nvim-ts-autotag",
+  "https://github.com/brenoprata10/nvim-highlight-colors",
 })
 
 ----------------------------------------------------------------------
@@ -102,11 +105,33 @@ end
 -- but nvim does NOT auto-start it for non-bundled parsers, so start it
 -- per-filetype below.
 -- Install parsers: :TSInstall odin go lua markdown yaml json bash
+-- Web stack:       :TSInstall tsx typescript javascript css html
+-- Note: .tsx uses the `tsx` parser, .jsx uses the `javascript` parser.
 ----------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "odin", "go", "c", "cpp", "lua", "markdown", "yaml", "json", "bash", "python", "toml", "sql", "dockerfile", "java" },
+  pattern = {
+    "odin", "go", "c", "cpp", "lua", "markdown", "yaml", "json", "bash",
+    "python", "toml", "sql", "dockerfile", "java",
+    "javascript", "javascriptreact", "typescript", "typescriptreact",
+    "css", "scss", "html",
+  },
   callback = function()
     pcall(vim.treesitter.start)
+  end,
+})
+
+----------------------------------------------------------------------
+-- Web filetypes use 2-space indent (Prettier's default). The global
+-- shiftwidth of 4 would otherwise fight format-on-save on every write.
+----------------------------------------------------------------------
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = {
+    "javascript", "javascriptreact", "typescript", "typescriptreact",
+    "json", "jsonc", "css", "scss", "html", "yaml",
+  },
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
   end,
 })
 
@@ -151,7 +176,61 @@ vim.lsp.config("basedpyright", {
 -- uses for Python.
 vim.lsp.config("ruff", {})
 
-vim.lsp.enable({ "gopls", "clangd", "ols", "basedpyright", "ruff", "marksman", "jdtls" })
+-- TypeScript / React ------------------------------------------------
+-- Inlay hints are OFF at the server level by default; enabling
+-- vim.lsp.inlay_hint client-side (see LspAttach below) is not enough.
+local ts_inlay_hints = {
+  parameterNames           = { enabled = "literals" },
+  parameterTypes           = { enabled = true },
+  variableTypes            = { enabled = true },
+  propertyDeclarationTypes = { enabled = true },
+  functionLikeReturnTypes  = { enabled = true },
+  enumMemberValues         = { enabled = true },
+}
+
+local ts_settings = {
+  typescript = {
+    inlayHints = ts_inlay_hints,
+    -- Renaming a file in Oil rewrites every import that referenced it.
+    updateImportsOnFileMove = { enabled = "always" },
+  },
+  javascript = {
+    inlayHints = ts_inlay_hints,
+    updateImportsOnFileMove = { enabled = "always" },
+  },
+}
+
+vim.lsp.config("vtsls", { settings = ts_settings })
+vim.lsp.config("ts_ls", { settings = ts_settings })
+
+-- eslint owns the React-specific diagnostics TypeScript cannot see:
+-- react-hooks/exhaustive-deps and conditional hook calls.
+vim.lsp.config("eslint", {
+  settings = { workingDirectories = { mode = "auto" } },
+})
+
+vim.lsp.config("tailwindcss", {})
+
+local servers = { "gopls", "clangd", "ols", "basedpyright", "ruff", "marksman", "jdtls" }
+
+-- Web servers are enabled only when their binary is actually on PATH, so a
+-- missing install is a no-op rather than a silent failed attach. vtsls wins
+-- over ts_ls when both are present; enabling both would double-attach.
+local web_servers = {
+  vtsls       = "vtsls",
+  ts_ls       = "typescript-language-server",
+  eslint      = "vscode-eslint-language-server",
+  tailwindcss = "tailwindcss-language-server",
+}
+for server, binary in pairs(web_servers) do
+  if vim.fn.executable(binary) == 1 then
+    if not (server == "ts_ls" and vim.fn.executable("vtsls") == 1) then
+      table.insert(servers, server)
+    end
+  end
+end
+
+vim.lsp.enable(servers)
 
 vim.diagnostic.config({
   virtual_text = false,
@@ -174,12 +253,31 @@ vim.api.nvim_create_autocmd("LspAttach", {
       end, opts)
     end
 
-    -- Format on save
-    if client and client:supports_method("textDocument/formatting") then
+    -- Format on save. These clients advertise textDocument/formatting but
+    -- must not use it: the TypeScript servers ship the old VSCode JS
+    -- formatter, which silently fights Prettier and churns every diff.
+    -- conform.nvim owns formatting for all of them instead.
+    local skip_lsp_format = {
+      vtsls = true, ts_ls = true, eslint = true,
+      jsonls = true, html = true, cssls = true, tailwindcss = true,
+    }
+    if client
+      and client:supports_method("textDocument/formatting")
+      and not skip_lsp_format[client.name] then
       vim.api.nvim_create_autocmd("BufWritePre", {
         buffer = ev.buf,
         callback = function()
           vim.lsp.buf.format({ bufnr = ev.buf })
+        end,
+      })
+    end
+
+    -- Apply eslint autofixes on save (import order, hook deps, etc.)
+    if client and client.name == "eslint" then
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        buffer = ev.buf,
+        callback = function()
+          pcall(vim.cmd, "LspEslintFixAll")
         end,
       })
     end
@@ -253,6 +351,47 @@ require("gitsigns").setup({
 require("mini.statusline").setup({ use_icons = true })
 require("mini.pairs").setup({})
 require("mini.surround").setup({})
+
+----------------------------------------------------------------------
+-- conform.nvim — Prettier-based formatting for the web stack.
+-- Preferred over LSP formatting because it honours the project's own
+-- .prettierrc and degrades gracefully when a project has none.
+-- prettierd is a warm daemon (~15ms); prettier is the fallback.
+----------------------------------------------------------------------
+local prettier = { "prettierd", "prettier", stop_after_first = true }
+
+require("conform").setup({
+  formatters_by_ft = {
+    javascript      = prettier,
+    javascriptreact = prettier,
+    typescript      = prettier,
+    typescriptreact = prettier,
+    css             = prettier,
+    scss            = prettier,
+    html            = prettier,
+    json            = prettier,
+    jsonc           = prettier,
+  },
+  format_on_save = {
+    timeout_ms = 1000,
+    lsp_format = "never",   -- LSP formatting is handled in LspAttach
+  },
+})
+
+----------------------------------------------------------------------
+-- nvim-ts-autotag — close and rename JSX/HTML tag pairs.
+-- mini.pairs handles brackets and quotes but has no concept of tags.
+----------------------------------------------------------------------
+require("nvim-ts-autotag").setup()
+
+----------------------------------------------------------------------
+-- nvim-highlight-colors — inline swatches for hex/rgb and Tailwind classes
+----------------------------------------------------------------------
+require("nvim-highlight-colors").setup({
+  render = "virtual",
+  virtual_symbol = "●",
+  enable_tailwind = true,
+})
 
 ----------------------------------------------------------------------
 -- toggleterm — floating terminal
