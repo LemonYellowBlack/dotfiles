@@ -422,3 +422,22 @@ vim.keymap.set("n", "<leader>gg", function() lazygit:toggle() end,
   { desc = "Lazygit" })
 
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
+----------------------------------------------------------------------
+-- Plugin pruning — KEEP THIS LAST
+--
+-- Uninstalls plugins that are still on disk but no longer listed in
+-- vim.pack.add(), so deleting a line from that list is the whole uninstall
+-- procedure and nvim-pack-lock.json doesn't resurrect them on every machine.
+--
+-- This must stay below every vim.pack.add() call in the config. A plugin that
+-- hasn't been added yet this session looks stale, so a prune running above an
+-- add() would delete and re-clone that plugin on every startup.
+----------------------------------------------------------------------
+local stale = vim.iter(vim.pack.get())
+  :filter(function(p) return not p.active end)
+  :map(function(p) return p.spec.name end)
+  :totable()
+if #stale > 0 then
+  vim.pack.del(stale)
+end
