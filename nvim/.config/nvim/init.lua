@@ -74,6 +74,7 @@ vim.pack.add({
   "https://github.com/stevearc/conform.nvim",
   "https://github.com/windwp/nvim-ts-autotag",
   "https://github.com/brenoprata10/nvim-highlight-colors",
+  "https://github.com/coder/claudecode.nvim",
 })
 
 ----------------------------------------------------------------------
@@ -109,7 +110,13 @@ local ts_langs = {
   "python", "toml", "sql", "dockerfile", "java",
   "javascript", "typescript", "tsx", "css", "scss", "html",
 }
-require("nvim-treesitter.install").install(ts_langs, { summary = true })
+local ts_installed = require("nvim-treesitter.config").get_installed("parsers")
+local ts_missing = vim.tbl_filter(function(lang)
+  return not vim.list_contains(ts_installed, lang)
+end, ts_langs)
+if #ts_missing > 0 then
+  require("nvim-treesitter.install").install(ts_missing, { summary = true })
+end
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = {
@@ -124,8 +131,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 ----------------------------------------------------------------------
--- Web filetypes use 2-space indent (Prettier's default). The global
--- shiftwidth of 4 would otherwise fight format-on-save on every write.
+-- Web filetypes use 2-space indent (Prettier's default). 
 ----------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
   pattern = {
@@ -349,17 +355,24 @@ require("gitsigns").setup({
 })
 
 ----------------------------------------------------------------------
--- mini.nvim — statusline, autopairs, surround
+-- mini.nvim — statusline, autopairs, surround, file explorer
 ----------------------------------------------------------------------
 require("mini.statusline").setup({ use_icons = true })
 require("mini.pairs").setup({})
 require("mini.surround").setup({})
 
+-- mini.files — miller-column explorer (parent | current | preview)
+require("mini.files").setup({
+  windows = { preview = true, width_focus = 30, width_preview = 40 },
+})
+vim.keymap.set("n", "<leader>fe", function()
+  local buf_name = vim.api.nvim_buf_get_name(0)
+  -- An unnamed/scratch buffer has no path; fall back to the cwd.
+  MiniFiles.open(vim.fn.filereadable(buf_name) == 1 and buf_name or nil)
+end, { desc = "File explorer (mini.files)" })
+
 ----------------------------------------------------------------------
 -- conform.nvim — Prettier-based formatting for the web stack.
--- Preferred over LSP formatting because it honours the project's own
--- .prettierrc and degrades gracefully when a project has none.
--- prettierd is a warm daemon (~15ms); prettier is the fallback.
 ----------------------------------------------------------------------
 local prettier = { "prettierd", "prettier", stop_after_first = true }
 
@@ -427,15 +440,41 @@ vim.keymap.set("n", "<leader>gg", function() lazygit:toggle() end,
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 ----------------------------------------------------------------------
+-- claudecode.nvim — Claude Code IDE integration
+----------------------------------------------------------------------
+require("claudecode").setup({
+  terminal = {
+    provider = "native",
+    split_side = "right",
+    split_width_percentage = 0.25,   -- fraction of columns; must be 0 < v < 1
+  },
+})
+
+vim.keymap.set({ "n", "t" }, "<M-c>", "<cmd>ClaudeCodeFocus<cr>",
+  { desc = "Toggle Claude (works in terminal mode)" })
+
+vim.keymap.set("n", "<leader>cc", "<cmd>ClaudeCode<cr>", { desc = "Toggle Claude" })
+vim.keymap.set("n", "<leader>cf", "<cmd>ClaudeCodeFocus<cr>", { desc = "Focus Claude" })
+vim.keymap.set("n", "<leader>cr", "<cmd>ClaudeCode --resume<cr>", { desc = "Resume Claude" })
+vim.keymap.set("n", "<leader>cC", "<cmd>ClaudeCode --continue<cr>", { desc = "Continue Claude" })
+vim.keymap.set("n", "<leader>cm", "<cmd>ClaudeCodeSelectModel<cr>", { desc = "Select Claude model" })
+vim.keymap.set("n", "<leader>cb", "<cmd>ClaudeCodeAdd %<cr>", { desc = "Add current buffer" })
+vim.keymap.set("v", "<leader>cs", "<cmd>ClaudeCodeSend<cr>", { desc = "Send selection to Claude" })
+vim.keymap.set("n", "<leader>ca", "<cmd>ClaudeCodeDiffAccept<cr>", { desc = "Accept diff" })
+vim.keymap.set("n", "<leader>cd", "<cmd>ClaudeCodeDiffDeny<cr>", { desc = "Reject diff" })
+
+-- In a file explorer, <leader>cs adds the file under the cursor instead of
+-- sending a selection. Buffer-local so it does not shadow the visual map.
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "oil", "minifiles" },
+  callback = function(ev)
+    vim.keymap.set("n", "<leader>cs", "<cmd>ClaudeCodeTreeAdd<cr>",
+      { buffer = ev.buf, desc = "Add file to Claude context" })
+  end,
+})
+
+----------------------------------------------------------------------
 -- Plugin pruning — KEEP THIS LAST
---
--- Uninstalls plugins that are still on disk but no longer listed in
--- vim.pack.add(), so deleting a line from that list is the whole uninstall
--- procedure and nvim-pack-lock.json doesn't resurrect them on every machine.
---
--- This must stay below every vim.pack.add() call in the config. A plugin that
--- hasn't been added yet this session looks stale, so a prune running above an
--- add() would delete and re-clone that plugin on every startup.
 ----------------------------------------------------------------------
 local stale = vim.iter(vim.pack.get())
   :filter(function(p) return not p.active end)
