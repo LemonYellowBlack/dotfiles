@@ -101,13 +101,16 @@ for _, group in ipairs(transparent_groups) do
 end
 
 ----------------------------------------------------------------------
--- Treesitter — parsers only; the highlight engine is built into 0.12,
--- but nvim does NOT auto-start it for non-bundled parsers, so start it
--- per-filetype below.
--- Install parsers: :TSInstall odin go lua markdown yaml json bash
--- Web stack:       :TSInstall tsx typescript javascript css html
--- Note: .tsx uses the `tsx` parser, .jsx uses the `javascript` parser.
+-- Treesitter — parsers only
+-- Parsers install themselves from the list below
 ----------------------------------------------------------------------
+local ts_langs = {
+  "odin", "go", "c", "cpp", "yaml", "json", "bash",
+  "python", "toml", "sql", "dockerfile", "java",
+  "javascript", "typescript", "tsx", "css", "scss", "html",
+}
+require("nvim-treesitter.install").install(ts_langs, { summary = true })
+
 vim.api.nvim_create_autocmd("FileType", {
   pattern = {
     "odin", "go", "c", "cpp", "lua", "markdown", "yaml", "json", "bash",
