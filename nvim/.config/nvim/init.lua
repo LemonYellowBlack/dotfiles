@@ -443,32 +443,25 @@ vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" }
 -- claudecode.nvim — Claude Code IDE integration
 ----------------------------------------------------------------------
 require("claudecode").setup({
+  focus_after_send = true,
   terminal = {
     provider = "native",
     split_side = "right",
-    split_width_percentage = 0.25,   -- fraction of columns; must be 0 < v < 1
+    split_width_percentage = 0.45,   -- fraction of columns; must be 0 < v < 1
   },
 })
 
-vim.keymap.set({ "n", "t" }, "<M-c>", "<cmd>ClaudeCodeFocus<cr>",
-  { desc = "Toggle Claude (works in terminal mode)" })
+vim.keymap.set({ "n", "t", "v" }, "<M-c>", "<cmd>ClaudeCode<cr>",
+  { desc = "Show/hide Claude split" })
 
-vim.keymap.set("n", "<leader>cc", "<cmd>ClaudeCode<cr>", { desc = "Toggle Claude" })
-vim.keymap.set("n", "<leader>cf", "<cmd>ClaudeCodeFocus<cr>", { desc = "Focus Claude" })
-vim.keymap.set("n", "<leader>cr", "<cmd>ClaudeCode --resume<cr>", { desc = "Resume Claude" })
-vim.keymap.set("n", "<leader>cC", "<cmd>ClaudeCode --continue<cr>", { desc = "Continue Claude" })
-vim.keymap.set("n", "<leader>cm", "<cmd>ClaudeCodeSelectModel<cr>", { desc = "Select Claude model" })
-vim.keymap.set("n", "<leader>cb", "<cmd>ClaudeCodeAdd %<cr>", { desc = "Add current buffer" })
-vim.keymap.set("v", "<leader>cs", "<cmd>ClaudeCodeSend<cr>", { desc = "Send selection to Claude" })
-vim.keymap.set("n", "<leader>ca", "<cmd>ClaudeCodeDiffAccept<cr>", { desc = "Accept diff" })
-vim.keymap.set("n", "<leader>cd", "<cmd>ClaudeCodeDiffDeny<cr>", { desc = "Reject diff" })
+vim.keymap.set({"n", "v"}, "<M-t>", "<cmd>ClaudeCodeFocus<cr>", { desc = "Jump to Claude split" })
+vim.keymap.set("t", "<M-t>", [[<C-\><C-n><C-w>p]], { desc = "Jump back from Claude split" })
+vim.keymap.set("v", "<M-s>", "<cmd>ClaudeCodeSend<cr>", { desc = "Send selection to Claude" })
 
--- In a file explorer, <leader>cs adds the file under the cursor instead of
--- sending a selection. Buffer-local so it does not shadow the visual map.
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "oil", "minifiles" },
   callback = function(ev)
-    vim.keymap.set("n", "<leader>cs", "<cmd>ClaudeCodeTreeAdd<cr>",
+    vim.keymap.set("n", "<M-f>", "<cmd>ClaudeCodeTreeAdd<cr>",
       { buffer = ev.buf, desc = "Add file to Claude context" })
   end,
 })
