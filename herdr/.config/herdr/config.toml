@@ -1,0 +1,51 @@
+# herdr — terminal workspace manager for AI coding agents
+#
+# Tuned for attaching from Moshi (iOS) over SSH/Tailscale at ~45 columns.
+# The herdr *server* runs on this box; the phone is only a client, so
+# anything herdr plays or raises locally (sound, `system` toasts) lands
+# here, not on the phone. Alerts have to go out through the terminal.
+#
+# Reload without restarting:  herdr server reload-config   (or prefix+shift+R)
+# Never `herdr server stop` from inside a pane — it kills the panes too.
+
+onboarding = false
+
+[theme]
+name = "kanagawa"
+
+[ui]
+# 45 columns total: a 26-column sidebar is most of the screen.
+# "compact" keeps the narrow status rail, so agent state stays visible.
+sidebar_start_collapsed = true
+sidebar_collapsed_mode  = "compact"
+
+# Reclaim columns. Every one counts at this width.
+pane_scrollbars = false
+pane_gaps       = false
+
+# Phone rows swing between ~15 and ~35 as the soft keyboard shows/hides.
+hide_tab_bar_when_single_tab = true
+
+# Typing names on a soft keyboard is friction; generated names are fine.
+prompt_new_tab_name = false
+
+# Cheap way to tell panes apart without the sidebar expanded.
+show_agent_labels_on_pane_borders = true
+
+[ui.toast]
+# "terminal" asks Moshi to raise the notification, rather than "system"
+# which would ring mako on this box where nobody is looking.
+# If Moshi ignores OSC 9/777, fall back to "herdr" for in-app toasts.
+delivery = "terminal"
+
+[ui.sound]
+# Would play through this machine's speakers, not the phone. Useless as an
+# alert channel when away from the desk, and noisy when not.
+enabled = false
+
+[keys]
+# Do NOT bind alt+... chords. The iOS soft keyboard sends esc without a
+# fast enough follow-up byte, so herdr flushes a lone esc into the pane and
+# cancels whatever the agent was prompting for. See the raw_input warnings
+# in herdr-client.log. Stick to prefix+key and ctrl+letter.
+prefix = "ctrl+b"

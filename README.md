@@ -11,7 +11,7 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 | Area | Packages |
 |------|----------|
 | Shell / prompt | `zsh` `starship` |
-| Terminal / editor | `kitty` `nvim` |
+| Terminal / editor | `kitty` `nvim` `herdr` |
 | Wayland desktop | `hypr` `mako` `fuzzel` `gammastep` `waybar` |
 | Theme | `kanagawa` `vivid` `gtk` |
 | CLI tools | `bat` `bottom` `btop` `lazygit` `television` `yazi` `zathura` |
@@ -30,7 +30,7 @@ cd ~/dotfiles
 stow zsh starship kitty nvim hypr mako fuzzel gammastep waybar \
      kanagawa vivid gtk bat bottom btop lazygit television yazi zathura \
      psql pspg git ssh environment.d mimeapps
-stow --no-folding bin
+stow --no-folding bin herdr
 ```
 
 Stow only creates symlinks; install the underlying programs separately.
@@ -42,6 +42,11 @@ Stow only creates symlinks; install the underlying programs separately.
   Stow collapses it into a single directory symlink and those installers would
   write into this repo. `--no-folding` keeps `~/.local/bin` a real directory
   with per-file symlinks.
+- **`herdr` must use `--no-folding` too**, for the mirror-image reason: herdr
+  itself writes runtime state into `~/.config/herdr` alongside `config.toml` —
+  two Unix sockets, three logs, and a constantly-rewritten `session.json`.
+  Folded, that directory becomes one symlink into this repo and all of it
+  lands in git. Only `config.toml` belongs here.
 - **`hypr` is folded** — `~/.config/hypr` is a single directory symlink into
   this repo, so any file a tool auto-generates there lands in git. Re-stow with
   `stow --restow --no-folding hypr` if that becomes a problem.

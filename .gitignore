@@ -2,3 +2,10 @@ scripts/wallpapers/
 ssh/.ssh/config
 bin/.local/bin/claude
 bin/.local/bin/moshi*
+
+# herdr writes runtime state beside its config; belt-and-braces if the
+# package is ever stowed without --no-folding (see README gotcha).
+herdr/.config/herdr/*.log
+herdr/.config/herdr/*.sock
+herdr/.config/herdr/session.json
+herdr/.config/herdr/.plugins.lock
