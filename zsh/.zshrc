@@ -32,7 +32,6 @@ alias vltget='vltopen && vltkeys && vltclose'
 alias tor='torbrowser-launcher'
 alias srv="ssh thinkcentre"
 alias pwroff='shutdown now'
-alias claude='claude --allow-dangerously-skip-permissions'
 
 # Yazi shell wrapper (cd on quit)
 function y() {
