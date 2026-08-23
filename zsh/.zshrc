@@ -70,10 +70,29 @@ export EDITOR=nvim
 export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 export GPG_TTY=$(tty)
-# Explicit path, not the bare theme name: vivid path-resolves the argument first,
+# Explicit path: vivid path-resolves the argument first,
 # so the ~/dotfiles/kanagawa/ stow package shadows the theme in shells started there.
 export LS_COLORS="$(vivid generate "$HOME/.config/vivid/themes/kanagawa.yml")"
 export FZF_DEFAULT_OPTS="--color=fg:#DCD7BA,bg:-1,hl:#E46876,fg+:#DCD7BA,bg+:#2A2A37,hl+:#E46876,info:#658594,prompt:#7E9CD8,pointer:#E46876,marker:#98BB6C,spinner:#957FB8,header:#7AA89F,border:#363646"
+
+export NEWT_COLORS='
+root=white,black
+window=white,black
+border=blue,black
+title=yellow,black
+label=white,black
+button=black,white
+actbutton=white,blue
+listbox=white,black
+actlistbox=black,white
+textbox=white,black
+acttextbox=black,white
+entry=white,black
+disentry=gray,black
+checkbox=white,black
+actcheckbox=black,blue
+helpline=gray,black
+'
 
 # Beads (Dolt server on ThinkCentre)
 export BEADS_DIR=~/lyb/.beads
