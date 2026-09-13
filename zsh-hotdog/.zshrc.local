@@ -4,4 +4,12 @@
 pg-aigateway() {
     PGPASSWORD=litellm psql -h 127.0.0.1 -p 5434 -U litellm -d litellm "$@"
 }
+
+# Auto-launch the graphical session on physical tty1 login (paired with
+# getty autologin -- see /etc/systemd/system/getty@tty1.service.d/). Guarded
+# to tty1 with no existing session so it never fires over SSH or in a
+# terminal opened from inside the session itself.
+if [[ -z "$WAYLAND_DISPLAY" && -z "$DISPLAY" && "$(tty)" == "/dev/tty1" ]]; then
+    exec start-hyprland
+fi
   

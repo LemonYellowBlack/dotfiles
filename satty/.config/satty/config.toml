@@ -1,0 +1,56 @@
+# Satty — screenshot annotation. Kanagawa (Wave); see ../../../kanagawa-palette.md
+# Full reference: https://github.com/gabm/Satty/blob/main/config.toml
+
+[general]
+# Annotated copies land beside the hyprshot originals (see hypr/hyprland.conf).
+# Supports a leading ~ (>= 0.20.0) and chrono strftime specifiers.
+output-filename = "~/Pictures/Screenshots/%Y-%m-%d-%H%M%S_satty.png"
+
+# Make the toolbar "copy" button and Ctrl+C actually reach the Wayland clipboard.
+copy-command = "wl-copy"
+
+# Enter = write the annotated copy, put it on the clipboard, then quit.
+# Escape = quit without saving anything. Ctrl+S still saves on demand.
+actions-on-enter = ["save-to-file", "save-to-clipboard", "exit"]
+actions-on-escape = ["exit"]
+
+initial-tool = "rectangle"
+primary-highlighter = "block"
+default-round-caps = true
+corner-roundness = 12
+disable-notifications = false
+
+# Tool hotkeys (since 0.20.0) — these are the defaults, kept here as a cheat sheet.
+[keybinds]
+pointer = "p"
+crop = "c"
+brush = "b"
+line = "i"
+arrow = "z"
+rectangle = "r"
+ellipse = "e"
+text = "t"
+marker = "m"
+blur = "u"
+highlight = "g"
+
+[font]
+family = "Maple Mono NF"
+style = "Bold"
+
+# Kanagawa Wave accents shown in the toolbar for quick selection, warm -> cool.
+[color-palette]
+palette = [
+  "#C34043ff", # autumnRed
+  "#FFA066ff", # surimiOrange
+  "#E6C384ff", # carpYellow
+  "#98BB6Cff", # springGreen
+  "#7E9CD8ff", # crystalBlue
+  "#957FB8ff", # oniViolet
+  "#D27E99ff", # sakuraPink
+  "#DCD7BAff", # fujiWhite
+]
+custom = [
+  "#1F1F28", # sumiInk3
+  "#16161D", # sumiInk0
+]
