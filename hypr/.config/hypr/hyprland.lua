@@ -20,11 +20,16 @@ local mod = "SUPER"
 hl.env("XCURSOR_THEME", "Bibata-Modern-Ice")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("XDG_SESSION_TYPE", "wayland")
-hl.env("AQ_NO_MODIFIERS", "1")
-hl.env("LIBVA_DRIVER_NAME", "nvidia")
-hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
-hl.env("NVD_BACKEND", "direct")
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
+
+-- AQ_NO_MODIFIERS was removed: it forced Aquamarine to skip DRM format
+-- modifier negotiation, which AMD tolerated but breaks scanout buffer
+-- allocation on NVIDIA (causes an infinite mode-cycling hang on startup).
+
+-- GPU vendor env (LIBVA_DRIVER_NAME / __GLX_VENDOR_LIBRARY_NAME / NVD_BACKEND)
+-- lives in each machine's host.lua instead of here — hotdog and the XPS need
+-- different values, and hardcoding one here silently broke VA-API hardware
+-- decode on the other machine.
 
 
 -------------------

@@ -6,6 +6,14 @@
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 2 })
 hl.monitor({ output = "Unknown-1", disabled = true })
 
+-- GPU vendor env for hardware video accel. This is an Optimus laptop — the
+-- Intel iGPU drives the display by default (NVIDIA is on-demand via the PRIME
+-- toggle below), so VA-API/GLX need to target Intel, not NVIDIA. Forcing
+-- nvidia here (as the shared base config used to) breaks hardware video
+-- decode for anything using VA-API, including Moonlight.
+hl.env("LIBVA_DRIVER_NAME", "iHD")
+hl.env("__GLX_VENDOR_LIBRARY_NAME", "mesa")
+
 -- Backlight — requires a /sys/class/backlight device
 hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set 5%+"), { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"), { locked = true, repeating = true })
