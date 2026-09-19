@@ -33,6 +33,11 @@ alias tor='torbrowser-launcher'
 alias srv="ssh thinkcentre"
 alias pwroff='shutdown now'
 
+function work() {
+    aws ec2 start-instances --region us-east-1 --instance-ids i-0eb6a4da2cf5ec290
+    aws ssm start-session --region us-east-1 --target i-0eb6a4da2cf5ec290
+}
+
 # Yazi shell wrapper (cd on quit)
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
