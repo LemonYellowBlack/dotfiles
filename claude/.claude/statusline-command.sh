@@ -9,13 +9,16 @@ model=$(echo "$input" | jq -r '.model.display_name // ""')
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 session_name=$(echo "$input" | jq -r '.session_name // empty')
 branch=$(git --no-optional-locks -C "$cwd" branch --show-current 2>/dev/null)
+host=$(uname -n)
 
 # Kanagawa palette (true-color ANSI)
+# #7AA89F → teal    (hostname, matches starship)
 # #957FB8 → purple  (directory, matches starship)
 # #76946A → green   (git branch, autumnGreen — "git add" in the palette)
 # #E6C384 → yellow  (model name)
 # #727169 → muted   (context usage)
 # #FFA066 → orange  (session name / high context warning)
+teal='\033[38;2;122;168;159m'
 purple='\033[38;2;149;127;184m'
 green='\033[38;2;118;148;106m'
 yellow='\033[38;2;230;195;132m'
@@ -31,8 +34,11 @@ if [ "${#parts[@]}" -gt 3 ]; then
   cwd="…/${parts[-3]}/${parts[-2]}/${parts[-1]}"
 fi
 
+# Hostname (teal)
+out="$(printf "${teal}%s${reset}" "$host")"
+
 # Directory (purple)
-out="$(printf "${purple}%s${reset}" "$cwd")"
+out="${out}  $(printf "${purple}%s${reset}" "$cwd")"
 
 # Git branch (green)
 if [ -n "$branch" ]; then
