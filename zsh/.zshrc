@@ -73,6 +73,7 @@ source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zs
 
 export EDITOR=nvim
 export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
+export PATH=~/.npm-global/bin:$PATH
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 export GPG_TTY=$(tty)
 # Explicit path: vivid path-resolves the argument first,
