@@ -18,6 +18,7 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 | Database | `psql` `pspg` |
 | System | `git` `ssh` `environment.d` `mimeapps` |
 | Scripts | `bin` (→ `~/.local/bin`) |
+| Claude Code | `claude` (→ `~/.claude/statusline-command.sh`) |
 
 `scripts/` is **not** a Stow package — it holds helper assets (e.g.
 `kanagawa_wallpaper.py`) referenced by scripts in `bin/`. Don't stow it.
@@ -29,7 +30,7 @@ git clone git@forgejo:lemonyellowblack/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 stow zsh starship kitty nvim hypr mako fuzzel gammastep waybar satty \
      kanagawa vivid gtk bat bottom btop lazygit television yazi zathura \
-     psql pspg git ssh environment.d mimeapps
+     psql pspg git ssh environment.d mimeapps claude
 stow --no-folding bin herdr
 ```
 
