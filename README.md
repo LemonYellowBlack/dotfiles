@@ -51,6 +51,12 @@ Stow only creates symlinks; install the underlying programs separately.
 - **`hypr` is folded** — `~/.config/hypr` is a single directory symlink into
   this repo, so any file a tool auto-generates there lands in git. Re-stow with
   `stow --restow --no-folding hypr` if that becomes a problem.
+- **`hypr-xps`'s `.config/neowall/` stays unfolded on its own** — neowall
+  writes a runtime `state` file straight into `~/.config/neowall/`, alongside
+  the stowed `config.vibe` and `shaders/`. Stow already leaves it per-file
+  (a real file coexisting with the package forces that), so `state` never
+  lands in git. No `--no-folding` needed; just don't add a same-named file to
+  the package.
 - **`pspg`'s theme uses colour *names*, not hex — keep it that way.** pspg
   renders hex by reassigning 256-colour palette slots from 64 up, via the
   terminfo `initc` capability (an `OSC 4` sequence). Nvim's built-in terminal
