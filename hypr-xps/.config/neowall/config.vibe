@@ -1,5 +1,5 @@
 default {
-  shader kanagawa-wave.glsl
+  shader practice.glsl
   shader_speed 1.0
   vsync false
   shader_fps 30
