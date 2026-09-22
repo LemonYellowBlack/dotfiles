@@ -1,3 +1,7 @@
+// Kanagawa "Wave" palette, as normalized 0..1 floats for GLSL.
+const vec3 sumiInk0   = vec3(0.086, 0.086, 0.114);  // #16161D
+const vec3 crystalBlue  = vec3(0.494, 0.612, 0.847);  // #7E9CD8
+
 // [r,g,b,a] out, [x, y] in; [0,0] is bottom-left
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // center and aspect-correct 
@@ -19,8 +23,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // this results in a soft edge on the rim of the circle
     float shape = 1.0 - smoothstep(-0.005, 0.0025, d);
 
-    vec3 background = vec3(0.086, 0.086, 0.114);  // sumiInk0
-    vec3 fillColor   = vec3(0.494, 0.612, 0.847);  // crystalBlue
+    vec3 background = sumiInk0;
+    vec3 fillColor   = crystalBlue;
 
     // col is the [r,g,b] value of the pixel
     // mix(a, b, t) linearly blends a -> b as t goes 0 -> 1. (linear interpolation)
