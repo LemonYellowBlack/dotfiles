@@ -1,7 +1,0 @@
-# practice2.neowall — sidecar manifest for practice2.glsl.
-# Declares that the shader has a Buffer A pass whose channel 0 is its own
-# previous frame (self), and that the Image pass reads Buffer A on channel 0.
-shader practice2.glsl
-
-bufferA { ch0 self }
-image   { ch0 bufferA }

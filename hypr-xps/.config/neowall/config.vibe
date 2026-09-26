@@ -1,5 +1,5 @@
 default {
-  shader practice3.glsl
+  shader simple3D.glsl
   shader_speed 1.0
   vsync false
   shader_fps 60
