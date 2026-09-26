@@ -6,6 +6,7 @@ input=$(cat)
 # Extract fields
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
 model=$(echo "$input" | jq -r '.model.display_name // ""')
+effort=$(echo "$input" | jq -r '.effort.level // empty')
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 session_name=$(echo "$input" | jq -r '.session_name // empty')
 branch=$(git --no-optional-locks -C "$cwd" branch --show-current 2>/dev/null)
@@ -45,9 +46,13 @@ if [ -n "$branch" ]; then
   out="${out}  $(printf "${green}(%s)${reset}" "$branch")"
 fi
 
-# Model (yellow)
+# Model (yellow), with effort level appended when present
 if [ -n "$model" ]; then
-  out="${out}  $(printf "${yellow}%s${reset}" "$model")"
+  if [ -n "$effort" ]; then
+    out="${out}  $(printf "${yellow}%s (%s)${reset}" "$model" "$effort")"
+  else
+    out="${out}  $(printf "${yellow}%s${reset}" "$model")"
+  fi
 fi
 
 # Context usage (muted, shifts to orange when >=75%)

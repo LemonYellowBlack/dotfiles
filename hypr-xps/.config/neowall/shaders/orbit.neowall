@@ -1,0 +1,7 @@
+# orbit.neowall: sidecar manifest for orbit.glsl.
+# Buffer A reads its own previous frame (self) to smooth per-core load, RAM,
+# and CPU, and to accumulate the orbit phase. The Image pass reads Buffer A.
+shader orbit.glsl
+
+bufferA { ch0 self }
+image   { ch0 bufferA }
