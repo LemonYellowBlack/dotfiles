@@ -144,8 +144,9 @@ const float GLOW_DISC_DIM = 0.6;             // how much glow the disc itself sk
 
 // --- the air round the planet, and the backdrop
 const float AIR_GLOW      = 0.15;            // brightness of the thin air where the moon lights it
-const float AIR_THICKNESS = 0.3;             // how far it reaches past the planet's edge
+const float AIR_THICKNESS = 0.5;             // how far it can reach past the planet's edge (it fades to 0 by here)
 const float AIR_FALLOFF   = 12.0;            // how fast it thins out (bigger = a tighter ring)
+const float AIR_WISPS     = 0.5;             // how uneven its reach is round the ring (0 = a perfect circle, keep under ~0.8)
 const vec2  AIR_BACKLIT   = vec2(0.2, 2.2);  // its brightness: moon in front .. moon behind
 const float AIR_TINT      = 0.5;             // how much it takes the moon's colour (0 = all AIR_COLOR)
 const float BACKDROP_LIFT   = 0.45;          // how much the background brightens behind the planet
@@ -695,8 +696,20 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         // distance to its edge is sqrt(D^2 - 1)
         float near = moonBright(MOON_R / sqrt(max(dot(mPos, mPos) - 1.0, 0.05)));
         float back = smoothstep(0.0, 1.5, dot(mPos, CAM_FW));   // 1 well behind the planet
-        // back from screen units to world units past the edge, near enough
-        float halo = exp(-AIR_FALLOFF * (qd - edge) * (CAM_DIST / FOCAL)) * (1.0 - aP);
+        // how far out: 0 at the planet's edge .. 1 at the ring's outer limit
+        float x    = (qd - edge) / (haloOut - edge);
+        // uneven reach round the ring: three slow waves of unrelated sizes.
+        // Whole-number waves only: atan jumps from pi to -pi at the planet's
+        // left, and only they match on both sides of the jump.
+        float ang  = atan(q.y, q.x);
+        float wisp = 0.5 * sin( 3.0 * ang + 0.11 * iTime)
+                   + 0.3 * sin( 7.0 * ang - 0.07 * iTime + 2.0)
+                   + 0.2 * sin(13.0 * ang + 0.05 * iTime + 4.0);
+        float fall = AIR_FALLOFF * (1.0 - AIR_WISPS * wisp);
+        // back from screen units to world units past the edge, near enough;
+        // faded to exactly 0 by the ring's outer limit, so no hard edge
+        float halo = exp(-fall * (qd - edge) * (CAM_DIST / FOCAL))
+                   * (1.0 - smoothstep(0.4, 1.0, x)) * (1.0 - aP);
         col += mix(toLinear(AIR_COLOR), moonCol, AIR_TINT) * halo * near * lit
              * mix(AIR_BACKLIT.x, AIR_BACKLIT.y, back) * AIR_GLOW;
     }
