@@ -6,6 +6,8 @@
 //   ram    how fast the moon goes around
 //   heat   the moon's colour, fuji white -> old white, and so the colour
 //          of the light it throws on the planet
+//   (each one stretched over the range it really covers on this laptop:
+//   see BUSY_RANGE below)
 //
 // What makes it move like motion graphics instead of a clock hand:
 //   - the moon obeys Kepler: it whips through the close pass and hangs at
@@ -90,16 +92,34 @@ struct Orbit {
     float turn;   // the angle the ellipse's long axis points at
 };
 
-// m = smoothed (cpu, ram, heat)
-Orbit orbitFor(vec3 m) {
+// The range each input really covers on this laptop (XPS 15 7590, measured
+// Sep 2026). Mapping the whole 0..1 wastes most of it: across a stretch of
+// ordinary use iCpu sat at 0.04..0.07, so the orbit only ever used the
+// first 7% of its range of shapes. smoothstep(lo, hi, x) turns lo..hi into
+// 0..1, flat at both ends, so everyday noise below lo doesn't wobble anything.
+//   iCpuMax   the busiest CPU thread. iCpu averages all 12, so one thread
+//             flat out reads as just 0.08. Idle, this wanders 0.1..0.3
+//   iRam      used / total. With 16 GB it lives around 0.3..0.6
+//   iThermal  (hottest CPU sensor - 30 C) / 65 C. The graphics chip sits in
+//             the same package, so with this wallpaper on screen the CPU
+//             idles around 70 C; flat out it heads for 95 C
+const vec2 BUSY_RANGE = vec2(0.30, 0.95);
+const vec2 RAM_RANGE  = vec2(0.25, 0.75);
+const vec2 HEAT_RANGE = vec2(0.68, 0.97);   // 74 C .. 93 C
+
+// The ellipse itself slowly turns (apsidal precession), once every ~2.7
+// minutes: the close pass starts off at the planet's right edge, where the
+// bulge shows best, then drifts behind, round the left, and back.
+const float PRECESSION_PERIOD = 160.0;      // seconds per full turn
+
+// m = smoothed (busiest thread, ram, heat), turns = how far the ellipse has
+// turned so far (whole turns don't matter)
+Orbit orbitFor(vec3 m, float turns) {
     Orbit o;
-    o.e    = mix(0.24, 0.37, m.x);
+    o.e    = mix(0.24, 0.37, smoothstep(BUSY_RANGE.x, BUSY_RANGE.y, m.x));
     o.a    = 1.95;
-    o.rate = mix(0.11, 0.16, m.y);
-    // The ellipse itself slowly turns (apsidal precession), once every ~2.7
-    // minutes: the close pass starts off at the planet's right edge, where
-    // the bulge shows best, then drifts behind, round the left, and back.
-    o.turn = -0.35 + iTime * TAU / 160.0;
+    o.rate = mix(0.11, 0.16, smoothstep(RAM_RANGE.x, RAM_RANGE.y, m.y));
+    o.turn = -0.35 + TAU * turns;
     return o;
 }
 
@@ -146,15 +166,16 @@ float pullTarget(vec3 moonPos) {
 }
 
 // The simulation's output: one row of texels, each holding one thing.
-const int S_METRICS = 0;   // smoothed cpu, ram, heat (+ the marker, see below)
-const int S_PHASE   = 1;   // orbit phase: coarse part, fine part
+const int S_METRICS = 0;   // smoothed busiest thread, ram, heat (+ the marker, see below)
+const int S_PHASE   = 1;   // orbit phase, then the ellipse's turn: coarse and fine part each
 const int S_SPRING  = 2;   // bulge height, and how fast it's moving
 const int S_BULGE   = 3;   // bulge direction, and its height (capped)
 const int S_MOON_HI = 4;   // moon position, coarse part
 const int S_MOON_LO = 5;   // moon position, fine part
 const int S_MOON_V  = 6;   // moon heading, and how stretched it is
 const int S_SCREEN  = 7;   // the moon on screen: where, how big, how hot
-const int S_COUNT   = 8;
+const int S_METRICS_LO = 8;   // smoothed inputs, fine part (S_METRICS holds the coarse)
+const int S_COUNT   = 9;
 
 vec4 state(int i) { return texelFetch(iChannel0, ivec2(i, 0), 0); }
 
@@ -165,6 +186,15 @@ vec4 state(int i) { return texelFetch(iChannel0, ivec2(i, 0), 0); }
 // a coarse one in whole 1/128ths (which half floats hold exactly) and the
 // small leftover (where half floats are very precise). Add them to read.
 vec3 coarse(vec3 x) { return floor(x * 128.0 + 0.5) / 128.0; }
+
+// The same trick for a number that grows a little every frame, counted in
+// turns (so it wraps at 1): hi holds whole 1/256ths, lo the leftover, and
+// whenever lo passes 1/256 it carries over into hi. Add the two to read it.
+vec2 accumulate(vec2 hilo, float step) {
+    float lo    = hilo.y + step;
+    float carry = floor(lo * 256.0) / 256.0;
+    return vec2(fract(hilo.x + carry), lo - carry);
+}
 
 // Buffer A: the simulation
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
@@ -177,6 +207,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // can hand over garbage on the very first frame, so the metrics texel
     // only counts as remembered if its alpha holds the marker 0.75.
     vec4 prevM = state(S_METRICS);
+    vec4 prevL = state(S_METRICS_LO);
     vec4 prevP = state(S_PHASE);
     vec4 prevS = state(S_SPRING);
     vec4 prevB = state(S_BULGE);
@@ -192,26 +223,35 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // at 60 fps and 3.3 s at 30; deriving the fraction from dt keeps the lag
     // the same in seconds at any frame rate. tau is roughly the time it
     // takes to get 63% of the way to a new value.
-    vec3 live = vec3(iCpu, iRam, iThermal);
-    vec3 m    = fresh ? live : mix(prevM.rgb, live, 1.0 - exp(-dt / vec3(1.5, 3.0, 4.0)));
-    Orbit o   = orbitFor(m);
+    // Stored in two parts, like the positions: near 1 a half float moves in
+    // steps of ~0.0005, and one frame's nudge toward a value that's close is
+    // smaller than that, so a single number would stall short of it. For
+    // heat at 60 fps that was up to 0.12 short: 8 C, reading too cool.
+    vec3 live = vec3(iCpuMax, iRam, iThermal);
+    vec3 prev = prevM.rgb + prevL.rgb;
+    vec3 m    = fresh ? live : mix(prev, live, 1.0 - exp(-dt / vec3(1.5, 3.0, 4.0)));
 
-    // --- orbit phase
-    // Added up a frame at a time (phase += rate * dt). orbit.glsl's
-    // iTime * speed has a catch: iTime reaches the thousands, so the tiniest
-    // change in speed jumps the moon to another spot on its orbit.
-    // It's split in two for the same half-float reason as the positions:
-    // near 1.0 a half float's smallest step is ~0.0005, a quarter of one
-    // frame's movement, so a single number would round every frame's step
-    // and make the speed stutter. hi holds whole 1/256ths, lo the leftover,
-    // and whenever lo passes 1/256 it carries over into hi.
-    float lo    = (fresh ? 0.0 : prevP.g) + o.rate * dt;
-    float carry = floor(lo * 256.0) / 256.0;
-    float hi    = fract((fresh ? 0.0 : prevP.r) + carry);
-    lo -= carry;
+    // --- the ellipse's slow turn, and the orbit phase
+    // Both are added up a frame at a time (turn += dt / period, phase +=
+    // rate * dt) instead of worked out from iTime. orbit.glsl's iTime * speed
+    // has a catch: iTime reaches the thousands, so the tiniest change in
+    // speed jumps the moon to another spot on its orbit. And neowall resets
+    // iTime to 0 about once an hour, while the wallpaper is hidden: a turn
+    // worked out from iTime would swing the orbit to a new angle behind the
+    // simulation's back, and the bulge would be left reaching for a moon
+    // that isn't there. (It also means neowall's shader_speed setting does
+    // nothing here: it speeds up iTime, not iTimeDelta.)
+    // Each is split in two for the same half-float reason as the positions:
+    // near 1.0 a half float's smallest step is ~0.0005. The phase moves ~4x
+    // that a frame, so a single number would round every step and make the
+    // speed stutter; the turn moves ~0.0001 a frame, so it wouldn't move at
+    // all. accumulate() does the carrying.
+    vec2  turn  = accumulate(fresh ? vec2(0.0) : prevP.ba, dt / PRECESSION_PERIOD);
+    Orbit o     = orbitFor(m, turn.x + turn.y);
+    vec2  phase = accumulate(fresh ? vec2(0.0) : prevP.rg, o.rate * dt);
 
     vec3 moonPos, moonVel;
-    moonState(hi + lo, o, moonPos, moonVel);
+    moonState(phase.x + phase.y, o, moonPos, moonVel);
 
     // --- bulge height, as a damped spring
     // The spring is pulled toward the moon's tug. It lags on the way up,
@@ -238,7 +278,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // --- the moon's look: stretched when fast, warmer when hot
     float speed   = length(moonVel);
     float stretch = 1.0 + 0.15 * max(speed - 1.2, 0.0);
-    float warmth  = smoothstep(0.3, 0.85, m.z);
+    float warmth  = smoothstep(HEAT_RANGE.x, HEAT_RANGE.y, m.z);
 
     // --- where the moon lands on screen, for the drawing pass's shortcut
     // (the same projection the camera ray does, run backwards: z is the
@@ -249,8 +289,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     // each texel keeps its own slice of all that
     vec4 outv;
-    if      (px.x == S_METRICS) outv = vec4(m, 0.75);
-    else if (px.x == S_PHASE)   outv = vec4(hi, lo, 0.0, 0.0);
+    if      (px.x == S_METRICS) outv = vec4(coarse(m), 0.75);
+    else if (px.x == S_METRICS_LO) outv = vec4(m - coarse(m), 0.0);
+    else if (px.x == S_PHASE)   outv = vec4(phase, turn);
     else if (px.x == S_SPRING)  outv = vec4(h, v, 0.0, 0.0);
     else if (px.x == S_BULGE)   outv = vec4(dir, clamp(h, -BULGE_MAX, BULGE_MAX));
     else if (px.x == S_MOON_HI) outv = vec4(coarse(moonPos), 0.0);
@@ -267,7 +308,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 const float MOON_POWER = 40.0;   // how much light the moon throws
 
 // Lights: a big soft key up and to the left, a cool rim from behind right.
-// The key is a softbox, a rounded rectangle; BOX_U and BOX_V lie in its face.
+// The key is a softbox with a diffuser over its face; BOX_U and BOX_V lie
+// in that face.
 const vec3 KEY_DIR = normalize(vec3(-0.7, 0.6, 0.3));
 const vec3 RIM_DIR = normalize(vec3(0.8, 0.25, -0.55));
 const vec3 BOX_U   = normalize(cross(KEY_DIR, vec3(0.0, 1.0, 0.0)));
@@ -337,15 +379,24 @@ float moonShadow(vec3 p, vec3 l, vec3 c) {
 vec3 studio(vec3 d) {
     vec3 col = mix(toLinear(sumiInk0), toLinear(winterBlue) * 2.5, smoothstep(-0.3, 0.9, d.y));
 
-    // The softbox: find where d crosses the box's plane, then test that
-    // spot against a rounded rectangle (a 2D distance, like practice.glsl's
-    // circle). Rectangular highlights are the studio look.
+    // The softbox: find where d crosses the box's face (q), then light that
+    // spot with smooth falloffs and no edge anywhere, so its reflection
+    // reads as a glow on the coat rather than a shape stuck on top of it.
+    // Two parts, like a real diffuser:
+    //   body  wide and soft. pow(r, 2.2) keeps its middle broad before it
+    //         fades, the k.x line makes it a little egg-shaped (wider toward
+    //         its top), and it's brighter toward the top, like a window
+    //         with sky above it
+    //   core  a small hot spot near the top, where the diffuser glows most
     float facing = dot(d, KEY_DIR);
     if (facing > 0.0) {
-        vec2  q = vec2(dot(d, BOX_U), dot(d, BOX_V)) / facing;
-        vec2  e = abs(q) - vec2(0.26, 0.16);
-        float box = length(max(e, 0.0)) + min(max(e.x, e.y), 0.0) - 0.06;
-        col += vec3(5.0) * smoothstep(0.06, -0.03, box);
+        vec2  q    = vec2(dot(d, BOX_U), dot(d, BOX_V)) / facing;
+        vec2  k    = q / vec2(0.46, 0.34);
+        k.x       /= 1.0 + 0.18 * k.y;
+        float body = exp(-1.4 * pow(length(k), 2.2)) * (0.75 + 0.4 * smoothstep(-1.0, 1.0, k.y));
+        vec2  c    = (q - vec2(0.0, 0.08)) / vec2(0.22, 0.16);
+        float core = exp(-2.0 * dot(c, c));
+        col += vec3(3.2) * body + vec3(2.4) * core;
     }
 
     col += toLinear(dragonBlue) * 1.5 * smoothstep(0.70, 0.90, dot(d, RIM_DIR));
