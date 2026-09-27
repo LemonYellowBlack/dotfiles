@@ -1,0 +1,7 @@
+# orbit3d.neowall: sidecar manifest for orbit3d.glsl.
+# Buffer A reads its own previous frame (self): that's the simulation's
+# memory from one frame to the next. The Image pass reads Buffer A.
+shader orbit3d.glsl
+
+bufferA { ch0 self }
+image   { ch0 bufferA }
