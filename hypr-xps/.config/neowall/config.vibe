@@ -1,5 +1,5 @@
 default {
-  shader orbit3d.glsl
+  shader jelly.glsl
   shader_speed 1.0
   # vsync on: frames are paced to the 60 Hz panel, so motion is smooth.
   # (off, neowall paces with its own timer, which drifts against the panel.)

@@ -1,0 +1,7 @@
+# jelly.neowall: sidecar manifest for jelly.glsl.
+# Buffer A reads its own previous frame (self): that's the simulation's
+# memory from one frame to the next. The Image pass reads Buffer A.
+shader jelly.glsl
+
+bufferA { ch0 self }
+image   { ch0 bufferA }
