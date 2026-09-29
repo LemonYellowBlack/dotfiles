@@ -115,7 +115,7 @@ const float DROP_RADIUS = 1.1;    // how wide (in grid points)
 
 // --- wind: now and then a gust drifts across, roughening a patch of the water
 const vec2  GUST_EVERY  = vec2(18.0, 40.0);   // seconds between gusts: shortest .. longest
-const float GUST        = 0.011;              // how hard it ruffles the water
+const float GUST        = 0.000;              // how hard it ruffles the water
 const vec2  GUST_SIZE   = vec2(0.18, 0.32);   // its radius: smallest .. largest
 const float GUST_SPEED  = 0.12;               // how fast it drifts across
 
