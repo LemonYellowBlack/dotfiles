@@ -470,7 +470,10 @@ Sim simulate(bool fresh) {
     s.seen = state(S_SEEN);
     s.line = L.x; s.pending = L.y; s.stopped = L.z + L.w;
     s.departing = F.x; s.sleep = F.y; s.syncSeen = F.z; s.kind = F.w;
-    float dt = min(iTimeDelta, 0.05);    // after a pause neowall says 0.25 s; the train doesn't leap
+    // After a pause neowall says 0.25 s; the train doesn't leap. (0.1, not
+    // less: some screens get only 15 frames a second, and a smaller cap
+    // would slow everything down there.)
+    float dt = min(iTimeDelta, 0.1);
 
     // ---- the program's commands
     // A resync (a debugging key): jump to where the program thinks we are.
@@ -698,7 +701,7 @@ vec4 stateTexel(int i, vec4 prev, bool fresh, bool running) {
     if (i == S_MARK) return vec4(running ? min(fresh ? 0.0 : prev.x + 1.0, 8.0) : prev.x, 0.0, 0.0, running ? 0.75 : (fresh ? 0.0 : 0.5));
     if (i >= D_MOTION) return drawTexel(i);
     if (!running) return fresh ? vec4(0.0) : prev;      // the program isn't there: hold everything as it is
-    float dt = min(iTimeDelta, 0.05);
+    float dt = min(iTimeDelta, 0.1);
     if (i == S_CPU) {
         float c = fresh ? iCpuMax : prev.x + prev.y;
         c += (iCpuMax - c) * min(dt / CPU_LAG, 1.0);
@@ -957,7 +960,7 @@ vec4 fogTexel(ivec2 f, vec4 prev, bool fresh, bool running) {
     vec2 e = vec2(abs(p.x) / hw, abs(p.y - 0.5) * 2.0);
     float edge = max(e.x, e.y);
     vec4 E = state(S_ENV) + state(S_ENVLO);
-    float lo = prev.g + E.y * min(iTimeDelta, 0.05) / FOG_TIME * (0.7 + 0.6 * edge * edge);
+    float lo = prev.g + E.y * min(iTimeDelta, 0.1) / FOG_TIME * (0.7 + 0.6 * edge * edge);
     float carry = floor(lo * 256.0) / 256.0;
     float fog = min(prev.r + carry, 1.0);
     lo -= carry;
