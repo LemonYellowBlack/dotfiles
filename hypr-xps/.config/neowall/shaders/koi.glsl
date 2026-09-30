@@ -36,8 +36,8 @@
 //     a while, sometimes it comes up to gulp at the surface. A drop landing
 //     right beside one near the surface makes it start and dive
 //   - the water is a real wave simulation: rain, gulps, the wakes of koi
-//     swimming just under the surface, the pointer and gusts of wind all start
-//     ripples, which spread, cross and fade as they would
+//     swimming just under the surface and the pointer all start ripples,
+//     which spread, cross and fade as they would
 //   - light does the rest: the ripples bend your view of everything under
 //     them, focus light into caustics on the floor, and catch glints of the
 //     sun, the moon or the lantern; koi and pads throw shadows on the floor
@@ -113,12 +113,6 @@ const float RAIN_MAX    = 8.0;    // drops a second, flat out
 const float DROP_DEPTH  = 1.2;    // how hard a drop hits
 const float DROP_RADIUS = 1.1;    // how wide (in grid points)
 
-// --- wind: now and then a gust drifts across, roughening a patch of the water
-const vec2  GUST_EVERY  = vec2(18.0, 40.0);   // seconds between gusts: shortest .. longest
-const float GUST        = 0.000;              // how hard it ruffles the water
-const vec2  GUST_SIZE   = vec2(0.18, 0.32);   // its radius: smallest .. largest
-const float GUST_SPEED  = 0.12;               // how fast it drifts across
-
 // --- the lantern: a stone lantern just off the top-left corner, lit at night
 const vec3  LANTERN_POS   = vec3(-1.02, 0.60, 0.28);  // x, y in pond units (on a 16:9 screen), and how high it stands
 const float LANTERN       = 1.6;                      // how bright
@@ -191,7 +185,7 @@ vec3 toLinear(vec3 c) { return c * c; }
 // Buffer A is a picture the size of 70% of the screen (neowall's size for a
 // buffer that reads itself), and this uses a few patches of it:
 //
-//   row 0                   the state: koi, pads, lights, wind, rain...
+//   row 0                   the state: koi, pads, lights, rain...
 //   rows 2..109, left       tiles: which koi and pads reach each patch of the
 //                           screen (20 px squares on a 4K screen)
 //   rows 2..33, from x 300  each koi's skin, laid out flat
@@ -226,13 +220,11 @@ const int S_SRC        = 4;    // 4..13, things poking the water: 2 drops, 7 koi
 const int N_SRC        = 10;
 const int S_LIGHT      = 14;   // where the light comes from, and how much it's day
 const int S_LIGHT2     = 15;   // the light's colour, and how golden
-const int S_GUST       = 16;   // the gust: where it is, and its velocity
-const int S_GUST2      = 17;   // its age (below 0 while waiting for the next), lifetime, radius, strength
-const int S_LANTERN    = 18;   // the lantern's light just now, and how much it's night
-const int S_PHASE      = 19;   // two steady clocks, for flicker and dabbling (coarse, fine each)
+const int S_LANTERN    = 16;   // the lantern's light just now, and how much it's night
+const int S_PHASE      = 17;   // two steady clocks, for flicker and dabbling (coarse, fine each)
 // the koi: F_STRIDE texels each. The mind is worked out first each frame; the
 // body follows where the mind put the head, a frame later.
-const int F_BASE       = 20;
+const int F_BASE       = 18;
 const int F_STRIDE     = 23;
 const int F_HEAD = 0, F_MOVE = 1, F_SWIM = 2, F_MIND = 3, F_EXTRA = 4;
 const int F_CHEAD = 5, F_CHAIN = 6, F_DRAW = 10, F_SHADOW = 14, F_LOOK = 15, F_TINT = 16, F_FIN = 17,
@@ -375,18 +367,6 @@ vec4 rippleCell(ivec2 px, Grid g, float hw, bool fresh) {
             + WAVE_VISC * (lap2.x - lap2.y);
     // soaked up past the edge; and the whole pond levels off, very slowly
     h *= 1.0 - 0.12 * edge - 0.002;
-    // a gust: wind pushing the surface about under it, which the waves turn
-    // into a patch of fine chop drifting across the pond
-    vec4 G2 = state(S_GUST2);
-    if (G2.w > 0.0) {
-        vec4  G = state(S_GUST);
-        vec2  dg = (pos - G.xy) / G2.z;
-        float fall = 1.0 - dot(dg, dg);
-        if (fall > 0.0) {
-            vec2 np = pos / (3.5 * g.cell) - G.zw * G2.x * 90.0;
-            h += G2.w * fall * fall * (vnoise(np) + vnoise(np * 1.7 + 4.1) - 1.0);
-        }
-    }
     // Things poking the water. Each poke is a dip with a raised rim, shaped
     // so it adds no water overall: pokes that only pushed down would slowly
     // hollow the pond out.
@@ -1032,36 +1012,6 @@ vec4 stateTexel(int i, float hw, Grid g) {
         float p1 = ph.x + ph.y, p2 = ph.z + ph.w;
         float fl = 0.88 + 0.07 * sin(TAU * p1) + 0.03 * sin(TAU * (2.0 * p2 + 0.2)) + 0.02 * sin(TAU * (3.0 * p1 + p2));
         return vec4(toLinear(mix(surimiOrange, carpYellow, 0.35)) * LANTERN * night * fl, night);
-    }
-    if (i == S_GUST || i == S_GUST2) {
-        vec4 G = state(S_GUST), G2 = state(S_GUST2);
-        if (fresh) { G = vec4(0.0); G2 = vec4(-6.0, 1.0, 0.2, 0.0); }
-        G2.x += dt;
-        if (G2.x >= G2.y) {
-            // that one's gone: wait a while for the next
-            float n = floor(iTime * 0.37) + 13.0 * floor(G.x * 17.0);
-            G2 = vec4(-mix(GUST_EVERY.x, GUST_EVERY.y, hash(n * 1.3)), 1.0, 0.2, 0.0);
-            G = vec4(1e3, 0.0, 0.0, 0.0);
-        }
-        if (G2.x < 0.0 && G2.x + dt >= 0.0) {
-            // a new one: from just off the screen, upwind, on a line passing
-            // near the middle, all the way across. Half the way across is
-            // however far it must go to leave the screen along its heading.
-            float n = floor(iTime * 0.53) + 7.0;
-            float a = TAU * hash(n * 2.1);
-            vec2  dirG = vec2(cos(a), sin(a));
-            float radius = mix(GUST_SIZE.x, GUST_SIZE.y, hash(n * 3.7));
-            vec2  half_ = (vec2(hw, 0.5) + radius) / max(abs(dirG), vec2(1e-3));
-            float across = min(half_.x, half_.y);
-            G  = vec4(rot90(dirG) * (hash(n * 5.1) - 0.5) * 0.4 - dirG * across, dirG * GUST_SPEED);
-            G2 = vec4(0.0, 2.0 * across / GUST_SPEED, radius, 0.0);
-        }
-        if (G2.x >= 0.0) {
-            // it drifts, rising and falling over its life
-            G.xy += G.zw * dt;
-            G2.w = GUST * sin(3.14159 * clamp(G2.x / G2.y, 0.0, 1.0));
-        }
-        return i == S_GUST ? G : G2;
     }
     // --- rain: drips when the network's quiet, a shower when it's busy.
     // Each drop pokes the water once (in the frame after the one it's
