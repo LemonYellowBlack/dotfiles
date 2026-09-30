@@ -10,4 +10,7 @@ herdr/.config/herdr/*.sock
 herdr/.config/herdr/session.json
 herdr/.config/herdr/.plugins.lock
 
+# neowall writes a runtime state file beside its config; same reasoning.
+neowall/.config/neowall/state
+
 .claude/settings.local.json

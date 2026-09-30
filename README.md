@@ -12,7 +12,7 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 |------|----------|
 | Shell / prompt | `zsh` `starship` |
 | Terminal / editor | `kitty` `nvim` `herdr` |
-| Wayland desktop | `hypr` `mako` `fuzzel` `gammastep` `waybar` `satty` |
+| Wayland desktop | `hypr` `neowall` `mako` `fuzzel` `gammastep` `waybar` `satty` |
 | Theme | `kanagawa` `vivid` `gtk` |
 | CLI tools | `bat` `bottom` `btop` `lazygit` `television` `yazi` `zathura` |
 | Database | `psql` `pspg` |
@@ -31,7 +31,7 @@ cd ~/dotfiles
 stow zsh starship kitty nvim hypr mako fuzzel gammastep waybar satty \
      kanagawa vivid gtk bat bottom btop lazygit television yazi zathura \
      psql pspg git ssh environment.d mimeapps claude
-stow --no-folding bin herdr
+stow --no-folding bin herdr neowall
 ```
 
 Stow only creates symlinks; install the underlying programs separately.
@@ -51,12 +51,10 @@ Stow only creates symlinks; install the underlying programs separately.
 - **`hypr` is folded** — `~/.config/hypr` is a single directory symlink into
   this repo, so any file a tool auto-generates there lands in git. Re-stow with
   `stow --restow --no-folding hypr` if that becomes a problem.
-- **`hypr-xps`'s `.config/neowall/` stays unfolded on its own** — neowall
-  writes a runtime `state` file straight into `~/.config/neowall/`, alongside
-  the stowed `config.vibe` and `shaders/`. Stow already leaves it per-file
-  (a real file coexisting with the package forces that), so `state` never
-  lands in git. No `--no-folding` needed; just don't add a same-named file to
-  the package.
+- **`neowall` must use `--no-folding` too**, same reason as herdr: neowall
+  writes a runtime `state` file into `~/.config/neowall/` beside
+  `config.vibe` and `shaders/`. On a machine with no `~/.config/neowall` yet,
+  a plain `stow` folds it and `state` lands in git.
 - **`pspg`'s theme uses colour *names*, not hex — keep it that way.** pspg
   renders hex by reassigning 256-colour palette slots from 64 up, via the
   terminfo `initc` capability (an `OSC 4` sequence). Nvim's built-in terminal
