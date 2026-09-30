@@ -1,0 +1,11 @@
+# termtest.sh's own checks, as tools/harness_term's built-in play() acts them
+# out: clicks, a drag, the wheel, right-click scenes, a middle-click calm.
+at 0.5 click 40 11
+at 1.4 click 120 30
+at 2.0 drag 20 35 60 35 0.6
+at 3.0 wheel up 120 30
++0.05 wheel up 120 30
+at 3.5 rclick 80 22
+at 5.0 rclick 80 22
+at 6.0 mclick 80 22
+at 7.0 end

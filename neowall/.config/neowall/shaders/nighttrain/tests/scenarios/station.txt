@@ -1,0 +1,6 @@
+# One station, start to finish: the test key asks for one (stop-in 900..1400
+# m, moved on past any tunnel or bridge), the train brakes to it and stops
+# with the sign in the middle, dwells, and leaves. Long enough for all of it.
+at 2 click 80 30
++0.3 key s
+at 200 end

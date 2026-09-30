@@ -1,0 +1,20 @@
+# termtest.vibe: a throwaway neowall config for the terminal-mode test.
+# Your real config.vibe isn't touched. To run it:
+#
+#   neowall kill
+#   neowall -f -v -c ~/.config/neowall/shaders/termtest/termtest.vibe
+#
+# -f keeps neowall in that terminal, -v makes it say how it wired the
+# passes up. Look for "Pass 0 (Buffer A): ch0=Self". Ctrl-C there to stop
+# it, then run `neowall` to bring your usual wallpaper back.
+default {
+  terminal "~/.config/neowall/shaders/termtest/termtest.sh"
+  term_shader ~/.config/neowall/shaders/termtest/termtest.glsl
+  # 48 px cells (24 wide) divide 3840x2160 exactly: a 160x45 grid, so the
+  # shader's idea of which cell is where matches neowall's click mapping
+  term_font_size 48
+  term_cols 0
+  term_rows 0
+  vsync true
+  shader_fps 30
+}

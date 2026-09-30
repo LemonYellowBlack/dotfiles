@@ -1,0 +1,35 @@
+# The basics: start-up header, heartbeat, the test key, inbox text (clean
+# and unsafe), a flood, a right-click tunnel, a left drag wiping the glass.
+# Short timings so it all fits in a minute.
+set DWELL 3
+set DEPART_CLEAR 4
+set ARRIVE_SLACK 0
+set STOP_IN [96, 96]
+set EVENT_GAP 2
+at 1.0 click 70 20
++0.5 key s
+at 3.0 inbox BUILD PASSED|radar
+at 20 inbox rm -rf $HOME; echo <x> ~`\| ünïcode ok
+at 36 inbox flood 1
++0.01 inbox flood 2
++0.01 inbox flood 3
++0.01 inbox flood 4
++0.01 inbox flood 5
++0.01 inbox flood 6
++0.01 inbox flood 7
++0.01 inbox flood 8
++0.01 inbox flood 9
++0.01 inbox flood 10
++0.01 inbox flood 11
++0.01 inbox flood 12
++0.01 inbox flood 13
++0.01 inbox flood 14
++0.01 inbox flood 15
++0.01 inbox flood 16
++0.01 inbox flood 17
++0.01 inbox flood 18
++0.01 inbox flood 19
++0.01 inbox flood 20
+at 38 rclick 100 30
+at 39 drag 20 35 60 36 0.5
+at 62 end

@@ -1,0 +1,4 @@
+set V_NOMINAL 2000
+set SAVE_EVERY 2
+at 5 key k
+at 6 end

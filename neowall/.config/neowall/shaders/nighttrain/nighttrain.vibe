@@ -1,0 +1,30 @@
+# nighttrain.vibe: the night-train wallpaper (see PLAN.md). neowall runs
+# nighttrain.py as a terminal wallpaper, and nighttrain.glsl draws the view
+# from what it prints.
+#
+# To try it (it replaces the wallpaper that's running):
+#   neowall kill
+#   neowall -f -v -c ~/.config/neowall/shaders/nighttrain/nighttrain.vibe
+# Look for "Pass 0 (Buffer A): ch0=Self" in what it prints. Ctrl-C stops
+# it, then `neowall` brings back the usual one.
+#
+# To keep it (as a machine's wallpaper), start neowall with it instead:
+#   neowall -c ~/.config/neowall/shaders/nighttrain/nighttrain.vibe
+# neowall doesn't reload a terminal wallpaper's shader: restart it after
+# editing nighttrain.glsl. Send it a station from anywhere:
+#   echo "BUILD PASSED|radar" > $XDG_RUNTIME_DIR/nighttrain/inbox
+#
+# The font size makes the terminal grid 160 x 45 cells of 24 x 48 px on a
+# 3840 x 2160 screen, an exact fit, so a click lands on the cell it's over.
+# The program needs no ssh agent (and no network): env drops the agent's
+# socket before starting it.
+default {
+  terminal "env -u SSH_AUTH_SOCK python3 ~/.config/neowall/shaders/nighttrain/nighttrain.py"
+  term_shader ~/.config/neowall/shaders/nighttrain/nighttrain.glsl
+  term_font /usr/share/fonts/noto/NotoSansMono-Medium.ttf
+  term_font_size 48
+  term_cols 0
+  term_rows 0
+  vsync true
+  shader_fps 30
+}
