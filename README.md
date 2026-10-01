@@ -23,6 +23,18 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 `scripts/` is **not** a Stow package — it holds helper assets (e.g.
 `kanagawa_wallpaper.py`) referenced by scripts in `bin/`. Don't stow it.
 
+### Per-machine packages
+
+`<pkg>-xps` and `<pkg>-hotdog` hold the files that differ between machines.
+Each machine stows its own alongside the shared `<pkg>`, into the same
+directory:
+
+| Shared | Per machine | What differs |
+|--------|-------------|--------------|
+| `hypr` | `hypr-xps` `hypr-hotdog` | monitors, GPU env, idle, `host.lua` / `host.conf` |
+| `zsh` | `zsh-xps` `zsh-hotdog` | `~/.zshrc.local` |
+| `neowall` | `neowall-xps` `neowall-hotdog` | `config.vibe` (which wallpaper); the shaders are shared |
+
 ## Install
 
 ```sh
@@ -32,6 +44,10 @@ stow zsh starship kitty nvim hypr mako fuzzel gammastep waybar satty \
      kanagawa vivid gtk bat bottom btop lazygit television yazi zathura \
      psql pspg git ssh environment.d mimeapps claude
 stow --no-folding bin herdr neowall
+
+host=xps   # or hotdog
+stow hypr-$host zsh-$host
+stow --no-folding neowall-$host
 ```
 
 Stow only creates symlinks; install the underlying programs separately.
@@ -54,7 +70,9 @@ Stow only creates symlinks; install the underlying programs separately.
 - **`neowall` must use `--no-folding` too**, same reason as herdr: neowall
   writes a runtime `state` file into `~/.config/neowall/` beside
   `config.vibe` and `shaders/`. On a machine with no `~/.config/neowall` yet,
-  a plain `stow` folds it and `state` lands in git.
+  a plain `stow` folds it and `state` lands in git. `neowall-<host>` too: it
+  adds `config.vibe` to that same directory, which only works while it's a
+  real directory and not one symlink into `neowall/`.
 - **`pspg`'s theme uses colour *names*, not hex — keep it that way.** pspg
   renders hex by reassigning 256-colour palette slots from 64 up, via the
   terminfo `initc` capability (an `OSC 4` sequence). Nvim's built-in terminal
