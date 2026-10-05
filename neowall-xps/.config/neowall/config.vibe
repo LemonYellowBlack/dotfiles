@@ -3,4 +3,8 @@ default {
   shader_speed 1.0
   vsync true
   shader_fps 30
+  # Pause when any tiled window is open. neowall 0.7.1 measures coverage in
+  # logical px against physical size, so at scale 2 a full-screen window
+  # reads ~25% and the default 0.8 never pauses.
+  pause_coverage_threshold 0.2
 }
