@@ -100,7 +100,7 @@ const float PULL_CLOSEST = 0.2;   // full strength at this gap (about the closes
 const float PULL_CURVE   = 0.4;   // the ramp's shape (see above)
 
 // --- the bulge: its shape, and how it moves
-const float BULGE_MAX    = 0.40;              // the tallest it may get
+const float BULGE_MAX    = 0.00;              // the tallest it may get
 const float BULGE_DENT   = 0.35 * BULGE_MAX;  // the deepest a wobble may dent it
 const float TIP_SHARE    = 0.55;              // how much of it is the narrow tip; the rest is a broad swell
 const vec2  TIP_SHARP    = vec2(4.0, 9.0);    // tip narrowness: small bulge .. tall one (bigger = narrower)
