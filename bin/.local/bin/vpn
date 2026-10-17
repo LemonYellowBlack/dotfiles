@@ -1,0 +1,167 @@
+#!/bin/zsh
+# Connect to a Mullvad exit node through Tailscale, by country or city.
+# "Best" server = online, highest Mullvad priority, then lowest ping.
+
+usage() {
+  cat <<'EOF'
+usage: vpn [-n]                      pick a country, then a city
+       vpn [-n] <country>            pick a city in that country
+       vpn [-n] <country> any        best server in that country
+       vpn [-n] <country> <city>     best server in that city
+       vpn [-n] <city>               best server in that city
+       vpn list [country]            countries, or cities in a country
+       vpn status                    current exit node
+       vpn off                       stop using an exit node
+
+  -n  show the server that would be picked, don't connect
+
+Names and codes match case-insensitively (us, uk, nyc, atlanta).
+Partial names open a picker.
+EOF
+}
+
+die() { print -u2 "vpn: $*"; exit 1 }
+
+# tailscale needs root unless this user is the tailscale operator
+ts_set() { tailscale set "$@" 2>/dev/null || sudo tailscale set "$@" }
+
+show_status() {
+  tailscale status --json | jq -r '
+    first(.Peer[] | select(.ExitNode)
+          | if .Location then "\(.Location.City), \(.Location.Country)  (\(.HostName))"
+            else .HostName end) // "off"'
+}
+
+# One line per online Mullvad server:
+# country  city  country-code  city-code  priority  hostname  ip
+load_servers() {
+  servers=("${(@f)$(tailscale status --json | jq -r '
+    .Peer[] | select(.ExitNodeOption and .Online and .Location != null)
+    | [.Location.Country, .Location.City, .Location.CountryCode, .Location.CityCode,
+       (.Location.Priority // 0), .HostName, .TailscaleIPs[0]] | @tsv')}")
+  [[ -n $servers[1] ]] || die "no Mullvad exit nodes visible to this device"
+}
+
+# Picker entries (kind, country, city, label) matching $1, limited to country $2
+# if given. Kinds: C = country, T = city, A = any city in a country.
+# Exact name/code matches win; otherwise every partial match is returned.
+resolve() {
+  print -rl -- $servers | awk -F'\t' -v OFS='\t' -v q="${1:l}" -v within="$2" '
+    within != "" && $1 != within { next }
+    {
+      country = tolower($1); city = tolower($2); town = city; sub(/,.*/, "", town)
+      if (within == "") {
+        if (country == q || tolower($3) == q) exact["C" OFS $1 OFS "*" OFS $1] = 1
+        else if (index(country, q))           part["C" OFS $1 OFS "*" OFS $1] = 1
+      }
+      t = "T" OFS $1 OFS $2 OFS $2 " — " $1
+      if (city == q || town == q || tolower($4) == q) exact[t] = 1
+      else if (index(city, q))                        part[t] = 1
+    }
+    END { if (length(exact)) for (e in exact) print e; else for (e in part) print e }' |
+    sort -t$'\t' -k4
+}
+
+pick() {  # $1 = prompt; stdin = entries; auto-picks a lone entry
+  fzf --delimiter=$'\t' --with-nth=4 --prompt="$1> " \
+      --height=40% --reverse --select-1 --exit-0
+}
+
+# stdin: server lines. Prints the best one with its ping (ms) appended.
+best() {
+  local -a cands=("${(@f)$(awk -F'\t' '
+    { line[NR] = $0; prio[NR] = $5; if ($5 > top) top = $5 }
+    END { for (i = 1; i <= NR; i++) if (prio[i] == top) print line[i] }')}")
+  local dir=$(mktemp -d) c host
+  for c in $cands; do
+    host=${${(ps:\t:)c}[6]}
+    # -4: without it ping stalls ~2s per host picking an address family
+    ping -4 -c 3 -i 0.2 -W 1 -q $host.relays.mullvad.net 2>/dev/null |
+      awk -F/ '/^rtt/ { print $5 }' > $dir/$host &
+  done
+  wait
+  local fastest=$(for c in $cands; do
+    host=${${(ps:\t:)c}[6]}
+    [[ -s $dir/$host ]] && print -r -- "$(<$dir/$host)"$'\t'"$c"
+  done | sort -n | head -1)
+  rm -rf $dir
+  # No ping replies at all: fall back to any top-priority server
+  if [[ -n $fastest ]]; then
+    print -r -- "${fastest#*$'\t'}"$'\t'"${fastest%%$'\t'*}"
+  else
+    print -r -- "$cands[1]"$'\t'"?"
+  fi
+}
+
+connect() {  # $1 = server line from best()
+  local -a f=("${(@ps:\t:)1}")
+  (( dry )) || ts_set --exit-node=$f[7] || exit 1
+  print "${${dry:#0}:+would connect: }$f[2], $f[1]  ($f[6], $f[8] ms)"
+}
+
+choose() {  # $1 = picker entry
+  [[ -n $1 ]] || exit 130
+  local -a e=("${(@ps:\t:)1}")
+  local country=$e[2] city=$e[3]
+  case $e[1] in
+    C) choose "$({ print -r -- "A"$'\t'"$country"$'\t*\t'"Any — best in $country"
+                   resolve '' "$country" } | pick "$country")" ;;
+    A) connect "$(print -rl -- $servers | awk -F'\t' -v c="$country" '$1 == c' | best)" ;;
+    T) connect "$(print -rl -- $servers |
+                  awk -F'\t' -v c="$country" -v t="$city" '$1 == c && $2 == t' | best)" ;;
+  esac
+}
+
+query() {  # $1 = country or city, full or partial
+  local entries=$(resolve "$1")
+  [[ -n $entries ]] || die "nothing matches '$1'"
+  choose "$(pick "$1" <<< $entries)"
+}
+
+list() {  # $1 = optional country
+  if [[ -z $1 ]]; then
+    print -rl -- $servers | awk -F'\t' '
+      { n[$1]++; if (!seen[$1 FS $2]++) cities[$1]++ }
+      END { for (c in n) printf "%-16s %2d cities %4d servers\n", c, cities[c], n[c] }' | sort
+    return
+  fi
+  local countries=$(resolve "$1" | grep '^C')
+  [[ -n $countries ]] || die "no country matches '$1'"
+  local country=$(pick country <<< $countries | cut -f2)
+  [[ -n $country ]] || exit 130
+  print -rl -- $servers | awk -F'\t' -v c="$country" '
+    $1 == c { n[$2]++ }
+    END { for (t in n) printf "%-24s %3d servers\n", t, n[t] }' | sort
+}
+
+dry=0
+[[ $1 == -n ]] && { dry=1; shift }
+
+case $1 in
+  -h|--help) usage; exit ;;
+  off)       ts_set --exit-node=; exit ;;
+  status)    show_status; exit ;;
+esac
+
+load_servers
+
+case $1 in
+  list) list "$2" ;;
+  '')   choose "$(resolve '' | grep '^C' | pick country)" ;;
+  *)
+    local countries
+    if (( # > 1 )) && countries=$(resolve "$1" | grep '^C'); then
+      local country=$(pick country <<< $countries | cut -f2) rest="${argv[2,-1]}" cities
+      [[ -n $country ]] || exit 130
+      if [[ ${rest:l} == any ]]; then
+        choose "A"$'\t'"$country"$'\t*\t'"any"
+      elif cities=$(resolve "$rest" "$country") && [[ -n $cities ]]; then
+        choose "$(pick "$country" <<< $cities)"
+      else
+        query "$*"   # e.g. "vpn new york": "new" matched New Zealand
+      fi
+    else
+      query "$*"
+    fi
+    ;;
+esac
