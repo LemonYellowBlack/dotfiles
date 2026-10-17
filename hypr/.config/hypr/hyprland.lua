@@ -73,10 +73,10 @@ hl.bind(mod .. " + SHIFT + F9",   hl.dsp.exec_cmd("~/.local/bin/lock-toggle"))
 hl.bind("CTRL + SUPER + SHIFT + Delete", hl.dsp.exec_cmd("systemctl poweroff"))
 
 -- Volume
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"),    { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),    { locked = true, repeating = true })
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),   { locked = true })
-hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("~/.local/bin/volnotify up"),      { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("~/.local/bin/volnotify down"),    { locked = true, repeating = true })
+hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("~/.local/bin/volnotify mute"),    { locked = true })
+hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("~/.local/bin/volnotify micmute"), { locked = true })
 
 -- Screenshots
 hl.bind("Print",                    hl.dsp.exec_cmd("hyprshot -m output -o ~/Pictures/Screenshots"))

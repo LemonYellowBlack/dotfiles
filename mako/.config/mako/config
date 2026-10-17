@@ -11,3 +11,8 @@ width=200
 default-timeout=4000
 anchor=top-right
 text-alignment=center
+
+[app-name=volume]
+progress-color=over #7E9CD8ff
+history=0
+padding=6,10

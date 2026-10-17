@@ -1,0 +1,32 @@
+#!/bin/sh
+# usage: volnotify up|down|mute|micmute
+
+sink=@DEFAULT_AUDIO_SINK@
+source=@DEFAULT_AUDIO_SOURCE@
+
+case "$1" in
+    up)   wpctl set-mute "$sink" 0; wpctl set-volume -l 1.0 "$sink" 5%+ ;;
+    down) wpctl set-mute "$sink" 0; wpctl set-volume "$sink" 5%- ;;
+    mute) wpctl set-mute "$sink" toggle ;;
+    micmute)
+        wpctl set-mute "$source" toggle
+        case "$(wpctl get-volume "$source")" in
+            *MUTED*) text="󰍭 Mic muted" ;;
+            *)       text="󰍬 Mic on" ;;
+        esac
+        notify-send -a volume -e -t 1500 "$text"
+        exit 0 ;;
+    *) echo "usage: volnotify up|down|mute|micmute" >&2; exit 1 ;;
+esac
+
+out=$(wpctl get-volume "$sink")
+vol=$(echo "$out" | awk '{printf "%d", $2*100}')
+case "$out" in
+    *MUTED*) text="󰝟 Muted"; vol=0 ;;
+    *)       text="󰕾 $vol%" ;;
+esac
+
+# Reuse the previous notification's ID so held keys update one popup
+idfile="${XDG_RUNTIME_DIR:-/tmp}/volnotify.id"
+id=$(cat "$idfile" 2>/dev/null)
+notify-send -a volume -e -t 1500 -h int:value:"$vol" ${id:+-r $id} -p "$text" > "$idfile"
