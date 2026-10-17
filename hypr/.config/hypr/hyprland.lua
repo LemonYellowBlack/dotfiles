@@ -58,6 +58,7 @@ end)
 
 hl.bind(mod .. " + Return",       hl.dsp.exec_cmd("kitty"))
 hl.bind(mod .. " + B",            hl.dsp.exec_cmd("zen-browser"))
+hl.bind(mod .. " + G",            hl.dsp.exec_cmd("google-chrome-stable"))
 hl.bind(mod .. " + Q",            hl.dsp.window.close())
 hl.bind(mod .. " + V",            hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod .. " + F",            hl.dsp.window.fullscreen())

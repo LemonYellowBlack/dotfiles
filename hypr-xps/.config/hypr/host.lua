@@ -21,6 +21,14 @@ hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"), { loc
 -- Lid
 hl.bind("switch:Lid Switch", hl.dsp.exec_cmd("~/.local/bin/lock-if-enabled"), { locked = true })
 
+-- Audio — EasyEffects DSP to compensate for the tiny built-in speakers.
+-- First line runs the background processor; second re-applies the preset each
+-- login (also primes it as "last used"). Tweak or swap the preset in the GUI.
+hl.on("hyprland.start", function()
+    hl.exec_cmd("easyeffects --service-mode --hide-window")
+    hl.exec_cmd("sleep 3 && easyeffects -l XPS15-Speakers")
+end)
+
 -- Battery
 hl.bind("SUPER + F2",         hl.dsp.exec_cmd("~/.local/bin/batterypopup"))
 hl.bind("SUPER + SHIFT + F2", hl.dsp.exec_cmd("~/.local/bin/batterypopup --persist"))
