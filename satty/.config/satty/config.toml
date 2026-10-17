@@ -2,7 +2,7 @@
 # Full reference: https://github.com/gabm/Satty/blob/main/config.toml
 
 [general]
-# Annotated copies land beside the hyprshot originals (see hypr/hyprland.conf).
+# Annotated copies land beside the hyprshot originals (see hypr/hyprland.lua).
 # Supports a leading ~ (>= 0.20.0) and chrono strftime specifiers.
 output-filename = "~/Pictures/Screenshots/%Y-%m-%d-%H%M%S_satty.png"
 

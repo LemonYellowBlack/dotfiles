@@ -6,7 +6,7 @@ Kanagawa (Wave) theme throughout.
 ## Layout
 
 Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
-`hypr/.config/hypr/hyprland.conf` → `~/.config/hypr/hyprland.conf`.
+`hypr/.config/hypr/hyprland.lua` → `~/.config/hypr/hyprland.lua`.
 
 | Area | Packages |
 |------|----------|
@@ -31,7 +31,7 @@ directory:
 
 | Shared | Per machine | What differs |
 |--------|-------------|--------------|
-| `hypr` | `hypr-xps` `hypr-hotdog` | monitors, GPU env, idle, `host.lua` / `host.conf` |
+| `hypr` | `hypr-xps` `hypr-hotdog` | monitors, GPU env, idle, `host.lua` |
 | `zsh` | `zsh-xps` `zsh-hotdog` | `~/.zshrc.local` |
 | `neowall` | `neowall-xps` `neowall-hotdog` | `config.vibe` (which wallpaper); the shaders are shared |
 
