@@ -1,0 +1,19 @@
+#!/bin/zsh
+# Run `git pull` in every git repo directly inside a directory.
+# Usage: git-pull-all [dir]   (defaults to the current directory)
+# Also works as `git pull-all`, since git runs any git-<name> found on PATH.
+
+root=${1:-.}
+[[ -d $root ]] || { echo "git-pull-all: not a directory: $root" >&2; exit 1 }
+
+failed=()
+for dir in $root/*(N-/); do
+    [[ -e $dir/.git ]] || continue
+    echo "==> ${dir:t}"
+    git -C "$dir" pull || failed+=(${dir:t})
+done
+
+if (( $#failed )); then
+    echo "Failed: ${failed[*]}" >&2
+    exit 1
+fi
