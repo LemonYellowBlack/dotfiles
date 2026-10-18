@@ -1,7 +1,9 @@
 default {
-  shader practice.glsl
-  shader_speed 1.0
-  vsync true
-  shader_fps 30
-  pause_coverage_threshold 0.2
+  path ~/Pictures/Wallpapers/solid-sumiInk0.png
+  mode stretch
+  # shader practice.glsl
+  # shader_speed 1.0
+  # vsync true
+  # shader_fps 30
+  # pause_coverage_threshold 0.2
 }
