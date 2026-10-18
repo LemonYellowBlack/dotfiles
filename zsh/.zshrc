@@ -30,7 +30,6 @@ alias vltclose='fusermount3 -u ~/.vlt-mnt'
 alias vltkeys='source ~/.vlt-mnt/keys.sh && echo "keys loaded"'
 alias vltget='vltopen && vltkeys && vltclose'
 alias tor='torbrowser-launcher'
-alias srv="ssh thinkcentre"
 alias pwroff='shutdown now'
 
 function work() {
@@ -99,13 +98,6 @@ checkbox=white,black
 actcheckbox=black,blue
 helpline=gray,black
 '
-
-# Beads (Dolt server on ThinkCentre)
-export BEADS_DIR=~/lyb/.beads
-export BEADS_DOLT_SERVER_MODE=1
-export BEADS_DOLT_SERVER_HOST=thinkcentre
-export BEADS_DOLT_SERVER_PORT=3307
-export BEADS_DOLT_SERVER_USER=root
 
 # java
 export JAVA_HOME=/usr/lib/jvm/default

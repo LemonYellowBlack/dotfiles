@@ -38,7 +38,7 @@ directory:
 ## Install
 
 ```sh
-git clone git@forgejo:lemonyellowblack/dotfiles.git ~/dotfiles
+git clone https://github.com/LemonYellowBlack/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 stow zsh starship kitty tmux nvim hypr mako fuzzel gammastep waybar satty \
      kanagawa vivid gtk bat bottom btop lazygit television yazi zathura \
