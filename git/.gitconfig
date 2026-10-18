@@ -4,6 +4,8 @@
 [pull]
 	rebase = true
 	ff = only
+[rebase]
+	autoStash = true
 [core]
 	hooksPath = ~/.config/git/hooks
 	pager = delta
