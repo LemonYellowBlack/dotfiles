@@ -11,7 +11,7 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 | Area | Packages |
 |------|----------|
 | Shell / prompt | `zsh` `starship` |
-| Terminal / editor | `kitty` `nvim` `herdr` |
+| Terminal / editor | `kitty` `tmux` `nvim` `herdr` |
 | Wayland desktop | `hypr` `neowall` `mako` `fuzzel` `gammastep` `waybar` `satty` |
 | Theme | `kanagawa` `vivid` `gtk` |
 | CLI tools | `bat` `bottom` `btop` `lazygit` `television` `yazi` `zathura` |
@@ -40,7 +40,7 @@ directory:
 ```sh
 git clone git@forgejo:lemonyellowblack/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-stow zsh starship kitty nvim hypr mako fuzzel gammastep waybar satty \
+stow zsh starship kitty tmux nvim hypr mako fuzzel gammastep waybar satty \
      kanagawa vivid gtk bat bottom btop lazygit television yazi zathura \
      psql pspg git ssh environment.d mimeapps claude
 stow --no-folding bin herdr neowall
