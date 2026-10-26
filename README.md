@@ -12,7 +12,7 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 |------|----------|
 | Shell / prompt | `zsh` `starship` |
 | Terminal / editor | `kitty` `tmux` `nvim` `herdr` |
-| Wayland desktop | `hypr` `neowall` `mako` `fuzzel` `gammastep` `waybar` `satty` |
+| Wayland desktop | `hypr` `quickshell` `neowall` `mako` `fuzzel` `gammastep` `waybar` `satty` |
 | Theme | `kanagawa` `vivid` `gtk` |
 | CLI tools | `bat` `bottom` `btop` `lazygit` `television` `yazi` `zathura` |
 | Database | `psql` `pspg` |
@@ -34,6 +34,7 @@ directory:
 | `hypr` | `hypr-xps` `hypr-hotdog` | monitors, GPU env, idle, `host.lua` |
 | `zsh` | `zsh-xps` `zsh-hotdog` | `~/.zshrc.local` |
 | `neowall` | `neowall-xps` `neowall-hotdog` | `config.vibe` (which wallpaper); the shaders are shared |
+| `quickshell` | `quickshell-xps` `quickshell-hotdog` | `Host.qml`: what hardware the Liquid shell can expect |
 
 ## Install
 
@@ -43,11 +44,11 @@ cd ~/dotfiles
 stow zsh starship kitty tmux nvim hypr mako fuzzel gammastep waybar satty \
      kanagawa vivid gtk bat bottom btop lazygit television yazi zathura \
      psql pspg git ssh environment.d mimeapps claude
-stow --no-folding bin herdr neowall
+stow --no-folding bin herdr neowall quickshell
 
 host=xps   # or hotdog
 stow hypr-$host zsh-$host
-stow --no-folding neowall-$host
+stow --no-folding neowall-$host quickshell-$host
 ```
 
 Stow only creates symlinks; install the underlying programs separately.
@@ -73,6 +74,16 @@ Stow only creates symlinks; install the underlying programs separately.
   a plain `stow` folds it and `state` lands in git. `neowall-<host>` too: it
   adds `config.vibe` to that same directory, which only works while it's a
   real directory and not one symlink into `neowall/`.
+- **`quickshell` must use `--no-folding` too**, and so must `quickshell-<host>`: the host
+  package adds `Host.qml` to the same `~/.config/quickshell/liquid/` directory, which only works
+  while it's a real directory. Start the shell with `qs -c liquid`; `hypr/liquid.lua` (required
+  from `hyprland.lua`) starts it with Hyprland, sets the look it's drawn for and binds its keys.
+- **The shell is the notification daemon.** mako and Quickshell both want
+  `org.freedesktop.Notifications`, and Quickshell waits while mako holds it. mako isn't enabled
+  anywhere; D-Bus starts it on the first notification nobody else is there for, so disabling it
+  does nothing. Switch with `systemctl --user mask --now mako`; `unmask` switches back.
+- **The homelab drawer runs `bin/labstatus` on hotdog**, over SSH from the XPS, so hotdog needs
+  `bin` stowed and the XPS needs an SSH key it can use without a prompt.
 - **`pspg`'s theme uses colour *names*, not hex — keep it that way.** pspg
   renders hex by reassigning 256-colour palette slots from 64 up, via the
   terminfo `initc` capability (an `OSC 4` sequence). Nvim's built-in terminal
