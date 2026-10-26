@@ -1,0 +1,48 @@
+#!/bin/bash
+# labstatus — one JSON snapshot of the homelab for the Liquid shell's homelab drawer: the GPU and
+# who holds it, compose containers, the user services under ~/.config/systemd/user, and whether
+# each GitHub runner is in a job. Runs on hotdog; the XPS calls it as `ssh hotdog labstatus`.
+set -u
+
+gpu='null'
+if command -v nvidia-smi >/dev/null && [ -d /sys/module/nvidia ]; then
+    g=$(nvidia-smi --query-gpu=name,utilization.gpu,memory.used,memory.total,power.draw,power.limit,temperature.gpu \
+        --format=csv,noheader,nounits 2>/dev/null | head -n1)
+    apps=$(nvidia-smi --query-compute-apps=process_name,used_memory --format=csv,noheader,nounits 2>/dev/null \
+        | jq -R -s -c 'split("\n") | map(select(length > 0) | split(", ") | {name: (.[0] | split(" ") | .[0] | split("/") | last), mem: (.[1] | tonumber / 1024)})')
+    [ -n "$g" ] && gpu=$(jq -n -c --arg g "$g" --argjson apps "${apps:-[]}" \
+        '$g | split(", ") | {name: .[0], util: (.[1] | tonumber), memUsed: (.[2] | tonumber / 1024), memTotal: (.[3] | tonumber / 1024),
+          power: (.[4] | tonumber), limit: (.[5] | tonumber), temp: (.[6] | tonumber), apps: $apps}')
+fi
+
+# Running containers, plus compose services that have stopped. Ad-hoc `docker run` leftovers are skipped.
+containers=$(docker ps -a --format '{{json .}}' 2>/dev/null | jq -s -c '
+    map(select(.State == "running" or (.Labels | test("com.docker.compose.project=")))
+        | {name: .Names, state: .State, status: .Status,
+           health: (if .Status | test("\\(healthy\\)") then "healthy" elif .Status | test("unhealthy") then "unhealthy" else "" end)})
+    | sort_by(.name)')
+
+# The homelab's own user services, by unit file (desktop plumbing lives elsewhere).
+mapfile -t files < <(find "$HOME/.config/systemd/user" -maxdepth 1 -name '*.service' ! -name '*@*' -printf '%f\n' | sort)
+mapfile -t runners < <(systemctl --user list-units 'github-runner@*' --all --plain --no-legend 2>/dev/null | awk '{print $1}')
+units='[]'
+if [ ${#files[@]} -gt 0 ] || [ ${#runners[@]} -gt 0 ]; then
+    units=$(systemctl --user show -p Id,ActiveState,SubState,ControlGroup "${files[@]}" "${runners[@]}" 2>/dev/null | awk -v RS= -F'\n' '
+        { id = st = sub_ = cg = ""
+          for (i = 1; i <= NF; i++) { split($i, kv, "="); k = kv[1]; v = substr($i, length(k) + 2)
+            if (k == "Id") id = v; else if (k == "ActiveState") st = v; else if (k == "SubState") sub_ = v; else if (k == "ControlGroup") cg = v }
+          busy = "false"
+          if (id ~ /^github-runner@/ && cg != "") {
+            cmd = "cat /sys/fs/cgroup" cg "/cgroup.procs 2>/dev/null"
+            while ((cmd | getline pid) > 0) { if ((getline comm < ("/proc/" pid "/comm")) > 0 && comm ~ /Runner.Worker/) busy = "true"; close("/proc/" pid "/comm") }
+            close(cmd) }
+          sub(/\.service$/, "", id)
+          printf "%s{\"name\":\"%s\",\"state\":\"%s\",\"sub\":\"%s\",\"busy\":%s}", (n++ ? "," : "["), id, st, sub_, busy }
+        END { if (n) print "]"; else print "[]" }')
+fi
+
+read -r up _ < /proc/uptime
+read -r load _ < /proc/loadavg
+jq -n -c --arg host "$(uname -n)" --argjson up "${up%.*}" --argjson load "$load" --argjson gpu "$gpu" \
+    --argjson containers "${containers:-[]}" --argjson units "$units" \
+    '{host: $host, uptime: $up, load: $load, gpu: $gpu, containers: $containers, units: $units}'
