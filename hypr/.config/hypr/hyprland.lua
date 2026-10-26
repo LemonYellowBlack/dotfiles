@@ -211,6 +211,12 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "smooth"
 hl.animation({ leaf = "layers",     enabled = true, speed = 4, bezier = "smooth", style = "fade" })
 
 
+-- The Liquid shell's look and binds (hypr/liquid.lua, quickshell/ and quickshell-<host>/). Until
+-- `stow --restow hypr` links liquid.lua in, this is a no-op rather than a config error.
+local liquid_ok, liquid_err = pcall(require, "liquid")
+if not liquid_ok and not tostring(liquid_err):find("module 'liquid' not found", 1, true) then error(liquid_err) end
+
+
 -- Host-specific overrides — MUST stay last. Lua executes top to bottom, so
 -- anything required here wins over the shared base above.
 -- Provided by the hypr-xps / hypr-hotdog stow packages.
