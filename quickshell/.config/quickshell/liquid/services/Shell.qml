@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
+import qs.config
 
 // UI state shared by every screen: which drawer or overlay is open and where, and what the island
 // is showing. Hyprland binds reach it through `qs -c liquid ipc call shell <fn> <arg>`.
@@ -19,6 +20,13 @@ Singleton {
     property int seq: 0
 
     readonly property bool busy: drawer !== "" || overlay !== ""
+
+    // SUPER Z hides the bar: Hyprland gets the space back, and the bar only drops down while a
+    // drawer, overlay or island popup needs it. `top` is the frame's top edge as it animates.
+    property bool barHidden: false
+    readonly property bool barShown: !barHidden || busy || island !== null
+    property real top: barShown ? Theme.barH : Theme.edge
+    Behavior on top { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
     readonly property var overlays: ["overview", "power", "keys"]
 
     function focusedScreen() { return Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : ""; }
@@ -57,5 +65,6 @@ Singleton {
         function open(name: string): void { root.open(name, ""); }
         function close(): void { root.close(); }
         function tab(name: string): void { root.open("dash", name); }
+        function toggleBar(): void { root.barHidden = !root.barHidden; }
     }
 }

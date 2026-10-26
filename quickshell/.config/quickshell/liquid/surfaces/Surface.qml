@@ -28,9 +28,9 @@ FocusScope {
 
     Item {
         id: inner
-        y: Theme.barH
+        y: Shell.top
         width: parent.width
-        height: parent.height - Theme.barH - Theme.edge
+        height: parent.height - Shell.top - Theme.edge
         clip: true
         ControlCenter { open: Shell.drawer === "control" && root.mine }
         Dashboard { open: Shell.drawer === "dash" && root.mine }
@@ -39,8 +39,9 @@ FocusScope {
         Launcher { open: Shell.drawer === "launcher" && root.mine }
     }
 
-    Bar { id: bar; width: parent.width; screenName: root.screenName }
+    // Slides up and fades with the frame's top edge when SUPER Z hides it.
+    Bar { id: bar; y: Shell.top - Theme.barH; opacity: (Shell.top - Theme.edge) / (Theme.barH - Theme.edge); visible: opacity > 0; width: parent.width; screenName: root.screenName }
 
     // The input region: the bar alone, or the whole screen while a drawer wants clicks.
-    Item { id: inputArea; width: parent.width; height: root.drawerOpen ? parent.height : Theme.barH }
+    Item { id: inputArea; width: parent.width; height: root.drawerOpen ? parent.height : Shell.top }
 }

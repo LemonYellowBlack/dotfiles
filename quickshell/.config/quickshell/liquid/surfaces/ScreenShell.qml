@@ -10,6 +10,7 @@ import qs.services
 Scope {
     id: root
     required property var modelData
+    readonly property int zoneTop: Shell.barHidden ? Theme.edge : Theme.barH
 
     // Inline components can't see this file's ids, so each Zone is given its screen below.
     component Zone: PanelWindow {
@@ -18,7 +19,7 @@ Scope {
         WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "liquid-zone"
     }
-    Zone { screen: root.modelData; anchors { top: true; left: true; right: true } implicitHeight: Theme.barH; exclusiveZone: Theme.barH }
+    Zone { screen: root.modelData; anchors { top: true; left: true; right: true } implicitHeight: root.zoneTop; exclusiveZone: root.zoneTop }
     Zone { screen: root.modelData; anchors { left: true; top: true; bottom: true } implicitWidth: Theme.edge; exclusiveZone: Theme.edge }
     Zone { screen: root.modelData; anchors { right: true; top: true; bottom: true } implicitWidth: Theme.edge; exclusiveZone: Theme.edge }
     Zone { screen: root.modelData; anchors { bottom: true; left: true; right: true } implicitHeight: Theme.edge; exclusiveZone: Theme.edge }
