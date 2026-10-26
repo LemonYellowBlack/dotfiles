@@ -66,7 +66,7 @@ hl.layer_rule({ name = "liquid-veil-blur", match = { namespace = "liquid-veil" }
 -- Each shell bind falls back to what the key did before, in case the shell isn't running.
 hl.unbind(mod .. " + D")
 hl.unbind(mod .. " + F1")
-hl.bind(mod .. " + D",      hl.dsp.exec_cmd(shell .. "toggle launcher || fuzzel"))
+hl.bind(mod .. " + Space",      hl.dsp.exec_cmd(shell .. "toggle launcher || fuzzel"))
 hl.bind(mod .. " + F1",     hl.dsp.exec_cmd(shell .. "toggle dash || ~/.local/bin/statuspopup"))
 hl.bind(mod .. " + A",      hl.dsp.exec_cmd(shell .. "toggle control"))
 hl.bind(mod .. " + N",      hl.dsp.exec_cmd(shell .. "toggle control"))
