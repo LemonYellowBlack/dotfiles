@@ -21,3 +21,30 @@ enabled = false
 # Mouse capture and drag-to-copy are on by default, matching tmux's `mouse on`.
 split_vertical   = ["prefix+backslash", "prefix+percent"]
 split_horizontal = ["prefix+minus", "prefix+double_quote"]
+# Arrows focus panes too, alongside the default h/j/k/l.
+focus_pane_left  = ["prefix+h", "prefix+left"]
+focus_pane_down  = ["prefix+j", "prefix+down"]
+focus_pane_up    = ["prefix+k", "prefix+up"]
+focus_pane_right = ["prefix+l", "prefix+right"]
+
+# Move the focused pane by swapping it with its neighbour: prefix+shift+arrow.
+# herdr has no built-in action for this, so each key calls the pane swap API.
+[[keys.command]]
+key = "prefix+shift+left"
+type = "shell"
+command = "herdr pane swap --current --direction left"
+
+[[keys.command]]
+key = "prefix+shift+down"
+type = "shell"
+command = "herdr pane swap --current --direction down"
+
+[[keys.command]]
+key = "prefix+shift+up"
+type = "shell"
+command = "herdr pane swap --current --direction up"
+
+[[keys.command]]
+key = "prefix+shift+right"
+type = "shell"
+command = "herdr pane swap --current --direction right"
