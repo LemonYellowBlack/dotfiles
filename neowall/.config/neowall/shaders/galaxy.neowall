@@ -1,0 +1,7 @@
+# galaxy.neowall: sidecar manifest for galaxy.glsl.
+# Buffer A keeps its own last frame (self) and repaints one strip of it a frame;
+# the Image pass reads Buffer A and adds the stars that breathe.
+shader galaxy.glsl
+
+bufferA { ch0 self }
+image   { ch0 bufferA }

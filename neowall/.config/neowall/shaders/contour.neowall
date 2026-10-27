@@ -1,0 +1,7 @@
+# contour.neowall: sidecar manifest for contour.glsl.
+# Buffer A keeps its own last frame (self): the land, painted once.
+# The Image pass reads Buffer A and draws the contour lines from it.
+shader contour.glsl
+
+bufferA { ch0 self }
+image   { ch0 bufferA }
