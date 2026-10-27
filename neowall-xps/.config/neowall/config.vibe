@@ -1,5 +1,5 @@
 default {
-  path ~/Pictures/Wallpapers/solid-sumiInk0.png
+  path ~/wallpaper-mockup/galaxy-3840.png
   mode stretch
   # shader practice.glsl
   # shader_speed 1.0
