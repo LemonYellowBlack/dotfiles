@@ -1,7 +1,6 @@
 # herdr — terminal workspace manager for AI coding agents
 #
 # Reload without restarting:  herdr server reload-config
-# Never `herdr server stop` from inside a pane — it kills the panes too.
 
 onboarding = false
 
@@ -9,15 +8,12 @@ onboarding = false
 name = "kanagawa"
 
 [ui.toast]
-# Notifications go to mako on this machine.
 delivery = "system"
 
 [ui.sound]
 enabled = false
 
 [keys]
-# Same split keys as tmux: \ for side-by-side, - for stacked, and % / " still work.
-# New panes already open in the current pane's folder (terminal.new_cwd = "follow").
-# Mouse capture and drag-to-copy are on by default, matching tmux's `mouse on`.
+prefix = "ctrl+p"
 split_vertical   = ["prefix+backslash", "prefix+percent"]
 split_horizontal = ["prefix+minus", "prefix+double_quote"]
