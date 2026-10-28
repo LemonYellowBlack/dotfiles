@@ -8,7 +8,7 @@ Row {
     property int bars: 4
     property real barWidth: 3
     property real barHeight: 13
-    property var colors: [Theme.accent, Theme.accentAlt, Theme.accentPop]
+    property var colors: [Theme.accent, Theme.accentAlt, Theme.accentCool]
     property real t: 0
     readonly property bool live: Media.playing && visible
     spacing: 3

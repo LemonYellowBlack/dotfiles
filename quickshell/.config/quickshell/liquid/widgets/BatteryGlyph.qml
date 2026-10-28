@@ -16,7 +16,7 @@ Item {
         height: parent.height - 5
         width: Math.max(2, (parent.width - 8) * Power.level)
         radius: 2.5
-        gradient: Grad { colors: Power.charging ? Theme.gCool : (Power.level <= 0.15 ? Theme.gHot : [Theme.info, Theme.accentAlt]) }
+        gradient: Grad { colors: Power.charging ? Theme.gCool : (Power.level <= 0.15 ? Theme.gHot : Theme.gAccent) }
         Behavior on width { NumberAnimation { duration: 600 } }
     }
     Icon { visible: Power.charging; anchors.centerIn: parent; anchors.horizontalCenterOffset: -2; path: Icons.bolt; size: 10; stroke: 2.2; color: Theme.textOnAccent }

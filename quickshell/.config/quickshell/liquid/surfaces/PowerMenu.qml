@@ -18,7 +18,7 @@ Item {
     function logout() { Hyprland.dispatch(Hyprland.usingLua ? "hl.dsp.exit()" : "exit"); }
     readonly property var actions: [
         { id: "lock", name: "Lock", hint: "L · click", icon: Icons.lock, colors: Theme.gAccent, hold: false, run: () => { Shell.close(); Quickshell.execDetached(["loginctl", "lock-session"]); } },
-        { id: "suspend", name: "Suspend", hint: "S · click", icon: Icons.moon, colors: Theme.gAccentAlt, hold: false, run: () => { Shell.close(); Quickshell.execDetached(["systemctl", "suspend"]); } },
+        { id: "suspend", name: "Suspend", hint: "S · click", icon: Icons.moon, colors: Theme.gAccentCool, hold: false, run: () => { Shell.close(); Quickshell.execDetached(["systemctl", "suspend"]); } },
         { id: "logout", name: "Log out", hint: "O · hold 1 s", icon: Icons.logout, colors: Theme.gWarm, hold: true, run: () => root.logout() },
         { id: "reboot", name: "Reboot", hint: "R · hold 1 s", icon: Icons.reboot, colors: Theme.gHot, hold: true,
           run: () => Quickshell.execDetached(root.firmware ? ["systemctl", "reboot", "--firmware-setup"] : ["systemctl", "reboot"]) },

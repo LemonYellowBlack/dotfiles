@@ -243,13 +243,13 @@ Drawer {
                         Viz { bars: 18; barHeight: 18; Layout.topMargin: 6 }
                     }
                 }
-                Meter { Layout.fillWidth: true; implicitHeight: 5; value: Media.length > 0 ? Media.position / Media.length : 0; colors: Theme.gAccentAlt }
+                Meter { Layout.fillWidth: true; implicitHeight: 5; value: Media.length > 0 ? Media.position / Media.length : 0; colors: Theme.gAccentCool }
                 RowLayout { T { text: Media.clock(Media.position); font.pixelSize: 11; color: Theme.textMuted; Layout.fillWidth: true } T { text: Media.length > 0 ? Media.clock(Media.length) : ""; font.pixelSize: 11; color: Theme.textMuted } }
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: 14
                     IconBtn { icon: Icons.prev; onClicked: Media.prev() }
-                    IconBtn { implicitWidth: 46; implicitHeight: 46; icon: Media.playing ? Icons.pause : Icons.play; iconSize: 18; fill: Theme.gAccentAlt; onClicked: Media.toggle() }
+                    IconBtn { implicitWidth: 46; implicitHeight: 46; icon: Media.playing ? Icons.pause : Icons.play; iconSize: 18; fill: Theme.gAccentCool; onClicked: Media.toggle() }
                     IconBtn { icon: Icons.next; onClicked: Media.next() }
                 }
             }
@@ -288,12 +288,12 @@ Drawer {
             GradText { text: Media.present ? Media.title : "Nothing playing"; font.pixelSize: 44; font.weight: Font.Light; Layout.maximumWidth: 640 }
             T { text: Media.artist + (Media.album ? " — " + Media.album : ""); font.pixelSize: 16; color: Theme.textSubtle; Layout.fillWidth: true }
             Viz { bars: 56; barWidth: 6; barHeight: 70; spacing: 4 }
-            Meter { Layout.fillWidth: true; implicitHeight: 6; value: Media.length > 0 ? Media.position / Media.length : 0; colors: Theme.gAccentAlt }
+            Meter { Layout.fillWidth: true; implicitHeight: 6; value: Media.length > 0 ? Media.position / Media.length : 0; colors: Theme.gAccentCool }
             RowLayout { T { text: Media.clock(Media.position); font.pixelSize: 12; color: Theme.textMuted; Layout.fillWidth: true } T { text: Media.length > 0 ? Media.clock(Media.length) : ""; font.pixelSize: 12; color: Theme.textMuted } }
             RowLayout {
                 spacing: 16
                 IconBtn { implicitWidth: 44; implicitHeight: 44; icon: Icons.prev; iconSize: 17; onClicked: Media.prev() }
-                IconBtn { implicitWidth: 62; implicitHeight: 62; icon: Media.playing ? Icons.pause : Icons.play; iconSize: 24; fill: Theme.gAccentAlt; onClicked: Media.toggle() }
+                IconBtn { implicitWidth: 62; implicitHeight: 62; icon: Media.playing ? Icons.pause : Icons.play; iconSize: 24; fill: Theme.gAccentCool; onClicked: Media.toggle() }
                 IconBtn { implicitWidth: 44; implicitHeight: 44; icon: Icons.next; iconSize: 17; onClicked: Media.next() }
                 Item { Layout.fillWidth: true }
                 T { text: "MPRIS · " + Mpris.players.values.length + " player" + (Mpris.players.values.length === 1 ? "" : "s"); font.pixelSize: 12; color: Theme.textMuted }

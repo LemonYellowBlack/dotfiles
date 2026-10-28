@@ -54,7 +54,7 @@ Drawer {
             spacing: 26
             Repeater {
                 model: root.gpu ? [[root.gpu.util / 100, root.gpu.util, "%", "gpu util", Theme.gAccent],
-                                   [root.gpu.memUsed / root.gpu.memTotal, root.gpu.memUsed.toFixed(1), "G", "vram of " + Math.round(root.gpu.memTotal), Theme.gAccentAlt],
+                                   [root.gpu.memUsed / root.gpu.memTotal, root.gpu.memUsed.toFixed(1), "G", "vram of " + Math.round(root.gpu.memTotal), Theme.gAccentCool],
                                    [root.gpu.power / root.gpu.limit, Math.round(root.gpu.power), "W", "power · " + root.gpu.temp + "°", Theme.gWarm]] : []
                 ColumnLayout {
                     required property var modelData

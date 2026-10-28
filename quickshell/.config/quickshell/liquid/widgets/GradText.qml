@@ -7,7 +7,7 @@ Item {
     id: root
     property alias text: label.text
     property alias font: label.font
-    property var colors: [Theme.info, Theme.accent, Theme.accentAlt, Theme.accentPop]
+    property var colors: [Theme.accentSoft, Theme.accent, Theme.accentAlt]
     implicitWidth: label.implicitWidth
     implicitHeight: label.implicitHeight
 

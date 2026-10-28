@@ -66,21 +66,22 @@ Singleton {
     // Text, brightest first.
     readonly property color text: fujiWhite
     readonly property color textAlt: oldWhite          // values, notification bodies
-    readonly property color textSubtle: springViolet2  // subtitles, artists, unselected tabs
-    readonly property color textMuted: springViolet1   // captions, hints, section labels
+    readonly property color textSubtle: boatYellow2    // subtitles, artists, unselected tabs
+    readonly property color textMuted: a(oldWhite, 0.7) // captions, hints, section labels
     readonly property color textFaint: fujiGray        // idle states, chart axes
     readonly property color textDisabled: sumiInk6
     readonly property color textOnAccent: sumiInk0     // text over accent fills and gradients
 
     // Accents and states.
-    readonly property color accent: crystalBlue        // focus, active, primary
-    readonly property color accentAlt: oniViolet       // the second stop of accent fills
-    readonly property color accentPop: sakuraPink      // the last stop of decorative gradients
-    readonly property color secondary: waveAqua2       // host and app names
+    readonly property color accent: carpYellow         // focus, active, primary
+    readonly property color accentSoft: oldWhite       // the pale start of accent fills
+    readonly property color accentAlt: autumnYellow    // the deep end of accent fills
+    readonly property color accentCool: crystalBlue    // the cool counterpart: media, suspend
+    readonly property color secondary: crystalBlue     // host and app names
     readonly property color info: springBlue           // weather, fans, streaming
     readonly property color highlight: carpYellow      // search matches, cursor, drop targets, lit toggles
     readonly property color success: springGreen
-    readonly property color warning: carpYellow
+    readonly property color warning: roninYellow
     readonly property color hot: surimiOrange          // heavy load, the sun
     readonly property color danger: waveRed
     readonly property color dangerDeep: autumnRed
@@ -91,8 +92,8 @@ Singleton {
     readonly property color card: a(layer, 0.42)
     readonly property color track: a(line, 0.35)
 
-    readonly property var gAccent: [info, accent, accentAlt]
-    readonly property var gAccentAlt: [accentAlt, accentPop]
+    readonly property var gAccent: [accentSoft, accent, accentAlt]
+    readonly property var gAccentCool: [info, accentCool]
     readonly property var gWarm: [warning, hot]
     readonly property var gCool: [secondary, success]
     readonly property var gHot: [hot, danger]
