@@ -1,7 +1,7 @@
 // galaxy.glsl — a band of the Milky Way across the Liquid shell's desktop, corner to corner, its
-// light running the window border's gradient (cyan, blue, violet, pink) along its length. Dust
-// rifts and pink emission knots in the band, stars thickening towards it, the brightest of them
-// breathing, and now and then a meteor.
+// light running the window border's gradient (crystal blue, old white, carp, autumn yellow) along
+// its length. Dust rifts and amber emission knots in the band, stars thickening towards it, the
+// brightest of them breathing, and now and then a meteor.
 //
 // Two passes (galaxy.neowall). The sky costs about 90 ms to paint at 4K on a laptop's graphics
 // chip, so Buffer A paints it twice, once into each of its two textures, and from then on
@@ -10,13 +10,13 @@
 // plain gradient.
 
 #define INK0   vec3(0.086, 0.086, 0.114)   // #16161D sumiInk0, the shell's frame
-#define WAVE1  vec3(0.133, 0.196, 0.286)   // #223249
-#define CYAN   vec3(0.498, 0.706, 0.792)   // #7FB4CA
-#define BLUE   vec3(0.494, 0.612, 0.847)   // #7E9CD8
-#define VIOLET vec3(0.584, 0.498, 0.722)   // #957FB8
-#define PINK   vec3(0.824, 0.494, 0.600)   // #D27E99
-#define FUJI   vec3(0.863, 0.843, 0.729)   // #DCD7BA
-#define CARP   vec3(0.902, 0.765, 0.518)   // #E6C384
+#define WAVE1  vec3(0.133, 0.196, 0.286)   // #223249 waveBlue1
+#define BLUE   vec3(0.494, 0.612, 0.847)   // #7E9CD8 crystalBlue
+#define OLD    vec3(0.784, 0.753, 0.576)   // #C8C093 oldWhite
+#define FUJI   vec3(0.863, 0.843, 0.729)   // #DCD7BA fujiWhite
+#define CARP   vec3(0.902, 0.765, 0.518)   // #E6C384 carpYellow
+#define AUTUMN vec3(0.863, 0.647, 0.380)   // #DCA561 autumnYellow
+#define RONIN  vec3(1.000, 0.620, 0.231)   // #FF9E3B roninYellow
 
 float gxHash(vec2 p) {
     vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -52,12 +52,12 @@ float gxFbm(vec2 p, int octaves) {
     return v;
 }
 
-// The border's four stops, s from 0 (cyan) to 1 (pink).
+// The border's four stops, s from 0 (crystal blue) to 1 (autumn yellow).
 vec3 gxBorder(float s) {
     s = clamp(s, 0.0, 1.0) * 3.0;
-    vec3 c = mix(CYAN, BLUE, clamp(s, 0.0, 1.0));
-    c = mix(c, VIOLET, clamp(s - 1.0, 0.0, 1.0));
-    return mix(c, PINK, clamp(s - 2.0, 0.0, 1.0));
+    vec3 c = mix(BLUE, OLD, clamp(s, 0.0, 1.0));
+    c = mix(c, CARP, clamp(s - 1.0, 0.0, 1.0));
+    return mix(c, AUTUMN, clamp(s - 2.0, 0.0, 1.0));
 }
 
 vec3 gxSaturate(vec3 c, float k) {
@@ -95,15 +95,21 @@ vec3 gxSky(vec2 p, out float clear) {
     float dustN = gxFbm(q * 3.4 + 2.6 * w + vec2(5.0, 1.0), 6);
     float dust = smoothstep(0.30, 0.68, dustN * (0.45 + 0.75 * lane)) * band;
 
-    // Pink knots of glowing hydrogen, strung along the band.
+    // Amber knots of glowing gas, strung along the band.
     float knots = smoothstep(0.60, 0.82, gxFbm(q * 1.8 + 1.5 * w + vec2(13.0, 2.0), 5)) * band;
 
-    float s = 0.5 + b.x * 0.52 + (w.x - 0.5) * 0.25;
+    float s = 0.42 + b.x * 0.6 + (w.x - 0.5) * 0.25;
     vec3 hue = gxSaturate(gxBorder(s), 1.25) * (1.15 - 0.15 * s);
+    // The yellows are brighter than the blue; even them out halfway so the warm end doesn't glare.
+    hue *= mix(1.0, 0.66 / dot(hue, vec3(0.299, 0.587, 0.114)), 0.5);
+    // Faint light keeps the blue and only the bright clouds warm, so dim yellow never goes brown.
+    hue = mix(gxSaturate(BLUE, 1.15) * 0.95, hue, smoothstep(0.08, 0.65, light));
     vec3 col = INK0 + WAVE1 * 0.30 * exp(-vv * vv / (width * width * 6.0));
     col += hue * light * 0.42;
     col += mix(hue, FUJI, 0.55) * core * light * 0.30;
-    col += gxSaturate(mix(PINK, VIOLET, 0.25), 1.3) * knots * 0.42;
+    // Amber over blue light reads as pink, so knots in the cool half glow blue-white instead.
+    vec3 knotHue = mix(mix(BLUE, FUJI, 0.35), gxSaturate(mix(AUTUMN, RONIN, 0.35), 1.3), smoothstep(0.35, 0.6, s));
+    col += knotHue * knots * 0.42;
     col *= 1.0 - 0.86 * dust;
     clear = 1.0 - 0.8 * dust;
     return col;
@@ -125,7 +131,7 @@ vec3 gxStars(vec2 px, vec2 res, float k, float cell, float sparse, float crowd, 
     float r = length(px - at) * k / max(size * k, 0.85);
     float sub = min(1.0, size * k / 0.85);
     float glow = (exp(-r * r * 2.0) + exp(-r * 0.8) * 0.05 * rank) * sub * sub;
-    vec3 tint = h.y < 0.55 ? FUJI : (h.y < 0.8 ? CYAN : (h.y < 0.93 ? CARP : PINK));
+    vec3 tint = h.y < 0.55 ? FUJI : (h.y < 0.8 ? BLUE : (h.y < 0.93 ? CARP : AUTUMN));
     return mix(FUJI, tint, 0.6) * glow * (0.25 + 0.75 * rank * rank);
 }
 
@@ -144,7 +150,7 @@ vec3 gxBright(vec2 px, float k, float t) {
     float core = 1.0 / (1.0 + r * r * r * r) + 0.10 / (1.0 + r * 0.35);
     float spikes = (1.0 / (1.0 + d.y * d.y)) / (1.0 + d.x * 0.05) + (1.0 / (1.0 + d.x * d.x)) / (1.0 + d.y * 0.05);
     float breathe = 0.80 + 0.20 * sin(t * (0.45 + 0.3 * h.y) + h.y * 30.0);
-    vec3 tint = mix(FUJI, h.y < 0.5 ? CYAN : CARP, 0.4);
+    vec3 tint = mix(FUJI, h.y < 0.5 ? BLUE : CARP, 0.4);
     return tint * (core + spikes * 0.3) * (0.5 + 0.5 * h.x / 0.28) * breathe;
 }
 
@@ -163,7 +169,7 @@ vec3 gxMeteor(vec2 p, float t) {
     float dist = length(rel - dir * along);
     float tail = smoothstep(run - 0.18, run, along);
     float fade = smoothstep(0.0, 0.08, age) * (1.0 - smoothstep(0.55, 0.9, age));
-    return mix(CYAN, FUJI, tail) * exp(-dist * dist * 4.0e5) * tail * fade * 0.9;
+    return mix(BLUE, FUJI, tail) * exp(-dist * dist * 4.0e5) * tail * fade * 0.9;
 }
 
 // Fades towards the frame, so its ink0 runs into space.
