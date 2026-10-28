@@ -19,12 +19,12 @@ Item {
             spacing: 4
             Repeater { model: parent.parent.keys.split(" "); Kbd { required property string modelData; text: modelData.replace(/_/g, " ") } }
         }
-        T { text: parent.does; font.pixelSize: 12; color: Theme.old; Layout.fillWidth: true }
+        T { text: parent.does; font.pixelSize: 12; color: Theme.textAlt; Layout.fillWidth: true }
         Rectangle {
             visible: parent.tag !== ""
             implicitWidth: tagText.implicitWidth + 14; implicitHeight: 18; radius: 9
-            color: parent.tag === "new" ? Theme.a(Theme.green, 0.2) : Theme.a(Theme.blue, 0.2)
-            T { id: tagText; anchors.centerIn: parent; text: parent.parent.tag; font.pixelSize: 10; color: parent.parent.tag === "new" ? Theme.green : Theme.blue }
+            color: parent.tag === "new" ? Theme.a(Theme.success, 0.2) : Theme.a(Theme.accent, 0.2)
+            T { id: tagText; anchors.centerIn: parent; text: parent.parent.tag; font.pixelSize: 10; color: parent.parent.tag === "new" ? Theme.success : Theme.accent }
         }
     }
     component Group: ColumnLayout { property string title; Layout.fillWidth: true; spacing: 6; Label { Layout.fillWidth: true; text: parent.title } }
@@ -34,9 +34,9 @@ Item {
         width: 1340
         height: sheet.implicitHeight + 52
         radius: 30
-        color: Theme.a(Theme.ink0, 0.82)
+        color: Theme.a(Theme.surface, 0.82)
         border.width: 1
-        border.color: Theme.a(Theme.blue, 0.22)
+        border.color: Theme.a(Theme.accent, 0.22)
         MouseArea { anchors.fill: parent }
         ColumnLayout {
             id: sheet
@@ -46,7 +46,7 @@ Item {
             RowLayout {
                 spacing: 14
                 GradText { text: "keybinds"; font.pixelSize: 24; font.weight: Font.DemiBold }
-                T { text: "SUPER /"; font.pixelSize: 12; color: Theme.muted; Layout.fillWidth: true }
+                T { text: "SUPER /"; font.pixelSize: 12; color: Theme.textMuted; Layout.fillWidth: true }
                 Pill { onClicked: Shell.close(); T { text: "esc close"; font.pixelSize: 12 } }
             }
             GridLayout {
@@ -86,7 +86,7 @@ Item {
                     Group { title: "session"; Bind { keys: "SUPER L"; does: "lock now" } Bind { keys: "CTRL SUPER ⇧ Del"; does: "power off" } }
                 }
             }
-            T { text: "Shell binds call qs ipc, e.g. qs -c liquid ipc call shell toggle control. The look (gaps, rounding, blur, the rotating border) lives in hypr/liquid.lua."; font.pixelSize: 11; color: Theme.muted }
+            T { text: "Shell binds call qs ipc, e.g. qs -c liquid ipc call shell toggle control. The look (gaps, rounding, blur, the rotating border) lives in hypr/liquid.lua."; font.pixelSize: 11; color: Theme.textMuted }
         }
     }
 }

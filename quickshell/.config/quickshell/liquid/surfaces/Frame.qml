@@ -20,7 +20,7 @@ Shape {
     }
     ShapePath {
         fillColor: "transparent"
-        strokeColor: Theme.a(Theme.blue, 0.09)
+        strokeColor: Theme.a(Theme.accent, 0.09)
         strokeWidth: 1
         PathRectangle { x: Theme.edge + 0.5; y: Shell.top + 0.5; width: root.iw - 1; height: root.ih - 1; radius: Theme.frameR }
     }

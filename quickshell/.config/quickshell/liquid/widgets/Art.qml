@@ -29,14 +29,14 @@ Item {
         id: cover
         anchors.fill: parent
         radius: root.radius
-        color: Theme.wave1
+        color: Theme.selectionDeep
         Rectangle {
             anchors.fill: parent
             visible: img.status !== Image.Ready
             gradient: Gradient {
-                GradientStop { position: 0; color: Theme.wave1 }
-                GradientStop { position: 0.45; color: Theme.violet }
-                GradientStop { position: 0.62; color: Theme.orange }
+                GradientStop { position: 0; color: Theme.selectionDeep }
+                GradientStop { position: 0.45; color: Theme.accentAlt }
+                GradientStop { position: 0.62; color: Theme.hot }
                 GradientStop { position: 0.63; color: "#1a2436" }
                 GradientStop { position: 1; color: "#1a2436" }
             }
@@ -44,9 +44,9 @@ Item {
                 width: parent.width * 0.44; height: width; radius: width / 2
                 anchors.horizontalCenter: parent.horizontalCenter
                 y: parent.height * 0.62 - height / 2
-                gradient: Gradient { GradientStop { position: 0; color: "#FFF1C9" } GradientStop { position: 1; color: Theme.orange } }
+                gradient: Gradient { GradientStop { position: 0; color: "#FFF1C9" } GradientStop { position: 1; color: Theme.hot } }
             }
-            Rectangle { width: parent.width; height: Math.max(1, parent.height * 0.03); y: parent.height * 0.66; color: Theme.orange; opacity: 0.9 }
+            Rectangle { width: parent.width; height: Math.max(1, parent.height * 0.03); y: parent.height * 0.66; color: Theme.hot; opacity: 0.9 }
         }
         Image {
             id: img

@@ -49,7 +49,7 @@ Rectangle {
             Rectangle {
                 anchors.centerIn: parent
                 width: 6; height: 6; radius: 3
-                color: hover.containsMouse ? Theme.fg : (slot.n ? "#8f8aa8" : "#3f3f52")
+                color: hover.containsMouse ? Theme.text : (slot.n ? Theme.textMuted : Theme.layerHover)
                 scale: hover.containsMouse ? 1.7 : 1
                 Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
             }
@@ -73,7 +73,7 @@ Rectangle {
         y: 5
         height: 20
         radius: 10
-        gradient: Grad { colors: [Theme.blue, Theme.violet] }
-        T { anchors.centerIn: parent; text: root.active; color: Theme.ink0; font.pixelSize: 11; font.weight: Font.Bold }
+        gradient: Grad { colors: [Theme.accent, Theme.accentAlt] }
+        T { anchors.centerIn: parent; text: root.active; color: Theme.textOnAccent; font.pixelSize: 11; font.weight: Font.Bold }
     }
 }

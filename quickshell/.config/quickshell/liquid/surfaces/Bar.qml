@@ -30,24 +30,24 @@ Item {
         Pill {
             active: root.on("launcher")
             onClicked: Shell.toggle("launcher", "")
-            T { text: "❯"; color: Theme.yellow }
-            T { text: Host.name; color: Theme.aqua; font.weight: Font.DemiBold }
+            T { text: "❯"; color: Theme.highlight }
+            T { text: Host.name; color: Theme.secondary; font.weight: Font.DemiBold }
         }
         Workspaces { id: workspaces }
         Pill {
             pad: 8
             active: root.on("overview")
             onClicked: Shell.toggle("overview", "")
-            Icon { path: Icons.grid; size: 14; stroke: 2; color: Theme.dim }
+            Icon { path: Icons.grid; size: 14; stroke: 2; color: Theme.textSubtle }
         }
         RowLayout {
             spacing: 8
             Layout.leftMargin: 6
             Layout.maximumWidth: 300
             visible: root.active !== null
-            AppIcon { size: 16; iconName: root.entry ? root.entry.icon : ""; glyph: Icons.term; colors: Theme.gAqua }
-            T { text: root.entry ? root.entry.name : root.appClass; color: Theme.aqua }
-            T { text: root.active ? root.active.title : ""; color: Theme.dim; Layout.fillWidth: true; Layout.maximumWidth: 220 }
+            AppIcon { size: 16; iconName: root.entry ? root.entry.icon : ""; glyph: Icons.term; colors: Theme.gCool }
+            T { text: root.entry ? root.entry.name : root.appClass; color: Theme.secondary }
+            T { text: root.active ? root.active.title : ""; color: Theme.textSubtle; Layout.fillWidth: true; Layout.maximumWidth: 220 }
         }
     }
 
@@ -68,19 +68,19 @@ Item {
             visible: Media.present
             onClicked: Shell.open("dash", "media")
             Viz { bars: 4; barHeight: 13 }
-            T { text: (Media.artist ? Media.artist + " — " : "") + Media.title; color: Theme.dim; Layout.maximumWidth: 210 }
+            T { text: (Media.artist ? Media.artist + " — " : "") + Media.title; color: Theme.textSubtle; Layout.maximumWidth: 210 }
         }
 
         Pill {
             id: flags
             readonly property var list: [
-                Toggles.caff ? [Icons.coffee, Theme.yellow, ""] : null,
-                !Toggles.autolock ? [Icons.unlock, Theme.muted, ""] : null,
-                Toggles.night && Sun.elevation < 3 ? [Icons.moon, Theme.yellow, ""] : null,
-                Net.exitNode ? [Icons.shield, Theme.green, Net.exitNode.slice(0, 3).toUpperCase()] : null,
-                Host.gpu === "prime" && Toggles.gpu !== "off" ? [Icons.gpu, Toggles.gpu === "on" ? Theme.orange : Theme.yellow, Sys.gpu ? Math.round(Sys.gpu.temp) + "°" : "…"] : null,
-                Host.sunshine && Toggles.sunshine ? [Icons.stream, Theme.cyan, ""] : null,
-                Toggles.dnd ? [Icons.bellOff, Theme.muted, ""] : null
+                Toggles.caff ? [Icons.coffee, Theme.highlight, ""] : null,
+                !Toggles.autolock ? [Icons.unlock, Theme.textMuted, ""] : null,
+                Toggles.night && Sun.elevation < 3 ? [Icons.moon, Theme.highlight, ""] : null,
+                Net.exitNode ? [Icons.shield, Theme.success, Net.exitNode.slice(0, 3).toUpperCase()] : null,
+                Host.gpu === "prime" && Toggles.gpu !== "off" ? [Icons.gpu, Toggles.gpu === "on" ? Theme.hot : Theme.warning, Sys.gpu ? Math.round(Sys.gpu.temp) + "°" : "…"] : null,
+                Host.sunshine && Toggles.sunshine ? [Icons.stream, Theme.info, ""] : null,
+                Toggles.dnd ? [Icons.bellOff, Theme.textMuted, ""] : null
             ].filter(x => x)
             visible: list.length > 0
             onClicked: Shell.toggle("control", "")
@@ -110,10 +110,10 @@ Item {
             onClicked: root.hang("homelab", lab)
             Rectangle {
                 implicitWidth: 8; implicitHeight: 8; radius: 4
-                color: Lab.ok ? (Lab.down > 0 ? Theme.yellow : Theme.green) : (Lab.error ? Theme.red : Theme.gray)
+                color: Lab.ok ? (Lab.down > 0 ? Theme.warning : Theme.success) : (Lab.error ? Theme.danger : Theme.textFaint)
                 SequentialAnimation on opacity { running: Lab.ok; loops: Animation.Infinite; NumberAnimation { to: 0.4; duration: 1100 } NumberAnimation { to: 1; duration: 1100 } }
             }
-            T { text: Host.labName; color: Theme.old }
+            T { text: Host.labName; color: Theme.textAlt }
         }
 
         Pill {
@@ -136,8 +136,8 @@ Item {
                 implicitWidth: Math.max(16, badge.implicitWidth + 8)
                 implicitHeight: 16
                 radius: 8
-                gradient: Grad { colors: [Theme.blue, Theme.violet] }
-                T { id: badge; anchors.centerIn: parent; text: Notifs.count; font.pixelSize: 10; font.weight: Font.Bold; color: Theme.ink0 }
+                gradient: Grad { colors: [Theme.accent, Theme.accentAlt] }
+                T { id: badge; anchors.centerIn: parent; text: Notifs.count; font.pixelSize: 10; font.weight: Font.Bold; color: Theme.textOnAccent }
             }
         }
 
@@ -145,7 +145,7 @@ Item {
             pad: 9
             active: root.on("power")
             onClicked: Shell.toggle("power", "")
-            Icon { path: Icons.power; size: 15; stroke: 2.2; color: Theme.red }
+            Icon { path: Icons.power; size: 15; stroke: 2.2; color: Theme.danger }
         }
     }
 
@@ -165,16 +165,16 @@ Item {
         radius: 14
         color: Theme.a(Theme.surface, 0.94)
         border.width: 1
-        border.color: Theme.a(Theme.blue, 0.25)
+        border.color: Theme.a(Theme.accent, 0.25)
         T { x: 12; y: 8; text: "workspace " + peek.ws; font.pixelSize: 11; font.weight: Font.DemiBold }
-        T { anchors.right: parent.right; anchors.rightMargin: 12; y: 8; text: peek.wins.length ? peek.wins.length + (peek.wins.length > 1 ? " windows" : " window") : "empty"; font.pixelSize: 11; color: Theme.muted }
+        T { anchors.right: parent.right; anchors.rightMargin: 12; y: 8; text: peek.wins.length ? peek.wins.length + (peek.wins.length > 1 ? " windows" : " window") : "empty"; font.pixelSize: 11; color: Theme.textMuted }
         Rectangle {
             id: mini
             x: 12; y: 30
             width: parent.width - 24
             height: parent.height - 42
             radius: 9
-            color: Theme.wave1
+            color: Theme.selectionDeep
             clip: true
             readonly property real sx: width / Math.max(1, Screen.width)
             Repeater {
@@ -187,10 +187,10 @@ Item {
                     width: o.size ? o.size[0] * mini.sx : mini.width
                     height: o.size ? o.size[1] * mini.sx : mini.height
                     radius: 5
-                    color: Theme.a(Theme.ink1, 0.9)
+                    color: Theme.a(Theme.surfaceRaised, 0.9)
                     border.width: 1
-                    border.color: modelData.activated ? Theme.a(Theme.blue, 0.7) : Theme.a(Theme.ink4, 0.6)
-                    T { anchors.centerIn: parent; width: parent.width - 6; horizontalAlignment: Text.AlignHCenter; text: parent.o.class || ""; font.pixelSize: 9; color: Theme.muted }
+                    border.color: modelData.activated ? Theme.a(Theme.accent, 0.7) : Theme.a(Theme.line, 0.6)
+                    T { anchors.centerIn: parent; width: parent.width - 6; horizontalAlignment: Text.AlignHCenter; text: parent.o.class || ""; font.pixelSize: 9; color: Theme.textMuted }
                 }
             }
         }

@@ -5,7 +5,7 @@ import qs.config
 Item {
     id: root
     property real value: 0
-    property var colors: Theme.gBlue
+    property var colors: Theme.gAccent
     property bool dim: false
     signal moved(real v)
     implicitHeight: 28
@@ -16,7 +16,7 @@ Item {
         width: Math.max(6, parent.width * root.shown)
         height: 6
         radius: 3
-        gradient: Grad { colors: root.dim ? Theme.gGray : root.colors }
+        gradient: Grad { colors: root.dim ? Theme.gOff : root.colors }
         Behavior on width { enabled: !mouse.pressed; NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
     }
     Rectangle {
@@ -26,9 +26,9 @@ Item {
         width: 18
         height: 18
         radius: 9
-        color: Theme.fg
+        color: Theme.text
         border.width: 4
-        border.color: Theme.a(Theme.fg, 0.12)
+        border.color: Theme.a(Theme.text, 0.12)
         scale: mouse.pressed || mouse.containsMouse ? 1.18 : 1
         Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
         Behavior on x { enabled: !mouse.pressed; NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }

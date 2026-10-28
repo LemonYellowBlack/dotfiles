@@ -29,7 +29,7 @@ Drawer {
         spacing: 12
         Rectangle {
             implicitWidth: 10; implicitHeight: 10; radius: 5
-            color: Lab.ok ? (Lab.down > 0 ? Theme.yellow : Theme.green) : (Lab.error ? Theme.red : Theme.gray)
+            color: Lab.ok ? (Lab.down > 0 ? Theme.warning : Theme.success) : (Lab.error ? Theme.danger : Theme.textFaint)
             SequentialAnimation on opacity { running: Lab.ok; loops: Animation.Infinite; NumberAnimation { to: 0.35; duration: 1100 } NumberAnimation { to: 1; duration: 1100 } }
         }
         ColumnLayout {
@@ -39,11 +39,11 @@ Drawer {
             T {
                 text: Lab.ok ? (Lab.remote ? "online · ssh " + Lab.ms + " ms" : "this machine") + " · up " + root.dur(root.d.uptime) + " · load " + root.d.load.toFixed(2)
                     : (Lab.error || "asking…")
-                font.pixelSize: 11; color: Lab.error ? Theme.red : Theme.muted
+                font.pixelSize: 11; color: Lab.error ? Theme.danger : Theme.textMuted
                 Layout.fillWidth: true
             }
         }
-        T { visible: root.gpu !== null; text: root.gpu ? root.gpu.name.replace("NVIDIA GeForce ", "") : ""; font.pixelSize: 11; color: Theme.old }
+        T { visible: root.gpu !== null; text: root.gpu ? root.gpu.name.replace("NVIDIA GeForce ", "") : ""; font.pixelSize: 11; color: Theme.textAlt }
     }
 
     Card {
@@ -53,8 +53,8 @@ Drawer {
             Layout.alignment: Qt.AlignHCenter
             spacing: 26
             Repeater {
-                model: root.gpu ? [[root.gpu.util / 100, root.gpu.util, "%", "gpu util", Theme.gBlue],
-                                   [root.gpu.memUsed / root.gpu.memTotal, root.gpu.memUsed.toFixed(1), "G", "vram of " + Math.round(root.gpu.memTotal), Theme.gViolet],
+                model: root.gpu ? [[root.gpu.util / 100, root.gpu.util, "%", "gpu util", Theme.gAccent],
+                                   [root.gpu.memUsed / root.gpu.memTotal, root.gpu.memUsed.toFixed(1), "G", "vram of " + Math.round(root.gpu.memTotal), Theme.gAccentAlt],
                                    [root.gpu.power / root.gpu.limit, Math.round(root.gpu.power), "W", "power · " + root.gpu.temp + "°", Theme.gWarm]] : []
                 ColumnLayout {
                     required property var modelData
@@ -66,10 +66,10 @@ Drawer {
                         RowLayout {
                             anchors.centerIn: parent; spacing: 1
                             T { text: modelData[1]; font.pixelSize: 20; font.weight: Font.Light }
-                            T { text: modelData[2]; font.pixelSize: 11; color: Theme.muted; Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: 3 }
+                            T { text: modelData[2]; font.pixelSize: 11; color: Theme.textMuted; Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: 3 }
                         }
                     }
-                    T { Layout.alignment: Qt.AlignHCenter; text: modelData[3]; font.pixelSize: 11; color: Theme.muted }
+                    T { Layout.alignment: Qt.AlignHCenter; text: modelData[3]; font.pixelSize: 11; color: Theme.textMuted }
                 }
             }
         }
@@ -81,8 +81,8 @@ Drawer {
                 Rectangle {
                     required property var modelData
                     implicitWidth: chip.implicitWidth + 18; implicitHeight: 22; radius: 11
-                    color: Qt.rgba(0.212, 0.212, 0.275, 0.7)
-                    T { id: chip; anchors.centerIn: parent; text: modelData.name + " · " + modelData.mem.toFixed(1) + " G"; font.pixelSize: 11; color: Theme.violet }
+                    color: Theme.a(Theme.layerHover, 0.7)
+                    T { id: chip; anchors.centerIn: parent; text: modelData.name + " · " + modelData.mem.toFixed(1) + " G"; font.pixelSize: 11; color: Theme.accentAlt }
                 }
             }
         }
@@ -106,7 +106,7 @@ Drawer {
                     Layout.fillWidth: true
                     implicitHeight: 24
                     radius: 12
-                    color: hover.containsMouse ? Qt.rgba(0.212, 0.212, 0.275, 0.9) : Qt.rgba(0.165, 0.165, 0.216, 0.45)
+                    color: hover.containsMouse ? Theme.a(Theme.layerHover, 0.9) : Theme.a(Theme.layer, 0.45)
                     RowLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 10
@@ -114,7 +114,7 @@ Drawer {
                         spacing: 8
                         Rectangle {
                             implicitWidth: 7; implicitHeight: 7; radius: 3.5
-                            color: modelData.ok ? Theme.green : (modelData.idle ? Theme.gray : (modelData.warn ? Theme.yellow : Theme.red))
+                            color: modelData.ok ? Theme.success : (modelData.idle ? Theme.textFaint : (modelData.warn ? Theme.warning : Theme.danger))
                             SequentialAnimation on opacity { running: modelData.ok; loops: Animation.Infinite; PauseAnimation { duration: (index * 170) % 1400 } NumberAnimation { to: 0.35; duration: 1100 } NumberAnimation { to: 1; duration: 1100 } }
                         }
                         T { text: modelData.name; font.pixelSize: 11; Layout.fillWidth: true }
@@ -143,18 +143,18 @@ Drawer {
                     implicitHeight: 8
                     radius: 4
                     visible: modelData.busy
-                    color: Theme.a(Theme.blue, 0.25)
+                    color: Theme.a(Theme.accent, 0.25)
                     clip: true
                     Row {
                         id: stripes
                         x: -16
                         spacing: 8
-                        Repeater { model: 40; Rectangle { width: 8; height: 16; y: -4; rotation: 30; color: Theme.a(Theme.blue, 0.75) } }
+                        Repeater { model: 40; Rectangle { width: 8; height: 16; y: -4; rotation: 30; color: Theme.a(Theme.accent, 0.75) } }
                         NumberAnimation on x { running: parent.visible; from: -16; to: 0; duration: 700; loops: Animation.Infinite }
                     }
                 }
                 Item { Layout.fillWidth: true; visible: !modelData.busy }
-                T { text: modelData.busy ? "in a job" : modelData.state; font.pixelSize: 11; color: modelData.busy ? Theme.blue : (modelData.state === "active" ? Theme.muted : Theme.red) }
+                T { text: modelData.busy ? "in a job" : modelData.state; font.pixelSize: 11; color: modelData.busy ? Theme.accent : (modelData.state === "active" ? Theme.textMuted : Theme.danger) }
             }
         }
     }
@@ -164,7 +164,7 @@ Drawer {
         Layout.fillWidth: true
         wrapMode: Text.WordWrap
         font.pixelSize: 12
-        color: Theme.old
+        color: Theme.textAlt
         text: "Couldn't run labstatus on " + Host.labVia + ". It needs `stow --no-folding bin` there, and an SSH key the session can use without a prompt."
     }
 }

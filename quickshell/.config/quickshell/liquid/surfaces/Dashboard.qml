@@ -39,11 +39,11 @@ Drawer {
             implicitWidth: 212
             implicitHeight: 36
             radius: 18
-            color: Qt.rgba(0.165, 0.165, 0.216, 0.5)
+            color: Theme.a(Theme.layer, 0.5)
             Rectangle {
                 x: 4 + tabs.index * 104; y: 4
                 width: 100; height: 28; radius: 14
-                gradient: Grad { colors: [Theme.blue, Theme.violet] }
+                gradient: Grad { colors: [Theme.accent, Theme.accentAlt] }
                 Behavior on x { NumberAnimation { duration: 450; easing.type: Easing.OutBack } }
             }
             Repeater {
@@ -52,13 +52,13 @@ Drawer {
                     required property string modelData
                     required property int index
                     x: 4 + index * 104; y: 4; width: 100; height: 28
-                    T { anchors.centerIn: parent; text: modelData; font.pixelSize: 12; color: tabs.index === index ? Theme.ink0 : Theme.dim; font.weight: tabs.index === index ? Font.DemiBold : Font.Normal }
+                    T { anchors.centerIn: parent; text: modelData; font.pixelSize: 12; color: tabs.index === index ? Theme.textOnAccent : Theme.textSubtle; font.weight: tabs.index === index ? Font.DemiBold : Font.Normal }
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Shell.dashTab = modelData }
                 }
             }
         }
         Item { Layout.fillWidth: true }
-        T { text: "SUPER F1"; font.pixelSize: 11; color: Theme.muted }
+        T { text: "SUPER F1"; font.pixelSize: 11; color: Theme.textMuted }
     }
 
     // ---- overview ----
@@ -76,10 +76,10 @@ Drawer {
                 RowLayout {
                     spacing: 6
                     GradText { text: Qt.formatTime(root.now, "HH:mm"); font.pixelSize: 78; font.weight: Font.ExtraLight }
-                    T { text: Qt.formatTime(root.now, "ss"); font.pixelSize: 22; font.weight: Font.ExtraLight; color: Theme.muted; Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: 14 }
+                    T { text: Qt.formatTime(root.now, "ss"); font.pixelSize: 22; font.weight: Font.ExtraLight; color: Theme.textMuted; Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: 14 }
                 }
-                T { text: root.dayNames[root.now.getDay()] + ", " + root.monthNames[root.now.getMonth()] + " " + root.now.getDate(); font.pixelSize: 14; color: Theme.dim }
-                T { text: "week " + root.isoWeek(root.now); font.pixelSize: 11; color: Theme.muted }
+                T { text: root.dayNames[root.now.getDay()] + ", " + root.monthNames[root.now.getMonth()] + " " + root.now.getDate(); font.pixelSize: 14; color: Theme.textSubtle }
+                T { text: "week " + root.isoWeek(root.now); font.pixelSize: 11; color: Theme.textMuted }
             }
             Card {
                 id: calCard
@@ -101,7 +101,7 @@ Drawer {
                     Layout.fillWidth: true
                     Repeater {
                         model: ["wk", "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-                        T { required property string modelData; required property int index; text: modelData; font.pixelSize: 11; color: index ? Theme.gray : Theme.violet; horizontalAlignment: Text.AlignHCenter; Layout.fillWidth: true; Layout.preferredHeight: 24 }
+                        T { required property string modelData; required property int index; text: modelData; font.pixelSize: 11; color: index ? Theme.textFaint : Theme.accentAlt; horizontalAlignment: Text.AlignHCenter; Layout.fillWidth: true; Layout.preferredHeight: 24 }
                     }
                     Repeater {
                         model: 48
@@ -118,14 +118,14 @@ Drawer {
                                 anchors.centerIn: parent
                                 width: 28; height: 28; radius: 14
                                 visible: parent.today
-                                gradient: Grad { colors: [Theme.blue, Theme.violet] }
+                                gradient: Grad { colors: [Theme.accent, Theme.accentAlt] }
                             }
                             T {
                                 anchors.centerIn: parent
                                 text: parent.col === 0 ? root.isoWeek(parent.d) : parent.d.getDate()
                                 font.pixelSize: parent.col === 0 ? 11 : 12
                                 font.weight: parent.today ? Font.Bold : Font.Normal
-                                color: parent.col === 0 ? Theme.violet : (parent.today ? Theme.ink0 : (!parent.inMonth ? Theme.ink4 : (parent.col > 5 ? Theme.old : Theme.fg)))
+                                color: parent.col === 0 ? Theme.accentAlt : (parent.today ? Theme.textOnAccent : (!parent.inMonth ? Theme.textDisabled : (parent.col > 5 ? Theme.textAlt : Theme.text)))
                             }
                         }
                     }
@@ -155,29 +155,29 @@ Drawer {
                         if (!c || c.length < 2) return;
                         const y = e => y0 - (e >= 0 ? e * k : Math.max(-60, e) * 0.55);
                         const x = i => i / (c.length - 1) * W;
-                        ctx.strokeStyle = "rgba(220,215,186,0.18)"; ctx.setLineDash([3, 4]);
+                        ctx.strokeStyle = Theme.a(Theme.text, 0.18); ctx.setLineDash([3, 4]);
                         ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke(); ctx.setLineDash([]);
                         // daylight fill
                         const fill = ctx.createLinearGradient(0, 0, 0, y0);
-                        fill.addColorStop(0, "rgba(255,160,102,0.38)"); fill.addColorStop(1, "rgba(255,160,102,0)");
+                        fill.addColorStop(0, Theme.a(Theme.hot, 0.38)); fill.addColorStop(1, Theme.a(Theme.hot, 0));
                         ctx.fillStyle = fill;
                         ctx.beginPath(); ctx.moveTo(0, y0);
                         for (let i = 0; i < c.length; i++) ctx.lineTo(x(i), Math.min(y0, y(c[i])));
                         ctx.lineTo(W, y0); ctx.closePath(); ctx.fill();
                         // the whole day's curve, then the daylight part in warm gradient
-                        ctx.strokeStyle = "rgba(126,156,216,0.45)"; ctx.lineWidth = 1.5;
+                        ctx.strokeStyle = Theme.a(Theme.accent, 0.45); ctx.lineWidth = 1.5;
                         ctx.beginPath(); for (let i = 0; i < c.length; i++) (i ? ctx.lineTo : ctx.moveTo).call(ctx, x(i), y(c[i])); ctx.stroke();
                         const warm = ctx.createLinearGradient(0, 0, W, 0);
-                        warm.addColorStop(0, Theme.yellow); warm.addColorStop(0.5, Theme.orange); warm.addColorStop(1, Theme.red);
+                        warm.addColorStop(0, Theme.highlight); warm.addColorStop(0.5, Theme.hot); warm.addColorStop(1, Theme.danger);
                         ctx.strokeStyle = warm; ctx.lineWidth = 2.5; ctx.lineCap = "round";
                         ctx.beginPath(); let on = false;
                         for (let i = 0; i < c.length; i++) { if (c[i] >= 0) { if (!on) ctx.moveTo(x(i), y(c[i])); else ctx.lineTo(x(i), y(c[i])); on = true; } else on = false; }
                         ctx.stroke();
-                        ctx.fillStyle = Theme.gray; ctx.font = "10px '" + Theme.font + "'";
+                        ctx.fillStyle = Theme.textFaint; ctx.font = "10px '" + Theme.font + "'";
                         [0, 6, 12, 18, 24].forEach(h => ctx.fillText(String(h).padStart(2, "0"), Math.min(W - 14, h / 24 * W), 136));
                         const n = Sun.now, e = Sun.elevation, sx = (n.getHours() * 60 + n.getMinutes()) / 1440 * W;
-                        ctx.shadowColor = e > 0 ? Theme.orange : Theme.blue; ctx.shadowBlur = 14;
-                        ctx.fillStyle = e > 0 ? Theme.yellow : Theme.blue;
+                        ctx.shadowColor = e > 0 ? Theme.hot : Theme.accent; ctx.shadowBlur = 14;
+                        ctx.fillStyle = e > 0 ? Theme.highlight : Theme.accent;
                         ctx.beginPath(); ctx.arc(sx, y(e), e > 0 ? 8 : 6, 0, 2 * Math.PI); ctx.fill();
                     }
                 }
@@ -191,7 +191,7 @@ Drawer {
                             required property var modelData
                             Layout.fillWidth: true
                             spacing: 0
-                            T { text: modelData[0]; font.pixelSize: 11; color: Theme.muted; Layout.fillWidth: true }
+                            T { text: modelData[0]; font.pixelSize: 11; color: Theme.textMuted; Layout.fillWidth: true }
                             T { text: modelData[1]; font.pixelSize: 16; Layout.fillWidth: true }
                         }
                     }
@@ -202,24 +202,24 @@ Drawer {
                 Label { Layout.fillWidth: true; text: "weather · " + Host.place; note: "open-meteo" }
                 RowLayout {
                     spacing: 16
-                    Icon { path: Icons.cloud; size: 46; stroke: 1.6; color: Theme.cyan }
+                    Icon { path: Icons.cloud; size: 46; stroke: 1.6; color: Theme.info }
                     GradText { text: Weather.now ? Weather.now.temp + "°" : "--"; font.pixelSize: 46; font.weight: Font.ExtraLight }
                     ColumnLayout {
                         spacing: 2
                         T { text: Weather.now ? Weather.describe(Weather.now.code) + " · feels " + Weather.now.feels + "°" : "fetching…"; font.pixelSize: 12 }
-                        T { text: Weather.now ? "H " + Weather.now.hi + "° · L " + Weather.now.lo + "° · " + Weather.now.dir + " " + Weather.now.wind + " mph" : ""; font.pixelSize: 12; color: Theme.muted }
+                        T { text: Weather.now ? "H " + Weather.now.hi + "° · L " + Weather.now.lo + "° · " + Weather.now.dir + " " + Weather.now.wind + " mph" : ""; font.pixelSize: 12; color: Theme.textMuted }
                     }
                 }
                 Spark {
                     readonly property var temps: Weather.hours.map(h => h.temp)
-                    Layout.fillWidth: true; implicitHeight: 40; values: temps; color: Theme.cyan
+                    Layout.fillWidth: true; implicitHeight: 40; values: temps; color: Theme.info
                     lo: temps.length ? Math.min(...temps) - 2 : 0; hi: temps.length ? Math.max(...temps) + 2 : 1
                 }
                 RowLayout {
                     Layout.fillWidth: true
                     Repeater {
                         model: Weather.hours
-                        T { required property var modelData; text: String(modelData.hour).padStart(2, "0") + "h"; font.pixelSize: 11; color: Theme.muted; Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter }
+                        T { required property var modelData; text: String(modelData.hour).padStart(2, "0") + "h"; font.pixelSize: 11; color: Theme.textMuted; Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter }
                     }
                 }
             }
@@ -239,17 +239,17 @@ Drawer {
                         Layout.fillWidth: true
                         spacing: 2
                         T { text: Media.title; font.pixelSize: 15; font.weight: Font.DemiBold; Layout.fillWidth: true }
-                        T { text: Media.artist; font.pixelSize: 12; color: Theme.dim; Layout.fillWidth: true }
+                        T { text: Media.artist; font.pixelSize: 12; color: Theme.textSubtle; Layout.fillWidth: true }
                         Viz { bars: 18; barHeight: 18; Layout.topMargin: 6 }
                     }
                 }
-                Meter { Layout.fillWidth: true; implicitHeight: 5; value: Media.length > 0 ? Media.position / Media.length : 0; colors: Theme.gViolet }
-                RowLayout { T { text: Media.clock(Media.position); font.pixelSize: 11; color: Theme.muted; Layout.fillWidth: true } T { text: Media.length > 0 ? Media.clock(Media.length) : ""; font.pixelSize: 11; color: Theme.muted } }
+                Meter { Layout.fillWidth: true; implicitHeight: 5; value: Media.length > 0 ? Media.position / Media.length : 0; colors: Theme.gAccentAlt }
+                RowLayout { T { text: Media.clock(Media.position); font.pixelSize: 11; color: Theme.textMuted; Layout.fillWidth: true } T { text: Media.length > 0 ? Media.clock(Media.length) : ""; font.pixelSize: 11; color: Theme.textMuted } }
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: 14
                     IconBtn { icon: Icons.prev; onClicked: Media.prev() }
-                    IconBtn { implicitWidth: 46; implicitHeight: 46; icon: Media.playing ? Icons.pause : Icons.play; iconSize: 18; fill: Theme.gViolet; onClicked: Media.toggle() }
+                    IconBtn { implicitWidth: 46; implicitHeight: 46; icon: Media.playing ? Icons.pause : Icons.play; iconSize: 18; fill: Theme.gAccentAlt; onClicked: Media.toggle() }
                     IconBtn { icon: Icons.next; onClicked: Media.next() }
                 }
             }
@@ -262,7 +262,7 @@ Drawer {
                             ["memory", Sys.memUsed.toFixed(1) + " / " + Sys.memTotal.toFixed(1) + " GiB"], ["zram", Sys.zram || "off"]]
                     RowLayout {
                         required property var modelData
-                        T { text: modelData[0]; font.pixelSize: 12; color: Theme.muted; Layout.fillWidth: true }
+                        T { text: modelData[0]; font.pixelSize: 12; color: Theme.textMuted; Layout.fillWidth: true }
                         T { text: modelData[1]; font.pixelSize: 12 }
                     }
                 }
@@ -284,19 +284,19 @@ Drawer {
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 14
-            T { text: ("now playing · " + Media.source).toUpperCase(); font.pixelSize: 12; font.letterSpacing: 1.5; color: Theme.muted }
+            T { text: ("now playing · " + Media.source).toUpperCase(); font.pixelSize: 12; font.letterSpacing: 1.5; color: Theme.textMuted }
             GradText { text: Media.present ? Media.title : "Nothing playing"; font.pixelSize: 44; font.weight: Font.Light; Layout.maximumWidth: 640 }
-            T { text: Media.artist + (Media.album ? " — " + Media.album : ""); font.pixelSize: 16; color: Theme.dim; Layout.fillWidth: true }
+            T { text: Media.artist + (Media.album ? " — " + Media.album : ""); font.pixelSize: 16; color: Theme.textSubtle; Layout.fillWidth: true }
             Viz { bars: 56; barWidth: 6; barHeight: 70; spacing: 4 }
-            Meter { Layout.fillWidth: true; implicitHeight: 6; value: Media.length > 0 ? Media.position / Media.length : 0; colors: Theme.gViolet }
-            RowLayout { T { text: Media.clock(Media.position); font.pixelSize: 12; color: Theme.muted; Layout.fillWidth: true } T { text: Media.length > 0 ? Media.clock(Media.length) : ""; font.pixelSize: 12; color: Theme.muted } }
+            Meter { Layout.fillWidth: true; implicitHeight: 6; value: Media.length > 0 ? Media.position / Media.length : 0; colors: Theme.gAccentAlt }
+            RowLayout { T { text: Media.clock(Media.position); font.pixelSize: 12; color: Theme.textMuted; Layout.fillWidth: true } T { text: Media.length > 0 ? Media.clock(Media.length) : ""; font.pixelSize: 12; color: Theme.textMuted } }
             RowLayout {
                 spacing: 16
                 IconBtn { implicitWidth: 44; implicitHeight: 44; icon: Icons.prev; iconSize: 17; onClicked: Media.prev() }
-                IconBtn { implicitWidth: 62; implicitHeight: 62; icon: Media.playing ? Icons.pause : Icons.play; iconSize: 24; fill: Theme.gViolet; onClicked: Media.toggle() }
+                IconBtn { implicitWidth: 62; implicitHeight: 62; icon: Media.playing ? Icons.pause : Icons.play; iconSize: 24; fill: Theme.gAccentAlt; onClicked: Media.toggle() }
                 IconBtn { implicitWidth: 44; implicitHeight: 44; icon: Icons.next; iconSize: 17; onClicked: Media.next() }
                 Item { Layout.fillWidth: true }
-                T { text: "MPRIS · " + Mpris.players.values.length + " player" + (Mpris.players.values.length === 1 ? "" : "s"); font.pixelSize: 12; color: Theme.muted }
+                T { text: "MPRIS · " + Mpris.players.values.length + " player" + (Mpris.players.values.length === 1 ? "" : "s"); font.pixelSize: 12; color: Theme.textMuted }
             }
         }
     }

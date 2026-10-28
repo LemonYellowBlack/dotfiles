@@ -31,7 +31,7 @@ Singleton {
     // Don't greet the session with an OSD for the volume it restored.
     property bool settled: false
     Timer { interval: 2000; running: true; onTriggered: root.settled = true }
-    onVolumeChanged: if (settled) Shell.osd(muted ? Icons.volX : Icons.vol, muted ? 0 : volume, Theme.gBlue, "volume")
-    onMutedChanged: if (settled) Shell.osd(muted ? Icons.volX : Icons.vol, muted ? 0 : volume, muted ? Theme.gGray : Theme.gBlue, muted ? "muted" : "volume")
-    onMicMutedChanged: if (settled) Shell.msg(micMuted ? Icons.micOff : Icons.mic, micMuted ? "Microphone muted" : "Microphone on", micMuted ? Theme.red : Theme.aqua)
+    onVolumeChanged: if (settled) Shell.osd(muted ? Icons.volX : Icons.vol, muted ? 0 : volume, Theme.gAccent, "volume")
+    onMutedChanged: if (settled) Shell.osd(muted ? Icons.volX : Icons.vol, muted ? 0 : volume, muted ? Theme.gOff : Theme.gAccent, muted ? "muted" : "volume")
+    onMicMutedChanged: if (settled) Shell.msg(micMuted ? Icons.micOff : Icons.mic, micMuted ? "Microphone muted" : "Microphone on", micMuted ? Theme.danger : Theme.secondary)
 }

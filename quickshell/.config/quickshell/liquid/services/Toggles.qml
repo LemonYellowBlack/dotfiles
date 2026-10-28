@@ -56,10 +56,10 @@ Singleton {
         case "touch": exec(bin + "touchpad-toggle"); touchpad = !touchpad; break;
         case "gpu": if (gpu === "loading") return; gpu = gpu === "on" ? "off" : "loading"; run.command = [bin + "gpu-toggle"]; run.running = true; break;
         case "night": exec("pkill -USR1 -x gammastep"); night = !night; nightKnown = true;
-            Shell.msg(Icons.moon, night ? "Night light on" : "Night light paused · 6500 K", night ? Theme.yellow : Theme.muted); break;
-        case "dnd": dnd = !dnd; Shell.msg(dnd ? Icons.bellOff : Icons.bell, dnd ? "Do not disturb · popups held" : "Popups on", dnd ? Theme.muted : Theme.blue); break;
+            Shell.msg(Icons.moon, night ? "Night light on" : "Night light paused · 6500 K", night ? Theme.highlight : Theme.textMuted); break;
+        case "dnd": dnd = !dnd; Shell.msg(dnd ? Icons.bellOff : Icons.bell, dnd ? "Do not disturb · popups held" : "Popups on", dnd ? Theme.textMuted : Theme.accent); break;
         case "sunshine": exec("systemctl --user " + (sunshine ? "stop " : "start ") + sunshineUnit); sunshine = !sunshine;
-            Shell.msg(Icons.stream, sunshine ? "Sunshine on · Moonlight can connect" : "Sunshine stopped", sunshine ? Theme.blue : Theme.muted); break;
+            Shell.msg(Icons.stream, sunshine ? "Sunshine on · Moonlight can connect" : "Sunshine stopped", sunshine ? Theme.accent : Theme.textMuted); break;
         case "wifi": Net.toggleWifi(); break;
         case "vpn": Net.toggleExit(); break;
         }

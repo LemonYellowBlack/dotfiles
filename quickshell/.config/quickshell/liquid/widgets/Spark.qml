@@ -8,9 +8,9 @@ Item {
     property var values: []
     property real lo: 0
     property real hi: 100
-    property color color: Theme.blue
+    property color color: Theme.accent
     property real limit: NaN
-    property color limitColor: Theme.red
+    property color limitColor: Theme.danger
     implicitHeight: 48
     onValuesChanged: canvas.requestPaint()
     onColorChanged: canvas.requestPaint()

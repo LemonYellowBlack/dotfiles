@@ -8,7 +8,7 @@ Item {
     id: root
     property string iconName
     property string glyph
-    property var colors: Theme.gBlue
+    property var colors: Theme.gAccent
     property real size: 36
     readonly property string source: !iconName ? "" : (iconName.startsWith("/") ? "file://" + iconName : (iconName.indexOf("://") > 0 ? iconName : Quickshell.iconPath(iconName, true)))
     implicitWidth: size
@@ -19,7 +19,7 @@ Item {
         visible: root.source === ""
         radius: root.size / 3
         gradient: Grad { colors: root.colors }
-        Icon { anchors.centerIn: parent; path: root.glyph; size: root.size / 2; stroke: 2; color: Theme.ink0 }
-        T { anchors.centerIn: parent; visible: root.glyph === ""; text: (root.iconName || "?").slice(0, 1).toUpperCase(); color: Theme.ink0; font.weight: Font.Bold }
+        Icon { anchors.centerIn: parent; path: root.glyph; size: root.size / 2; stroke: 2; color: Theme.textOnAccent }
+        T { anchors.centerIn: parent; visible: root.glyph === ""; text: (root.iconName || "?").slice(0, 1).toUpperCase(); color: Theme.textOnAccent; font.weight: Font.Bold }
     }
 }

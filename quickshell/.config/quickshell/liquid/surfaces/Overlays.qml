@@ -20,7 +20,7 @@ FocusScope {
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(0.05, 0.05, 0.07, 0.5)
+        color: Theme.a(Theme.surfaceDeep, 0.5)
         opacity: root.p
         MouseArea { anchors.fill: parent; onClicked: Shell.close() }
     }

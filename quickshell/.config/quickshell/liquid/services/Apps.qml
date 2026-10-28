@@ -46,7 +46,7 @@ Singleton {
     }
 
     function setQuery(v) { query = v; if (mode === "clip") loadClips(); if (mode === "vpn") Net.loadCountries(); }
-    function done(text) { Shell.close(); query = ""; if (text) Shell.msg(Icons.check, text, Theme.green); }
+    function done(text) { Shell.close(); query = ""; if (text) Shell.msg(Icons.check, text, Theme.success); }
     function sh(cmd) { Quickshell.execDetached(["sh", "-c", cmd]); }
 
     readonly property var actions: [

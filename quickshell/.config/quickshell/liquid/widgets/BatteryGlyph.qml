@@ -8,7 +8,7 @@ Item {
     id: root
     implicitWidth: 26
     implicitHeight: 14
-    readonly property color edge: Power.charging ? Theme.green : (Power.level <= 0.15 ? Theme.red : (Power.level <= 0.3 ? Theme.yellow : Theme.fg))
+    readonly property color edge: Power.charging ? Theme.success : (Power.level <= 0.15 ? Theme.danger : (Power.level <= 0.3 ? Theme.warning : Theme.text))
     Rectangle { x: 0.5; y: 0.5; width: parent.width - 4; height: parent.height - 1; radius: 4; color: "transparent"; border.width: 1.5; border.color: Theme.a(root.edge, 0.7) }
     Rectangle { x: parent.width - 2.6; y: parent.height / 2 - 2.5; width: 2; height: 5; radius: 1; color: Theme.a(root.edge, 0.7) }
     Rectangle {
@@ -16,8 +16,8 @@ Item {
         height: parent.height - 5
         width: Math.max(2, (parent.width - 8) * Power.level)
         radius: 2.5
-        gradient: Grad { colors: Power.charging ? Theme.gAqua : (Power.level <= 0.15 ? Theme.gRed : ["#7FB4CA", "#957FB8"]) }
+        gradient: Grad { colors: Power.charging ? Theme.gCool : (Power.level <= 0.15 ? Theme.gHot : [Theme.info, Theme.accentAlt]) }
         Behavior on width { NumberAnimation { duration: 600 } }
     }
-    Icon { visible: Power.charging; anchors.centerIn: parent; anchors.horizontalCenterOffset: -2; path: Icons.bolt; size: 10; stroke: 2.2; color: Theme.ink0 }
+    Icon { visible: Power.charging; anchors.centerIn: parent; anchors.horizontalCenterOffset: -2; path: Icons.bolt; size: 10; stroke: 2.2; color: Theme.textOnAccent }
 }

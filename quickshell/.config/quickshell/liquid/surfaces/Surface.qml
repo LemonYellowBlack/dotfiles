@@ -18,7 +18,7 @@ FocusScope {
     MouseArea { anchors.fill: parent; enabled: root.drawerOpen; onClicked: Shell.close() }
     Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(0.05, 0.05, 0.07, 0.55)
+        color: Theme.a(Theme.surfaceDeep, 0.55)
         opacity: Shell.drawer === "launcher" && root.mine ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: 300 } }

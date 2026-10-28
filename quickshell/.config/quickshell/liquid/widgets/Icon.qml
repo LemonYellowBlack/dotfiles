@@ -6,7 +6,7 @@ import qs.config
 Item {
     id: root
     property string path
-    property color color: Theme.fg
+    property color color: Theme.text
     property real size: 16
     property real stroke: 1.8
     implicitWidth: size

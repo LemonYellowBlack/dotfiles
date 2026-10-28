@@ -9,7 +9,7 @@ Rectangle {
     id: root
     property var note: null
     radius: 18
-    color: Qt.rgba(0.165, 0.165, 0.216, 0.5)
+    color: Theme.a(Theme.layer, 0.5)
     implicitHeight: row.implicitHeight + 24
     opacity: 0
     transform: Translate {
@@ -38,11 +38,11 @@ Rectangle {
             spacing: 3
             RowLayout {
                 Layout.fillWidth: true
-                T { text: root.note ? root.note.appName + (Notifs.ago(root.note) ? " · " + Notifs.ago(root.note) : "") : ""; font.pixelSize: 11; color: Theme.muted; Layout.fillWidth: true }
+                T { text: root.note ? root.note.appName + (Notifs.ago(root.note) ? " · " + Notifs.ago(root.note) : "") : ""; font.pixelSize: 11; color: Theme.textMuted; Layout.fillWidth: true }
                 IconBtn { implicitWidth: 24; implicitHeight: 24; icon: Icons.x; iconSize: 12; onClicked: if (root.note) root.note.dismiss() }
             }
             T { text: root.note ? root.note.summary : ""; font.weight: Font.DemiBold; Layout.fillWidth: true; wrapMode: Text.WordWrap; maximumLineCount: 2 }
-            T { visible: text !== ""; text: root.note ? root.note.body : ""; font.pixelSize: 12; color: Theme.old; Layout.fillWidth: true; wrapMode: Text.WordWrap; maximumLineCount: 4; lineHeight: 1.15 }
+            T { visible: text !== ""; text: root.note ? root.note.body : ""; font.pixelSize: 12; color: Theme.textAlt; Layout.fillWidth: true; wrapMode: Text.WordWrap; maximumLineCount: 4; lineHeight: 1.15 }
             Flow {
                 visible: root.note && root.note.actions.length > 0
                 Layout.fillWidth: true
@@ -56,10 +56,10 @@ Rectangle {
                         implicitHeight: 26
                         implicitWidth: actionText.implicitWidth + 22
                         radius: 13
-                        color: index === 0 ? "transparent" : (actionMouse.containsMouse ? Theme.a(Theme.blue, 0.25) : Qt.rgba(0.212, 0.212, 0.275, 0.7))
+                        color: index === 0 ? "transparent" : (actionMouse.containsMouse ? Theme.a(Theme.accent, 0.25) : Theme.a(Theme.layerHover, 0.7))
                         gradient: index === 0 ? first : null
-                        Grad { id: first; colors: [Theme.blue, Theme.violet] }
-                        T { id: actionText; anchors.centerIn: parent; text: modelData.text; font.pixelSize: 12; color: index === 0 ? Theme.ink0 : Theme.fg; font.weight: index === 0 ? Font.DemiBold : Font.Normal }
+                        Grad { id: first; colors: [Theme.accent, Theme.accentAlt] }
+                        T { id: actionText; anchors.centerIn: parent; text: modelData.text; font.pixelSize: 12; color: index === 0 ? Theme.textOnAccent : Theme.text; font.weight: index === 0 ? Font.DemiBold : Font.Normal }
                         MouseArea { id: actionMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: modelData.invoke() }
                     }
                 }

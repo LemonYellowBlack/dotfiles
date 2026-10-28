@@ -31,7 +31,7 @@ Singleton {
     readonly property string labName: "hotdog"
     readonly property string labVia: ""
 
-    readonly property real lat: 41.88
-    readonly property real lon: -87.63
-    readonly property string place: "Chicago"
+    readonly property real lat: 37.5407
+    readonly property real lon: -77.4360
+    readonly property string place: "Richmond"
 }

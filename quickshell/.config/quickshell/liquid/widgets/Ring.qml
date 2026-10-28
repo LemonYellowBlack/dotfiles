@@ -7,7 +7,7 @@ Item {
     id: root
     property real value: 0
     property real thickness: 7
-    property var colors: Theme.gBlue
+    property var colors: Theme.gAccent
     property bool glow: true
     default property alias content: inner.data
     property real shown: 0

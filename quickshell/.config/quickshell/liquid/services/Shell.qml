@@ -55,7 +55,7 @@ Singleton {
         islandTimer.restart();
     }
     function osd(icon, value, colors, label) { show({ kind: "osd", icon: icon, value: value, colors: colors, label: label || "" }, 1500); }
-    function msg(icon, text, color) { show({ kind: "msg", icon: icon, text: text, color: color || "#7E9CD8" }, 2200); }
+    function msg(icon, text, color) { show({ kind: "msg", icon: icon, text: text, color: color || Theme.accent }, 2200); }
 
     Timer { id: islandTimer; onTriggered: root.island = null }
 

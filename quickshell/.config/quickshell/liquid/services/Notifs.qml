@@ -32,11 +32,11 @@ Singleton {
         }
         const value = n.hints["value"];
         if (value !== undefined) {
-            Shell.osd(Icons.vol, Number(value) / 100, Theme.gBlue, n.summary.replace(/^\W+\s*/, ""));
+            Shell.osd(Icons.vol, Number(value) / 100, Theme.gAccent, n.summary.replace(/^\W+\s*/, ""));
             return;
         }
         if (tag && !n.body) {
-            Shell.msg("", n.summary, Theme.blue);
+            Shell.msg("", n.summary, Theme.accent);
             return;
         }
         n.tracked = true;

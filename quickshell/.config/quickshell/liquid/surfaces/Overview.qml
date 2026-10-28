@@ -50,7 +50,7 @@ Item {
             Layout.fillWidth: true
             spacing: 14
             GradText { text: "workspaces"; font.pixelSize: 26; font.weight: Font.DemiBold }
-            T { text: "drag a window to move it · click a card to switch · SUPER Tab"; font.pixelSize: 12; color: Theme.muted; Layout.fillWidth: true }
+            T { text: "drag a window to move it · click a card to switch · SUPER Tab"; font.pixelSize: 12; color: Theme.textMuted; Layout.fillWidth: true }
             Pill { onClicked: Shell.close(); T { text: "esc close"; font.pixelSize: 12 } }
         }
         GridLayout {
@@ -82,11 +82,11 @@ Item {
                         radius: 18
                         clip: true
                         gradient: Gradient {
-                            GradientStop { position: 0; color: Theme.wave1 }
-                            GradientStop { position: 1; color: Theme.ink0 }
+                            GradientStop { position: 0; color: Theme.selectionDeep }
+                            GradientStop { position: 1; color: Theme.surface }
                         }
                         border.width: slot.ws === root.current ? 2 : 1
-                        border.color: card.dropHere ? Theme.yellow : (slot.ws === root.current ? Theme.blue : Theme.a(Theme.ink4, 0.6))
+                        border.color: card.dropHere ? Theme.highlight : (slot.ws === root.current ? Theme.accent : Theme.a(Theme.line, 0.6))
                         scale: card.dropHere ? 1.05 : (cardMouse.containsMouse && !ghost.toplevel ? 1.03 : 1)
                         Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
                         MouseArea { id: cardMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.go(slot.ws) }
@@ -112,9 +112,9 @@ Item {
                                 onDraggingChanged: if (dragging) { ghost.tile = shot; ghost.toplevel = modelData; }
                                 opacity: ghost.toplevel === modelData ? 0.3 : 1
                                 radius: 8
-                                color: Qt.rgba(0.12, 0.12, 0.157, 0.9)
+                                color: Theme.a(Theme.surfaceRaised, 0.9)
                                 border.width: 1
-                                border.color: modelData.activated ? Theme.a(Theme.blue, 0.8) : Theme.a(Theme.ink4, 0.6)
+                                border.color: modelData.activated ? Theme.a(Theme.accent, 0.8) : Theme.a(Theme.line, 0.6)
                                 clip: true
                                 ScreencopyView {
                                     id: shot
@@ -146,8 +146,8 @@ Item {
                                     anchors.centerIn: parent
                                     visible: !shot.hasContent
                                     spacing: 4
-                                    AppIcon { Layout.alignment: Qt.AlignHCenter; size: 28; iconName: DesktopEntries.heuristicLookup(win.o.class || "") ? DesktopEntries.heuristicLookup(win.o.class).icon : ""; glyph: Icons.term; colors: Theme.gAqua }
-                                    T { Layout.alignment: Qt.AlignHCenter; Layout.maximumWidth: win.width - 10; text: win.modelData.title; font.pixelSize: 10; color: Theme.muted }
+                                    AppIcon { Layout.alignment: Qt.AlignHCenter; size: 28; iconName: DesktopEntries.heuristicLookup(win.o.class || "") ? DesktopEntries.heuristicLookup(win.o.class).icon : ""; glyph: Icons.term; colors: Theme.gCool }
+                                    T { Layout.alignment: Qt.AlignHCenter; Layout.maximumWidth: win.width - 10; text: win.modelData.title; font.pixelSize: 10; color: Theme.textMuted }
                                 }
                                 MouseArea {
                                     id: dragArea
@@ -169,12 +169,12 @@ Item {
                         spacing: 8
                         Rectangle {
                             implicitWidth: 22; implicitHeight: 22; radius: 11
-                            color: slot.ws === root.current ? "transparent" : Qt.rgba(0.212, 0.212, 0.275, 0.8)
+                            color: slot.ws === root.current ? "transparent" : Theme.a(Theme.layerHover, 0.8)
                             gradient: slot.ws === root.current ? g : null
-                            Grad { id: g; colors: Theme.gBlue }
-                            T { anchors.centerIn: parent; text: slot.ws; font.pixelSize: 11; font.weight: Font.Bold; color: slot.ws === root.current ? Theme.ink0 : Theme.fg }
+                            Grad { id: g; colors: Theme.gAccent }
+                            T { anchors.centerIn: parent; text: slot.ws; font.pixelSize: 11; font.weight: Font.Bold; color: slot.ws === root.current ? Theme.textOnAccent : Theme.text }
                         }
-                        T { text: slot.count ? slot.count + (slot.count > 1 ? " windows" : " window") : "empty"; font.pixelSize: 12; color: Theme.muted }
+                        T { text: slot.count ? slot.count + (slot.count > 1 ? " windows" : " window") : "empty"; font.pixelSize: 12; color: Theme.textMuted }
                     }
                 }
             }
@@ -190,9 +190,9 @@ Item {
         function end() { toplevel = null; tile = null; }
         visible: toplevel !== null
         radius: 8
-        color: Qt.rgba(0.12, 0.12, 0.157, 0.95)
+        color: Theme.a(Theme.surfaceRaised, 0.95)
         border.width: 2
-        border.color: Theme.yellow
+        border.color: Theme.highlight
         scale: 1.06
         Drag.active: toplevel !== null
         Drag.hotSpot.x: width / 2

@@ -21,7 +21,7 @@ Drawer {
         property string big
         property string unit
         property string label
-        property var colors: Theme.gBlue
+        property var colors: Theme.gAccent
         property real size: 88
         spacing: 6
         Ring {
@@ -32,21 +32,21 @@ Drawer {
                 anchors.centerIn: parent
                 spacing: 1
                 T { text: g.big; font.pixelSize: 20; font.weight: Font.Light }
-                T { text: g.unit; font.pixelSize: 11; color: Theme.muted; Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: 3 }
+                T { text: g.unit; font.pixelSize: 11; color: Theme.textMuted; Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: 3 }
             }
         }
-        T { Layout.alignment: Qt.AlignHCenter; text: g.label; font.pixelSize: 11; color: Theme.muted }
+        T { Layout.alignment: Qt.AlignHCenter; text: g.label; font.pixelSize: 11; color: Theme.textMuted }
     }
 
     RowLayout {
         Layout.fillWidth: true
         spacing: 10
-        AppIcon { size: 30; glyph: Icons.cpu; colors: Theme.gBlue }
+        AppIcon { size: 30; glyph: Icons.cpu; colors: Theme.gAccent }
         T { text: Host.cpu; font.weight: Font.DemiBold; Layout.fillWidth: true }
         Rectangle {
             visible: Power.profile !== ""
-            implicitWidth: profileText.implicitWidth + 18; implicitHeight: 22; radius: 11; color: Qt.rgba(0.212, 0.212, 0.275, 0.7)
-            T { id: profileText; anchors.centerIn: parent; text: Power.profile; font.pixelSize: 11; color: Theme.old }
+            implicitWidth: profileText.implicitWidth + 18; implicitHeight: 22; radius: 11; color: Theme.a(Theme.layerHover, 0.7)
+            T { id: profileText; anchors.centerIn: parent; text: Power.profile; font.pixelSize: 11; color: Theme.textAlt }
         }
     }
 
@@ -58,9 +58,9 @@ Drawer {
             spacing: 18
             Gauge { size: root.gpuOn ? 78 : 88; value: Sys.cpu; big: Math.round(Sys.cpu * 100); unit: "%"; label: "load" }
             Gauge { size: root.gpuOn ? 78 : 88; value: (Sys.temp - 30) / 70; big: Math.round(Sys.temp); unit: "°"; label: "package"; colors: Theme.tempColors(Sys.temp) }
-            Gauge { size: root.gpuOn ? 78 : 88; value: Sys.memTotal ? Sys.memUsed / Sys.memTotal : 0; big: Sys.memUsed.toFixed(1); unit: "G"; label: "memory"; colors: Theme.gAqua }
+            Gauge { size: root.gpuOn ? 78 : 88; value: Sys.memTotal ? Sys.memUsed / Sys.memTotal : 0; big: Sys.memUsed.toFixed(1); unit: "G"; label: "memory"; colors: Theme.gCool }
             Gauge { visible: Power.hasBattery; size: root.gpuOn ? 78 : 88; value: Power.watts / 45; big: Power.watts.toFixed(1); unit: "W"; label: Power.charging ? "charging" : "draw"; colors: Theme.gWarm }
-            Gauge { visible: root.gpuOn; size: 78; value: root.gpuOn ? (Sys.gpu.temp - 30) / 60 : 0; big: root.gpuOn ? Math.round(Sys.gpu.temp) : ""; unit: "°"; label: "gpu"; colors: Theme.gRed }
+            Gauge { visible: root.gpuOn; size: 78; value: root.gpuOn ? (Sys.gpu.temp - 30) / 60 : 0; big: root.gpuOn ? Math.round(Sys.gpu.temp) : ""; unit: "°"; label: "gpu"; colors: Theme.gHot }
         }
     }
 
@@ -68,7 +68,7 @@ Drawer {
         Layout.fillWidth: true
         spacing: 8
         Label { Layout.fillWidth: true; text: "load · 1 min"; note: Sys.threads.length + " threads" }
-        Spark { Layout.fillWidth: true; implicitHeight: 54; values: Sys.loadHist; lo: 0; hi: 100; color: Theme.blue }
+        Spark { Layout.fillWidth: true; implicitHeight: 54; values: Sys.loadHist; lo: 0; hi: 100; color: Theme.accent }
         RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: 40
@@ -80,14 +80,14 @@ Drawer {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     radius: 6
-                    color: Qt.rgba(0.33, 0.33, 0.43, 0.25)
+                    color: Theme.a(Theme.line, 0.25)
                     clip: true
                     Rectangle {
                         anchors.bottom: parent.bottom
                         width: parent.width
                         height: Math.max(3, parent.height * modelData)
                         radius: 6
-                        gradient: Gradient { GradientStop { position: 0; color: Theme.violet } GradientStop { position: 1; color: Theme.blue } }
+                        gradient: Gradient { GradientStop { position: 0; color: Theme.accentAlt } GradientStop { position: 1; color: Theme.accent } }
                         Behavior on height { NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
                     }
                 }
@@ -99,7 +99,7 @@ Drawer {
         Layout.fillWidth: true
         spacing: 8
         Label { Layout.fillWidth: true; text: "thermals · " + Host.tempSensor; note: "30 min" }
-        Spark { Layout.fillWidth: true; implicitHeight: 80; values: Sys.tempHist; lo: 30; hi: 100; limit: 90; color: Sys.temp > 70 ? Theme.yellow : Theme.aqua }
+        Spark { Layout.fillWidth: true; implicitHeight: 80; values: Sys.tempHist; lo: 30; hi: 100; limit: 90; color: Sys.temp > 70 ? Theme.warning : Theme.secondary }
         Repeater {
             model: Host.fans
             RowLayout {
@@ -109,11 +109,11 @@ Drawer {
                 Layout.fillWidth: true
                 spacing: 10
                 Icon {
-                    path: Icons.fan; size: 18; color: Theme.cyan; opacity: parent.rpm ? 1 : 0.5
+                    path: Icons.fan; size: 18; color: Theme.info; opacity: parent.rpm ? 1 : 0.5
                     RotationAnimation on rotation { running: parent.rpm > 0; loops: Animation.Infinite; from: 0; to: 360; duration: parent.rpm < 2600 ? 1200 : (parent.rpm < 3200 ? 800 : 500) }
                 }
-                T { text: modelData.label; color: Theme.muted; font.pixelSize: 12; Layout.preferredWidth: 130 }
-                Meter { Layout.fillWidth: true; value: parent.rpm / 5100; colors: Theme.gBlue }
+                T { text: modelData.label; color: Theme.textMuted; font.pixelSize: 12; Layout.preferredWidth: 130 }
+                Meter { Layout.fillWidth: true; value: parent.rpm / 5100; colors: Theme.gAccent }
                 T { text: parent.rpm ? parent.rpm.toLocaleString(Qt.locale("en_US"), "f", 0) + " rpm" : "idle"; font.pixelSize: 12; Layout.preferredWidth: 80; horizontalAlignment: Text.AlignRight }
             }
         }
@@ -123,12 +123,12 @@ Drawer {
         visible: Host.gpu !== "none"
         Layout.fillWidth: true
         border.width: root.gpuOn && Host.gpu === "prime" ? 1 : 0
-        border.color: Theme.a(Theme.orange, 0.45)
+        border.color: Theme.a(Theme.hot, 0.45)
         RowLayout {
             spacing: 10
-            AppIcon { size: 30; glyph: Icons.gpu; colors: root.gpuOn ? Theme.gRed : Theme.gGray }
+            AppIcon { size: 30; glyph: Icons.gpu; colors: root.gpuOn ? Theme.gHot : Theme.gOff }
             T { text: Host.gpuName; font.weight: Font.DemiBold }
-            T { text: root.gpuOn ? "loaded" : (Toggles.gpu === "loading" ? "loading" : "unloaded"); font.pixelSize: 11; color: root.gpuOn ? Theme.orange : Theme.muted; Layout.fillWidth: true }
+            T { text: root.gpuOn ? "loaded" : (Toggles.gpu === "loading" ? "loading" : "unloaded"); font.pixelSize: 11; color: root.gpuOn ? Theme.hot : Theme.textMuted; Layout.fillWidth: true }
             Pill {
                 visible: Host.gpu === "prime"
                 implicitHeight: 30
@@ -140,7 +140,7 @@ Drawer {
         T {
             visible: Host.gpu === "prime" && !root.gpuOn
             text: "Unloaded and blacklisted at boot. Games load it through the game wrapper and unload it on exit."
-            font.pixelSize: 12; color: Theme.old; wrapMode: Text.WordWrap; Layout.fillWidth: true
+            font.pixelSize: 12; color: Theme.textAlt; wrapMode: Text.WordWrap; Layout.fillWidth: true
         }
         GridLayout {
             visible: root.gpuOn
@@ -153,7 +153,7 @@ Drawer {
                     required property var modelData
                     Layout.fillWidth: true
                     spacing: 0
-                    T { text: modelData[0]; font.pixelSize: 11; color: Theme.muted; Layout.fillWidth: true }
+                    T { text: modelData[0]; font.pixelSize: 11; color: Theme.textMuted; Layout.fillWidth: true }
                     T { text: modelData[1]; font.pixelSize: 14; Layout.fillWidth: true }
                 }
             }
@@ -162,7 +162,7 @@ Drawer {
 
     RowLayout {
         Layout.fillWidth: true
-        T { text: "memory " + Sys.memUsed.toFixed(1) + " / " + Sys.memTotal.toFixed(1) + " GiB" + (Sys.zram ? " · zram " + Sys.zram : ""); font.pixelSize: 12; color: Theme.muted; Layout.fillWidth: true }
+        T { text: "memory " + Sys.memUsed.toFixed(1) + " / " + Sys.memTotal.toFixed(1) + " GiB" + (Sys.zram ? " · zram " + Sys.zram : ""); font.pixelSize: 12; color: Theme.textMuted; Layout.fillWidth: true }
         T { visible: Power.hasBattery; text: (Power.charging ? "+" : "−") + Power.watts.toFixed(1) + " W"; font.pixelSize: 12 }
     }
 }

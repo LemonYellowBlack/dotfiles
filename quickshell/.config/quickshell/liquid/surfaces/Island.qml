@@ -26,9 +26,9 @@ Rectangle {
     width: kind === "osd" ? 340 : (kind === "note" ? 440 : (kind === "charge" ? 340 : (kind === "msg" ? Math.min(480, msgText.implicitWidth + 84) : clockRow.implicitWidth + 34)))
     height: kind === "note" ? 84 : 30
     radius: kind === "note" ? 26 : 16
-    color: Theme.night
+    color: Theme.surfaceDeep
     border.width: 1
-    border.color: kind === "note" ? Theme.a(Theme.violet, 0.45) : Theme.a(Theme.blue, hover.containsMouse ? 0.45 : 0.18)
+    border.color: kind === "note" ? Theme.a(Theme.accentAlt, 0.45) : Theme.a(Theme.accent, hover.containsMouse ? 0.45 : 0.18)
     clip: true
     Behavior on width { NumberAnimation { duration: 560; easing.type: Easing.OutBack; easing.overshoot: 1.25 } }
     Behavior on height { NumberAnimation { duration: 560; easing.type: Easing.OutBack; easing.overshoot: 1.25 } }
@@ -58,7 +58,7 @@ Rectangle {
             id: clockRow
             anchors.centerIn: parent
             spacing: 10
-            T { text: root.days[root.now.getDay()] + " " + root.mons[root.now.getMonth()] + " " + root.now.getDate(); color: Theme.dim }
+            T { text: root.days[root.now.getDay()] + " " + root.mons[root.now.getMonth()] + " " + root.now.getDate(); color: Theme.textSubtle }
             T { text: Qt.formatTime(root.now, "HH:mm"); font.weight: Font.Bold }
             Viz { visible: Media.playing; bars: 4; barHeight: 12 }
         }
@@ -67,7 +67,7 @@ Rectangle {
     Layer {
         id: osdL
         on: root.kind === "osd"
-        readonly property var it: root.last.osd || { icon: "", value: 0, colors: Theme.gBlue }
+        readonly property var it: root.last.osd || { icon: "", value: 0, colors: Theme.gAccent }
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: 16
@@ -82,7 +82,7 @@ Rectangle {
     Layer {
         id: msgL
         on: root.kind === "msg"
-        readonly property var it: root.last.msg || { icon: "", text: "", color: Theme.blue }
+        readonly property var it: root.last.msg || { icon: "", text: "", color: Theme.accent }
         RowLayout {
             anchors.centerIn: parent
             spacing: 10
@@ -99,11 +99,11 @@ Rectangle {
             anchors.centerIn: parent
             spacing: 10
             Icon {
-                path: Icons.bolt; size: 16; stroke: 2; color: Theme.green
+                path: Icons.bolt; size: 16; stroke: 2; color: Theme.success
                 SequentialAnimation on y { running: Power.charging; loops: Animation.Infinite; NumberAnimation { to: -2; duration: 800; easing.type: Easing.InOutSine } NumberAnimation { to: 2; duration: 800; easing.type: Easing.InOutSine } }
             }
             T { text: chargeL.plugged ? "Charging" : "On battery" }
-            T { text: chargeL.plugged ? (Power.toFull > 0 ? "full in " + Power.span(Power.toFull) : "") : Power.span(Power.toEmpty) + " left"; color: Theme.muted; font.pixelSize: 12 }
+            T { text: chargeL.plugged ? (Power.toFull > 0 ? "full in " + Power.span(Power.toFull) : "") : Power.span(Power.toEmpty) + " left"; color: Theme.textMuted; font.pixelSize: 12 }
             BatteryGlyph { implicitWidth: 30; implicitHeight: 16 }
         }
     }
@@ -126,9 +126,9 @@ Rectangle {
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 2
-                T { text: noteL.n ? noteL.n.appName + "  now" : ""; font.pixelSize: 11; color: Theme.muted; Layout.fillWidth: true }
+                T { text: noteL.n ? noteL.n.appName + "  now" : ""; font.pixelSize: 11; color: Theme.textMuted; Layout.fillWidth: true }
                 T { text: noteL.n ? noteL.n.summary : ""; font.weight: Font.DemiBold; Layout.fillWidth: true }
-                T { text: noteL.n ? noteL.n.body.replace(/\n/g, " ") : ""; font.pixelSize: 12; color: Theme.old; Layout.fillWidth: true }
+                T { text: noteL.n ? noteL.n.body.replace(/\n/g, " ") : ""; font.pixelSize: 12; color: Theme.textAlt; Layout.fillWidth: true }
             }
         }
     }

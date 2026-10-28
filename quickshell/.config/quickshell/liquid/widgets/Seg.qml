@@ -12,7 +12,7 @@ Rectangle {
     readonly property int index: Math.max(0, options.indexOf(current))
     implicitHeight: 36
     radius: 18
-    color: Qt.rgba(0.165, 0.165, 0.216, 0.55)
+    color: Theme.a(Theme.layer, 0.55)
     Rectangle {
         y: 3
         height: parent.height - 6
@@ -20,7 +20,7 @@ Rectangle {
         x: 3 + root.index * width
         radius: height / 2
         visible: root.options.indexOf(root.current) >= 0
-        gradient: Grad { colors: Theme.gBlue }
+        gradient: Grad { colors: Theme.gAccent }
         Behavior on x { NumberAnimation { duration: 450; easing.type: Easing.OutBack } }
     }
     Row {
@@ -31,7 +31,7 @@ Rectangle {
                 required property string modelData
                 width: (root.width - 6) / Math.max(1, root.options.length)
                 height: root.height
-                T { anchors.centerIn: parent; text: modelData; font.pixelSize: 12; color: modelData === root.current ? Theme.ink0 : Theme.dim; font.weight: modelData === root.current ? Font.DemiBold : Font.Normal }
+                T { anchors.centerIn: parent; text: modelData; font.pixelSize: 12; color: modelData === root.current ? Theme.textOnAccent : Theme.textSubtle; font.weight: modelData === root.current ? Font.DemiBold : Font.Normal }
                 MouseArea { anchors.fill: parent; enabled: !root.readOnly; cursorShape: root.readOnly ? Qt.ArrowCursor : Qt.PointingHandCursor; onClicked: root.picked(modelData) }
             }
         }

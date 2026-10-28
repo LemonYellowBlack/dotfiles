@@ -14,9 +14,9 @@ Rectangle {
     implicitHeight: 30
     implicitWidth: row.implicitWidth + pad * 2
     radius: 15
-    color: active ? Theme.a(Theme.blue, 0.2) : (mouse.containsMouse ? Theme.pillHover : Theme.pill)
+    color: active ? Theme.a(Theme.accent, 0.2) : (mouse.containsMouse ? Theme.pillHover : Theme.pill)
     border.width: active || mouse.containsMouse ? 1 : 0
-    border.color: Theme.a(Theme.blue, active ? 0.55 : 0.3)
+    border.color: Theme.a(Theme.accent, active ? 0.55 : 0.3)
     scale: mouse.pressed ? 0.96 : 1
     Behavior on color { ColorAnimation { duration: 220 } }
     Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }

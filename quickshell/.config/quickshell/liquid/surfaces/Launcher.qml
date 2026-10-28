@@ -26,16 +26,16 @@ Drawer {
         if (!it.pos) return esc(it.name);
         const hit = {};
         it.pos.forEach(p => hit[p] = true);
-        return it.name.split("").map((c, i) => hit[i] ? "<font color=\"" + Theme.yellow + "\"><b>" + esc(c) + "</b></font>" : esc(c)).join("");
+        return it.name.split("").map((c, i) => hit[i] ? "<font color=\"" + Theme.highlight + "\"><b>" + esc(c) + "</b></font>" : esc(c)).join("");
     }
 
     Rectangle {
         Layout.fillWidth: true
         implicitHeight: 54
         radius: 27
-        color: Qt.rgba(0.165, 0.165, 0.216, 0.65)
+        color: Theme.a(Theme.layer, 0.65)
         border.width: 1
-        border.color: Theme.a(Theme.blue, input.activeFocus ? 0.55 : 0.3)
+        border.color: Theme.a(Theme.accent, input.activeFocus ? 0.55 : 0.3)
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: 20
@@ -47,16 +47,16 @@ Drawer {
                 Layout.fillWidth: true
                 font.family: Theme.font
                 font.pixelSize: 17
-                color: Theme.fg
-                selectionColor: Theme.wave
-                cursorDelegate: Rectangle { width: 2; color: Theme.yellow; SequentialAnimation on opacity { loops: Animation.Infinite; NumberAnimation { to: 0; duration: 500 } NumberAnimation { to: 1; duration: 500 } } }
+                color: Theme.text
+                selectionColor: Theme.selection
+                cursorDelegate: Rectangle { width: 2; color: Theme.highlight; SequentialAnimation on opacity { loops: Animation.Infinite; NumberAnimation { to: 0; duration: 500 } NumberAnimation { to: 1; duration: 500 } } }
                 clip: true
                 onTextEdited: { Apps.setQuery(text); root.sel = 0; }
                 Connections { target: Apps; function onQueryChanged() { if (input.text !== Apps.query) input.text = Apps.query; } }
                 T {
                     visible: input.text === ""
                     text: "apps, actions · = calc · : clipboard" + (Host.exitNode ? " · vpn" : "")
-                    color: Theme.muted
+                    color: Theme.textMuted
                     font.italic: true
                     font.pixelSize: 15
                     anchors.verticalCenter: parent.verticalCenter
@@ -80,8 +80,8 @@ Drawer {
                 implicitWidth: modeText.implicitWidth + 18
                 implicitHeight: 22
                 radius: 11
-                gradient: Grad { colors: Theme.gBlue }
-                T { id: modeText; anchors.centerIn: parent; text: Apps.mode; font.pixelSize: 11; font.weight: Font.Bold; color: Theme.ink0 }
+                gradient: Grad { colors: Theme.gAccent }
+                T { id: modeText; anchors.centerIn: parent; text: Apps.mode; font.pixelSize: 11; font.weight: Font.Bold; color: Theme.textOnAccent }
             }
         }
     }
@@ -97,11 +97,11 @@ Drawer {
             radius: 16
             gradient: Gradient {
                 orientation: Gradient.Horizontal
-                GradientStop { position: 0; color: Theme.a(Theme.blue, 0.3) }
-                GradientStop { position: 1; color: Theme.a(Theme.violet, 0.14) }
+                GradientStop { position: 0; color: Theme.a(Theme.accent, 0.3) }
+                GradientStop { position: 1; color: Theme.a(Theme.accentAlt, 0.14) }
             }
             border.width: 1
-            border.color: Theme.a(Theme.blue, 0.5)
+            border.color: Theme.a(Theme.accent, 0.5)
             Behavior on y { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }
         }
         ColumnLayout {
@@ -125,7 +125,7 @@ Drawer {
                             size: 36
                             iconName: modelData.iconName || ""
                             glyph: modelData.icon || ""
-                            colors: Theme.gBlue
+                            colors: Theme.gAccent
                             scale: parent.parent.on ? 1.1 : 1
                             rotation: parent.parent.on ? -4 : 0
                             Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }
@@ -135,7 +135,7 @@ Drawer {
                             Layout.fillWidth: true
                             spacing: 1
                             T { text: root.marked(modelData); textFormat: Text.StyledText; font.pixelSize: 14; font.weight: parent.parent.parent.on ? Font.DemiBold : Font.Normal; Layout.fillWidth: true }
-                            T { text: modelData.desc || ""; font.pixelSize: 11; color: parent.parent.parent.on ? Theme.old : Theme.muted; Layout.fillWidth: true; visible: text !== "" }
+                            T { text: modelData.desc || ""; font.pixelSize: 11; color: parent.parent.parent.on ? Theme.textAlt : Theme.textMuted; Layout.fillWidth: true; visible: text !== "" }
                         }
                         Kbd { visible: (modelData.hint || "") !== ""; text: modelData.hint || "" }
                     }
@@ -148,7 +148,7 @@ Drawer {
                     }
                 }
             }
-            T { visible: root.items.length === 0; text: "No match."; color: Theme.muted; Layout.alignment: Qt.AlignHCenter; Layout.topMargin: 24; Layout.bottomMargin: 24 }
+            T { visible: root.items.length === 0; text: "No match."; color: Theme.textMuted; Layout.alignment: Qt.AlignHCenter; Layout.topMargin: 24; Layout.bottomMargin: 24 }
         }
     }
 
@@ -157,9 +157,9 @@ Drawer {
         spacing: 12
         Repeater {
             model: [["↑↓", "move"], ["↵", "run"], ["tab", "mode"], ["esc", "close"]]
-            RowLayout { required property var modelData; spacing: 5; Kbd { text: modelData[0] } T { text: modelData[1]; font.pixelSize: 11; color: Theme.muted } }
+            RowLayout { required property var modelData; spacing: 5; Kbd { text: modelData[0] } T { text: modelData[1]; font.pixelSize: 11; color: Theme.textMuted } }
         }
         Item { Layout.fillWidth: true }
-        T { text: root.items.length + " shown"; font.pixelSize: 11; color: Theme.muted }
+        T { text: root.items.length + " shown"; font.pixelSize: 11; color: Theme.textMuted }
     }
 }

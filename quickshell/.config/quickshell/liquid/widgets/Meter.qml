@@ -5,7 +5,7 @@ import qs.config
 Rectangle {
     id: root
     property real value: 0
-    property var colors: Theme.gBlue
+    property var colors: Theme.gAccent
     property real shown: 0
     implicitHeight: 6
     radius: height / 2
