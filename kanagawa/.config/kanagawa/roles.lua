@@ -5,10 +5,15 @@
 -- `require(os.getenv("HOME") .. "/.config/kanagawa/roles.lua")`.
 -- Replaces roles.hypr, which hyprlang sourced. See roles.conf / roles.css
 -- for the other formats.
+--
+-- Each role is a palette.lua color, as bare hex; wrap it with p.rgba() where
+-- it's used.
+
+local p = require(os.getenv("HOME") .. "/.config/kanagawa/palette.lua")
 
 return {
-    content      = "rgba(1F1F28ff)",
-    chrome       = "rgba(16161Dff)",
-    focus_accent = "rgba(727169ff)",
-    dim_accent   = "rgba(2A2A37ff)",
+    content      = p.sumiInk3,
+    chrome       = p.sumiInk0,
+    focus_accent = p.fujiGray,
+    dim_accent   = p.sumiInk4,
 }

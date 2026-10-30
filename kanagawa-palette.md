@@ -18,6 +18,8 @@ The four chrome roles used across all themed tools in this repo. Source of truth
 
 To change a role across the shared tools, edit the matching file in the [`kanagawa/`](kanagawa/.config/kanagawa/) stow package. To change a role across inline tools, `rg <hex> dotfiles/`.
 
+**By name, not hex**: the same package has the whole palette below as `palette.lua` (Hyprland) and `palette.conf` (hyprlock), under the names Quickshell's `Theme.qml` uses too. `roles.lua`, `hypr/liquid.lua` and `hyprlock.conf` pick colors from them through tokens (`accent`, `line`, `danger`, …), so a retheme points a token at another name.
+
 ## Wave (dark default)
 
 ### Backgrounds

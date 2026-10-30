@@ -13,6 +13,26 @@ hl.on("hyprland.start", function()
 end)
 
 
+-----------------
+---- COLORS ----
+-----------------
+
+-- The same three layers as the shell's Theme.qml: palette names (kanagawa/palette.lua), the
+-- tokens below, named as in Theme.qml, and the border and shadows built from them. The two
+-- files can't read each other, so a token changed in Theme.qml needs changing here too.
+local p = require(os.getenv("HOME") .. "/.config/kanagawa/palette.lua")
+
+local accent     = p.carpYellow    -- focus, active, primary
+local accentSoft = p.oldWhite      -- the pale start of accent fills
+local accentAlt  = p.autumnYellow  -- the deep end of accent fills
+local accentCool = p.crystalBlue   -- the cool counterpart
+local line       = p.sumiInk6      -- idle borders
+local shadow     = p.abyss         -- under windows
+
+-- The focused window's border: Theme.gAccent with crystal blue in front, turning (see below).
+local activeBorder = { colors = { p.rgba(accentCool), p.rgba(accentSoft), p.rgba(accent), p.rgba(accentAlt) }, angle = 45 }
+
+
 ---------------
 ---- LOOK ----
 ---------------
@@ -23,8 +43,8 @@ hl.config({
         gaps_out    = 10,
         border_size = 2,
         col = {
-            active_border   = { colors = { "rgba(7E9CD8ff)", "rgba(C8C093ff)", "rgba(E6C384ff)", "rgba(DCA561ff)" }, angle = 45 },
-            inactive_border = "rgba(54546D88)",
+            active_border   = activeBorder,
+            inactive_border = p.rgba(line, 0.533),
         },
     },
 
@@ -35,8 +55,8 @@ hl.config({
             enabled        = true,
             range          = 24,
             render_power   = 3,
-            color          = "rgba(00000099)",
-            color_inactive = "rgba(00000066)",
+            color          = p.rgba(shadow, 0.6),
+            color_inactive = p.rgba(shadow, 0.4),
         },
 
         -- Frosted glass behind translucent windows. kitty is opaque until background_opacity is
