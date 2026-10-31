@@ -34,11 +34,11 @@ accentCool    = "blue"            # the cool counterpart: media, suspend, file n
 secondary     = "blue"            # host and app names
 info          = "blue_bright"     # weather, fans, streaming
 highlight     = "yellow"          # search matches, cursor, drop targets, lit toggles
-success       = "green"
+success       = "aqua"
 warning       = "orange_strong"
 hot           = "orange"          # heavy load, the sun
 danger        = "red"
-dangerDeep    = "red_deep"
+dangerDeep    = "red_bright"
 
 [roles]
 # The chrome roles kitty, waybar and Hyprland's fallback border share.
@@ -71,27 +71,39 @@ ansi16            = "hot"
 ansi17            = "red_bright"
 
 [syntax]
-# Code highlighting: bat, yazi's previews, delta. Apart from ui, so moving the accent never
-# recolors code.
+# Code: nvim, bat, yazi's previews and delta all read these, so code looks the same everywhere.
+# The roles TextMate themes lack (controlFlow, operators, preproc, builtins) follow the ones bat
+# folds them into.
+# Apart from ui, so moving the accent never recolors code.
 comments       = "fg_faint"
-strings        = "green"
+strings        = "fg_dim"
 numbers        = "pink"
-constants      = "orange"         # built-in constants
-identifiers    = "yellow"         # variables, user constants, attributes
+constants      = "yellow_deep"    # built-in constants, ALL_CAPS names, booleans
+identifiers    = "yellow"         # members, fields, attributes; user constants
 interpolation  = "yellow_muted"   # string interpolation
-keywords       = "red"
-storage        = "violet"         # storage, storage types, JSON keys
+keywords       = "red"            # keywords and statements: if, for, while
+storage        = "violet"         # def, class, let, fn, types as keywords; JSON keys
+controlFlow    = "keywords"       # return, raise, throw
+operators      = "keywords"       # + == and, and/or/not as words
+preproc        = "keywords"       # imports, includes, macros, decorators
+builtins       = "identifiers"    # self, this and other built-in variables
 types          = "aqua"           # classes and types
 functions      = "blue"
 parameters     = "violet_light"
-specials       = "blue_bright"    # tags, library functions and constants
+specials       = "blue_bright"    # tags, library functions and constants, constructors
 punctuation    = "lavender"
 regexps        = "yellow"
 invalid        = "red_bright"     # invalid code, escape characters
 deprecated     = "gray"
-errors         = "red_strong"
+errors         = "red_strong"     # error diagnostics
+diagnosticInfo = "blue_muted"
+diagnosticHint = "aqua_deep"
+gitAdded       = "green_deep"     # sign column and diff markers
+gitRemoved     = "red_deep"
+gitChanged     = "yellow_deep"
 diffAdd        = "bg_green"
 diffAddEmph    = "bg_green_bright"
 diffDelete     = "bg_red"
 diffDeleteEmph = "bg_red_bright"
-diffChange     = "bg_yellow"
+diffChange     = "bg_yellow"      # the changed words in a changed line
+diffChangeLine = "bg_blue_dim"    # a changed line

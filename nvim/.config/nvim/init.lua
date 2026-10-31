@@ -81,19 +81,30 @@ vim.pack.add({
 -- Kanagawa
 ----------------------------------------------------------------------
 -- This machine's theme, which retheme writes to ~/.config/theme/: theme.lua's slots and tokens for
--- the few highlights set in this file, and nvim.lua, kanagawa.nvim's Wave palette refilled from
--- this machine's palette, so nvim follows a palette switch like everything else. Without them
--- (before the first retheme) kanagawa.nvim keeps its own colors.
+-- the few highlights set in this file, and nvim.lua, every color role kanagawa.nvim draws with,
+-- filled from the variation (theme/variations/). Code colors come from its [syntax], the same ones
+-- bat and delta use. Without them (before the first retheme) kanagawa.nvim keeps its own colors.
 local ok_colors, colors = pcall(dofile, vim.fn.expand("~/.config/theme/theme.lua"))
 local ok_theme, theme = pcall(dofile, vim.fn.expand("~/.config/theme/nvim.lua"))
-if not ok_theme then theme = { light = false, palette = {} } end
+if not ok_theme then theme = { light = false, palette = {}, theme = {}, code = {} } end
 vim.o.background = theme.light and "light" or "dark"
 
 require("kanagawa").setup({
   theme = "wave",
   background = { dark = "wave", light = "wave" },
-  colors = { palette = theme.palette },
+  colors = { palette = theme.palette, theme = { all = theme.theme } },
   transparent = true,
+  overrides = function()
+    -- def, class, let, fn and type keywords are the variation's storage color, as in bat.
+    local storage = theme.code.storage and { fg = theme.code.storage, italic = true } or nil
+    return {
+      ["@keyword.function"] = storage,
+      ["@keyword.type"] = storage,
+      ["@keyword.modifier"] = storage,
+      -- Lua's table braces are punctuation, as every other language's are, not a keyword.
+      ["@constructor.lua"] = { link = "@punctuation.bracket" },
+    }
+  end,
 })
 vim.cmd.colorscheme("kanagawa")
 
@@ -263,8 +274,13 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
     vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, opts)
 
-    -- Toggle inlay hints (parameter/type hints)
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+    -- Color comes from tree-sitter alone. Semantic tokens let each language's server repaint
+    -- code its own way, so the same kind of thing came out a different color per language.
+    if client then client.server_capabilities.semanticTokensProvider = nil end
+
+    -- Toggle inlay hints (parameter/type hints)
     if client and client:supports_method("textDocument/inlayHint") then
       vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
       vim.keymap.set("n", "<leader>th", function()
