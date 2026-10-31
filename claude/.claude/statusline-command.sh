@@ -13,7 +13,7 @@ branch=$(git --no-optional-locks -C "$cwd" branch --show-current 2>/dev/null)
 host=$(uname -n)
 
 # Colors from this machine's theme (theme/retheme writes statusline.sh); plain text without it.
-blue='' cream='' amber='' yellow='' muted='' orange=''
+blue='' cream='' amber='' yellow='' muted='' subtle='' orange='' red=''
 . "$HOME/.config/theme/statusline.sh" 2>/dev/null
 reset='\033[0m'
 
@@ -45,20 +45,24 @@ if [ -n "$model" ]; then
   fi
 fi
 
-# Context usage (muted, shifts to orange when >=75%)
+# Context usage, warming as it fills: muted, then gold at 50%, orange at 70%, red at 85%
 if [ -n "$used_pct" ]; then
   used_int=$(printf '%.0f' "$used_pct")
-  if [ "$used_int" -ge 75 ]; then
+  if [ "$used_int" -ge 85 ]; then
+    ctx_color="$red"
+  elif [ "$used_int" -ge 70 ]; then
     ctx_color="$orange"
+  elif [ "$used_int" -ge 50 ]; then
+    ctx_color="$subtle"
   else
     ctx_color="$muted"
   fi
   out="${out}  $(printf "${ctx_color}ctx:%s%%%s" "$used_int" "$reset")"
 fi
 
-# Session name (orange, only when explicitly set via /rename)
+# Session name (subtle, only when explicitly set via /rename)
 if [ -n "$session_name" ]; then
-  out="${out}  $(printf "${orange}[%s]${reset}" "$session_name")"
+  out="${out}  $(printf "${subtle}[%s]${reset}" "$session_name")"
 fi
 
 printf "%b\n" "$out"

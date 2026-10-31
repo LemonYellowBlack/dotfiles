@@ -4,11 +4,15 @@
 # {{accentSoft}} → cream   (directory, matches starship)
 # {{accentAlt}} → amber   (git branch, matches starship)
 # {{accent}} → yellow  (model name)
-# {{textFaint}} → muted   (context usage)
-# {{hot}} → orange  (session name / high context warning)
+# {{textSubtle}} → subtle  (session name, context 50–69%)
+# {{textFaint}} → muted   (context under 50%)
+# {{hot}} → orange  (context 70–84%)
+# {{danger}} → red     (context 85% and up)
 blue='\033[38;2;{{secondary|sgr}}m'
 cream='\033[38;2;{{accentSoft|sgr}}m'
 amber='\033[38;2;{{accentAlt|sgr}}m'
 yellow='\033[38;2;{{accent|sgr}}m'
 muted='\033[38;2;{{textFaint|sgr}}m'
+subtle='\033[38;2;{{textSubtle|sgr}}m'
 orange='\033[38;2;{{hot|sgr}}m'
+red='\033[38;2;{{danger|sgr}}m'

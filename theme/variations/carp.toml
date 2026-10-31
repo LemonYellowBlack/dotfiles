@@ -48,24 +48,26 @@ focus_accent  = "accent"          # active borders, the focused window's frame
 dim_accent    = "layer"           # inactive borders
 
 [ansi]
-# The terminal's 16 colors (kitty), plus the two kitty adds after them.
-ansiBlack         = "bg3"
-ansiRed           = "red_deep"
-ansiGreen         = "green_deep"
+# The terminal's 16 colors (kitty), plus the two kitty adds after them. Where a ui token does the
+# same job they follow it, so changing danger or success in the shell's drawer recolors the
+# terminal too; the rest name slots.
+ansiBlack         = "content"
+ansiRed           = "dangerDeep"
+ansiGreen         = "success"
 ansiYellow        = "yellow_muted"
 ansiBlue          = "blue"
 ansiMagenta       = "violet"
 ansiCyan          = "aqua_deep"
-ansiWhite         = "fg_dim"
-ansiBrightBlack   = "fg_faint"
-ansiBrightRed     = "red_strong"
-ansiBrightGreen   = "green"
-ansiBrightYellow  = "yellow"
-ansiBrightBlue    = "blue_bright"
+ansiWhite         = "textAlt"
+ansiBrightBlack   = "textFaint"
+ansiBrightRed     = "danger"
+ansiBrightGreen   = "success"
+ansiBrightYellow  = "highlight"
+ansiBrightBlue    = "info"
 ansiBrightMagenta = "violet_muted"
 ansiBrightCyan    = "aqua"
-ansiBrightWhite   = "fg"
-ansi16            = "orange"
+ansiBrightWhite   = "text"
+ansi16            = "hot"
 ansi17            = "red_bright"
 
 [syntax]

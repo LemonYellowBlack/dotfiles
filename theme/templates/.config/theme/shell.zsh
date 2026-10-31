@@ -2,3 +2,10 @@
 # Sourced by ~/.zshrc, and again by each open shell after a retheme.
 export LS_COLORS="$(vivid generate "$HOME/.config/theme/vivid.yml")"
 export FZF_DEFAULT_OPTS="--color=fg:{{text}},bg:-1,hl:{{highlight}},fg+:{{text}},bg+:{{layer}},hl+:{{highlight}},info:{{textFaint}},prompt:{{accent}},pointer:{{accent}},marker:{{success}},spinner:{{accentAlt}},header:{{secondary}},border:{{line}}"
+# zsh-syntax-highlighting: command names in success, not the terminal's darker basic green.
+typeset -gA ZSH_HIGHLIGHT_STYLES
+for _k in arg0 command builtin alias suffix-alias function hashed-command; do
+  ZSH_HIGHLIGHT_STYLES[$_k]='fg={{success}}'
+done
+ZSH_HIGHLIGHT_STYLES[precommand]='fg={{success}},underline'
+unset _k

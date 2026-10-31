@@ -5,3 +5,5 @@ variation = "carp"
 
 # Tokens this machine picks for itself, on top of the variation: token = "slot".
 [overrides]
+dangerDeep = "red_bright"
+success = "aqua"
