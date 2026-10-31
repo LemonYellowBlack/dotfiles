@@ -5,20 +5,27 @@ Templates in theme/templates/ sit at the path their output goes to, relative to 
 root: theme/templates/kanagawa/.config/kanagawa/theme.lua writes kanagawa/.config/kanagawa/theme.lua.
 A template whose name ends in .block fills only the lines between the `theme:begin` and `theme:end`
 lines of its target, the same path without .block, and the rest of that file stays hand-written.
+For more than one block in a file, name them: config@volume.block fills the lines between
+`theme:begin:volume` and `theme:end:volume` in config.
 
 In a template, {{ name }} is a palette color or token from theme.toml, written as #RRGGBB. A
 filter after | writes it another way:
     bare   E6C384               hexa   E6C384, or C8C093B3 for a token with an opacity
     rgb    230,195,132          rgba4  230,195,132, or 200,192,147,0.7 with an opacity
+    sgr    230;195;132, for a terminal escape (38;2;R;G;B)
     ref    the palette name it comes down to
     src    its value as theme.toml gives it ("oldWhite @ 0.7")
     qml    the name it points at, or a(name, 0.7) with an opacity: a Theme.qml binding
+    css    @name, or alpha(@name, 0.7) with an opacity: a GTK CSS color
+    lower, upper   the text so far in that case
     pad:N  left-justified in N columns
 {{ col:N }} pads the line out to column N. Lines from {% for c in TABLE %} to {% endfor %} repeat
 for every color in a theme.toml table, with {{ c.name }} for its name.
 
 usage: theme/retheme               write whatever changed, then reload what reads it
        theme/retheme --no-reload   write whatever changed, and leave running programs alone
+       theme/retheme --reload      reload everything, changed or not: on the other machine after a
+                                   pull, whose files arrive already written
        theme/retheme --check       write nothing; show what would change, exit 1 if anything would
 """
 import argparse
@@ -39,8 +46,10 @@ TEMPLATES = ROOT / "theme" / "templates"
 # which is how retheme writes, and restarting it as well races that reload.
 RELOAD = [
     (("hypr/", "kanagawa/.config/kanagawa/theme.lua"), "Hyprland", ["hyprctl", "reload"]),
-    (("kanagawa/.config/kanagawa/roles.conf",), "kitty", ["pkill", "-USR1", "-x", "kitty"]),
-    (("kanagawa/.config/kanagawa/roles.css",), "waybar", ["pkill", "-USR2", "-x", "waybar"]),
+    (("kanagawa/.config/kanagawa/roles.conf", "kitty/"), "kitty", ["pkill", "-USR1", "-x", "kitty"]),
+    (("kanagawa/.config/kanagawa/theme.css", "waybar/"), "waybar", ["pkill", "-USR2", "-x", "waybar"]),
+    # Not a reload: bat (and delta, which uses its themes) reads a cache built from them.
+    (("bat/",), "bat's theme cache", ["bat", "cache", "--build"]),
 ]
 
 VALUE = re.compile(r"^(#[0-9A-Fa-f]{6}|[A-Za-z_]\w*)(?:\s*@\s*([0-9]*\.?[0-9]+))?$")
@@ -123,6 +132,8 @@ def fmt(color, kind):
         return ",".join(map(str, color.channels()))
     if kind == "rgba4":
         return ",".join(map(str, color.channels())) + (f",{color.alpha:g}" if translucent else "")
+    if kind == "sgr":
+        return ";".join(map(str, color.channels()))
     if kind == "ref":
         return color.ref
     if kind == "src":
@@ -130,6 +141,9 @@ def fmt(color, kind):
     if kind == "qml":
         target = color.via if color.via else f'"#{color.hex}"'
         return f"a({target}, {color.own_alpha:g})" if color.own_alpha is not None else target
+    if kind == "css":
+        target = f"@{color.via}" if color.via else f"#{color.hex}"
+        return f"alpha({target}, {color.own_alpha:g})" if color.own_alpha is not None else target
     raise ThemeError(f"unknown filter {kind!r}")
 
 
@@ -141,8 +155,9 @@ def evaluate(theme, expr, scope):
         value = theme.color(scope.get(head, head))
     for f in filters:
         kind, _, arg = f.partition(":")
-        if kind == "pad":
-            value = (fmt(value, "hex") if isinstance(value, Color) else value).ljust(int(arg))
+        if kind in ("pad", "lower", "upper"):
+            text = fmt(value, "hex") if isinstance(value, Color) else value
+            value = text.ljust(int(arg)) if kind == "pad" else getattr(text, kind)()
         elif isinstance(value, Color):
             value = fmt(value, kind)
         else:
@@ -187,12 +202,14 @@ def render(theme, text, where):
     return "".join(out)
 
 
-def fill_block(existing, content, target):
+def fill_block(existing, content, target, name):
+    suffix = f":{name}" if name else ""
+    marker = lambda edge: re.compile(rf"theme:{edge}{re.escape(suffix)}(?![:\w])")
     lines = existing.splitlines(keepends=True)
-    begin = [i for i, l in enumerate(lines) if "theme:begin" in l]
-    end = [i for i, l in enumerate(lines) if "theme:end" in l]
+    begin = [i for i, l in enumerate(lines) if marker("begin").search(l)]
+    end = [i for i, l in enumerate(lines) if marker("end").search(l)]
     if len(begin) != 1 or len(end) != 1 or end[0] < begin[0]:
-        raise ThemeError(f"{target}: needs one theme:begin line and, after it, one theme:end line")
+        raise ThemeError(f"{target}: needs one theme:begin{suffix} line and, after it, one theme:end{suffix} line")
     return "".join(lines[:begin[0] + 1]) + content + "".join(lines[end[0]:])
 
 
@@ -200,41 +217,50 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--check", action="store_true", help="write nothing; exit 1 if anything is out of date")
     parser.add_argument("--no-reload", action="store_true", help="don't reload running programs after writing")
+    parser.add_argument("--reload", action="store_true", help="reload everything, even if nothing changed")
     args = parser.parse_args()
 
     try:
         theme = Theme(THEME)
         for name in theme.raw:  # every value, even ones no template uses yet
             theme.color(name)
-        changed = []
+        # Every target's text as it is and as it will be, so a file with several blocks is
+        # compared and written once, with all of them filled.
+        targets = {}
         for template in sorted(p for p in TEMPLATES.rglob("*") if p.is_file()):
             rel = template.relative_to(TEMPLATES).as_posix()
             block = rel.endswith(".block")
-            target_rel = rel[:-len(".block")] if block else rel
-            target = ROOT / target_rel
+            target_rel, _, block_name = (rel[:-len(".block")] if block else rel).partition("@")
             content = render(theme, template.read_text(), f"templates/{rel}")
-            old = target.read_text() if target.exists() else None
-            if block:
-                if old is None:
-                    raise ThemeError(f"{target_rel}: doesn't exist, so templates/{rel} has nowhere to go")
-                new = fill_block(old, content, target_rel)
+            if target_rel not in targets:
+                target = ROOT / target_rel
+                text = target.read_text() if target.exists() else None
+                targets[target_rel] = [text, text]
+            if not block:
+                targets[target_rel][1] = content
+            elif targets[target_rel][1] is None:
+                raise ThemeError(f"{target_rel}: doesn't exist, so templates/{rel} has nowhere to go")
             else:
-                new = content
-            if new == old:
-                continue
-            changed.append(target_rel)
-            if args.check:
-                sys.stdout.writelines(difflib.unified_diff(
-                    (old or "").splitlines(keepends=True), new.splitlines(keepends=True),
-                    f"a/{target_rel}", f"b/{target_rel}"))
-            else:
-                target.parent.mkdir(parents=True, exist_ok=True)
-                # In place, so anything watching the file sees it change rather than vanish.
-                with open(target, "w") as f:
-                    f.write(new)
-                print(f"wrote {target_rel}")
+                targets[target_rel][1] = fill_block(targets[target_rel][1], content, target_rel, block_name)
     except ThemeError as e:
         sys.exit(f"retheme: {e}")
+
+    changed = []
+    for target_rel, (old, new) in targets.items():
+        if new == old:
+            continue
+        changed.append(target_rel)
+        if args.check:
+            sys.stdout.writelines(difflib.unified_diff(
+                (old or "").splitlines(keepends=True), new.splitlines(keepends=True),
+                f"a/{target_rel}", f"b/{target_rel}"))
+        else:
+            target = ROOT / target_rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            # In place, so anything watching the file sees it change rather than vanish.
+            with open(target, "w") as f:
+                f.write(new)
+            print(f"wrote {target_rel}")
 
     if args.check:
         if changed:
@@ -243,15 +269,20 @@ def main():
         return
     if not changed:
         print("retheme: nothing to change")
-        return
+        if not args.reload:
+            return
     if args.no_reload:
         return
     for prefixes, name, command in RELOAD:
-        if not any(t.startswith(p) for t in changed for p in prefixes):
+        if not args.reload and not any(t.startswith(p) for t in changed for p in prefixes):
             continue
         if name == "Hyprland" and not os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"):
             continue
-        if subprocess.run(command, capture_output=True).returncode == 0:
+        try:
+            done = subprocess.run(command, capture_output=True).returncode == 0
+        except FileNotFoundError:  # not installed on this machine
+            continue
+        if done:
             print(f"reloaded {name}")
             if name == "Hyprland":
                 errors = subprocess.run(["hyprctl", "configerrors"], capture_output=True, text=True).stdout.strip()

@@ -53,6 +53,10 @@ Singleton {
     readonly property color surimiOrange: "#FFA066"
     // Off-palette.
     readonly property color abyss: "#0D0D12"
+    readonly property color winterRed2: "#5E2E2B"
+    readonly property color winterGreen2: "#3E5232"
+    readonly property color oliveInk: "#222218"
+    readonly property color pureWhite: "#FFFFFF"
 
     // ── Tokens: the job each color does. theme.toml notes where each one is used.
     readonly property color surfaceDeep: abyss
@@ -71,6 +75,7 @@ Singleton {
     readonly property color textFaint: fujiGray
     readonly property color textDisabled: sumiInk6
     readonly property color textOnAccent: sumiInk0
+    readonly property color caret: oldWhite
     readonly property color accent: carpYellow
     readonly property color accentSoft: oldWhite
     readonly property color accentAlt: autumnYellow

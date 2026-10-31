@@ -1,0 +1,38 @@
+[styles.cpu]
+all_entry_color = "{{springGreen}}"
+avg_entry_color = "{{waveRed}}"
+cpu_core_colors = ["{{crystalBlue}}", "{{springGreen}}", "{{carpYellow}}", "{{sakuraPink}}", "{{waveAqua2}}", "{{surimiOrange}}", "{{oniViolet}}", "{{springBlue}}"]
+
+[styles.memory]
+ram_color = "{{crystalBlue}}"
+cache_color = "{{springBlue}}"
+swap_color = "{{oniViolet}}"
+arc_color = "{{waveAqua2}}"
+gpu_colors = ["{{sakuraPink}}", "{{surimiOrange}}", "{{carpYellow}}", "{{springGreen}}"]
+
+[styles.network]
+rx_color = "{{springGreen}}"
+tx_color = "{{waveRed}}"
+rx_total_color = "{{waveAqua2}}"
+tx_total_color = "{{sakuraPink}}"
+
+[styles.battery]
+high_battery_color = "{{success}}"
+medium_battery_color = "{{carpYellow}}"
+low_battery_color = "{{samuraiRed}}"
+
+[styles.tables]
+headers = {color = "{{crystalBlue}}", bold = true}
+
+[styles.graphs]
+graph_color = "{{line}}"
+legend_text = {color = "{{textFaint}}"}
+
+[styles.widgets]
+border_color = "{{sumiInk5}}"
+selected_border_color = "{{crystalBlue}}"
+widget_title = {color = "{{text}}"}
+text = {color = "{{text}}"}
+selected_text = {color = "{{sumiInk3}}", bg_color = "{{crystalBlue}}"}
+disabled_text = {color = "{{textDisabled}}"}
+thread_text = {color = "{{springGreen}}"}

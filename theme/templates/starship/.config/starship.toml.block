@@ -1,0 +1,11 @@
+# starship lowercases style names before looking them up, so the keys here are lowercase.
+[palettes.theme]
+{% for c in palette %}
+{{c.name|lower}} = "{{c}}"
+{% endfor %}
+{% for c in extras %}
+{{c.name|lower}} = "{{c}}"
+{% endfor %}
+{% for c in ui %}
+{{c.name|lower}} = "{{c}}"
+{% endfor %}

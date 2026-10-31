@@ -1,0 +1,10 @@
+  # Every palette name and token. A terminal color has no opacity, so a token's is dropped.
+{% for c in palette %}
+  {{c.name}}:{{col:18}}"{{c|bare}}"
+{% endfor %}
+{% for c in extras %}
+  {{c.name}}:{{col:18}}"{{c|bare}}"
+{% endfor %}
+{% for c in ui %}
+  {{c.name}}:{{col:18}}"{{c|bare}}"
+{% endfor %}

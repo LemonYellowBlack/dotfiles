@@ -23,14 +23,22 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 `scripts/` is **not** a Stow package — it holds helper assets (e.g.
 `kanagawa_wallpaper.py`) referenced by scripts in `bin/`. Don't stow it.
 
-`theme/` isn't a Stow package either. `theme/theme.toml` holds the colors: the
+`theme/` isn't a Stow package either. `theme/theme.toml` holds every color: the
 Kanagawa palette by name, the tokens that give each color a job (`accent`,
-`surface`, `line`, …) and the chrome roles. `theme/retheme` writes what's
-generated from it into the packages — `kanagawa/`'s `theme.lua`, `theme.conf`
-and `roles.*`, and the palette and tokens in Quickshell's `Theme.qml` — from the
-templates in `theme/templates/`. Edit `theme.toml`, then run `theme/retheme`;
-`--check` shows anything out of date. The generated files are committed, so a
-machine that only pulls never needs to run it.
+`surface`, `line`, …), the chrome roles, the terminal's 16 colors and the syntax
+colors. `theme/retheme` writes them into the packages from the templates in
+`theme/templates/`, each at the path it fills: whole theme files (kitty, bat,
+yazi, television), `kanagawa/`'s `theme.{lua,conf,css}` for configs that name
+colors themselves (Hyprland, hyprlock, waybar, nvim), and blocks between
+`theme:begin` and `theme:end` lines inside configs that are otherwise
+hand-edited (fuzzel, mako, zathura, starship, `.zshrc`, `.gitconfig`, …). Edit
+`theme.toml`, then run `theme/retheme`; `--check` shows anything out of date.
+The generated files are committed, so the other machine gets them by pulling;
+`theme/retheme --reload` there rebuilds bat's theme cache and reloads what's
+running.
+
+`yazi`'s Kanagawa flavor is generated too, so it's no longer a `ya pkg`
+dependency: `ya pkg upgrade` would overwrite it.
 
 ### Per-machine packages
 

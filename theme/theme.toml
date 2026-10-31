@@ -2,10 +2,13 @@
 #
 #   [palette]  Kanagawa Wave by its kanagawa.nvim names. Fixed: these names are what everything
 #              else uses, so no config needs a hex code.
-#   [extras]   colors the shell needs that Kanagawa doesn't have.
+#   [extras]   colors the configs need that Kanagawa doesn't have.
 #   [ui]       tokens: the job a color does (surface, text, accent, ...), as a palette name, or as
 #              "name @ opacity" for a translucent one ("oldWhite @ 0.7").
 #   [roles]    the chrome roles kitty, waybar and Hyprland's fallback look share, as ui tokens.
+#   [ansi]     the terminal's 16 colors (kitty), which anything asking for "red" or "blue" gets.
+#   [syntax]   code highlighting (bat, yazi's previews, delta), apart from ui so that moving
+#              accent never recolors code.
 #
 # A token can point at another token instead of a palette name. Edit this file, then run
 # theme/retheme: it rewrites every file and block generated from it, listed in theme/templates/.
@@ -53,7 +56,11 @@ peachRed      = "#FF5D62"
 surimiOrange  = "#FFA066"
 
 [extras]
-abyss = "#0D0D12"  # a deeper ink than sumiInk0
+abyss         = "#0D0D12"  # a deeper ink than sumiInk0
+winterRed2    = "#5E2E2B"  # a brighter winterRed, for emphasized deletions
+winterGreen2  = "#3E5232"  # a brighter winterGreen, for emphasized additions
+oliveInk      = "#222218"  # from the upstream Kanagawa tmTheme: its selection border
+pureWhite     = "#FFFFFF"  # from the upstream Kanagawa tmTheme: its JSON values
 
 [ui]
 # Surfaces, darkest first.
@@ -75,6 +82,7 @@ textMuted     = "oldWhite @ 0.7"  # captions, hints, section labels
 textFaint     = "fujiGray"        # idle states, chart axes
 textDisabled  = "sumiInk6"
 textOnAccent  = "sumiInk0"        # text over accent fills and gradients
+caret         = "oldWhite"        # the terminal's and editors' cursor
 
 # Accents and states.
 accent        = "carpYellow"      # focus, active, primary
@@ -95,3 +103,47 @@ content       = "surfaceRaised"   # editor, terminal and notification bodies; th
 chrome        = "surface"         # tab and status bars, inactive tabs
 focus_accent  = "selection"       # active borders, the focused window's frame
 dim_accent    = "layer"           # inactive borders
+
+[ansi]
+ansiBlack         = "sumiInk3"
+ansiRed           = "autumnRed"
+ansiGreen         = "autumnGreen"
+ansiYellow        = "boatYellow2"
+ansiBlue          = "crystalBlue"
+ansiMagenta       = "oniViolet"
+ansiCyan          = "waveAqua1"
+ansiWhite         = "oldWhite"
+ansiBrightBlack   = "fujiGray"
+ansiBrightRed     = "samuraiRed"
+ansiBrightGreen   = "springGreen"
+ansiBrightYellow  = "carpYellow"
+ansiBrightBlue    = "springBlue"
+ansiBrightMagenta = "springViolet1"
+ansiBrightCyan    = "waveAqua2"
+ansiBrightWhite   = "fujiWhite"
+ansi16            = "surimiOrange"
+ansi17            = "peachRed"
+
+[syntax]
+comments       = "fujiGray"
+strings        = "springGreen"
+numbers        = "sakuraPink"
+constants      = "surimiOrange"   # built-in constants
+identifiers    = "carpYellow"     # variables, user constants, attributes
+interpolation  = "boatYellow2"    # string interpolation
+keywords       = "waveRed"
+storage        = "oniViolet"      # storage, storage types, JSON keys
+types          = "waveAqua2"      # classes and types
+functions      = "crystalBlue"
+parameters     = "oniViolet2"
+specials       = "springBlue"     # tags, library functions and constants
+punctuation    = "springViolet2"
+regexps        = "carpYellow"
+invalid        = "peachRed"       # invalid code, escape characters
+deprecated     = "katanaGray"
+errors         = "samuraiRed"
+diffAdd        = "winterGreen"
+diffAddEmph    = "winterGreen2"
+diffDelete     = "winterRed"
+diffDeleteEmph = "winterRed2"
+diffChange     = "winterYellow"

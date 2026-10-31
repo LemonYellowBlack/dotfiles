@@ -51,6 +51,10 @@ local t = {
     surimiOrange  = "FFA066",
     -- Off-palette.
     abyss         = "0D0D12",
+    winterRed2    = "5E2E2B",
+    winterGreen2  = "3E5232",
+    oliveInk      = "222218",
+    pureWhite     = "FFFFFF",
 
     -- Tokens: the job each color does.
     surfaceDeep   = "0D0D12",      -- abyss
@@ -69,6 +73,7 @@ local t = {
     textFaint     = "727169",      -- fujiGray
     textDisabled  = "54546D",      -- sumiInk6
     textOnAccent  = "16161D",      -- sumiInk0
+    caret         = "C8C093",      -- oldWhite
     accent        = "E6C384",      -- carpYellow
     accentSoft    = "C8C093",      -- oldWhite
     accentAlt     = "DCA561",      -- autumnYellow
@@ -82,7 +87,7 @@ local t = {
     danger        = "E46876",      -- waveRed
     dangerDeep    = "C34043",      -- autumnRed
 
-    -- Chrome roles, shared with kitty (roles.conf) and waybar (roles.css).
+    -- Chrome roles, shared with kitty (roles.conf) and waybar (theme.css).
     content       = "1F1F28",      -- surfaceRaised
     chrome        = "16161D",      -- surface
     focus_accent  = "2D4F67",      -- selection

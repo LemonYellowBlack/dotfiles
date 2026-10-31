@@ -1,0 +1,1 @@
+export FZF_DEFAULT_OPTS="--color=fg:{{text}},bg:-1,hl:{{waveRed}},fg+:{{text}},bg+:{{layer}},hl+:{{waveRed}},info:{{dragonBlue}},prompt:{{crystalBlue}},pointer:{{waveRed}},marker:{{springGreen}},spinner:{{oniViolet}},header:{{waveAqua2}},border:{{sumiInk5}}"

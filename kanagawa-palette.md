@@ -4,7 +4,7 @@ Reference for the [kanagawa.nvim](https://github.com/rebelot/kanagawa.nvim) them
 
 ## Semantic roles
 
-The four chrome roles used across all themed tools in this repo. They're `[roles]` in [`theme/theme.toml`](theme/theme.toml), which generates `~/.config/kanagawa/roles.{conf,css}` and `theme.{lua,conf}` from them.
+The four chrome roles used across all themed tools in this repo. They're `[roles]` in [`theme/theme.toml`](theme/theme.toml), which generates `~/.config/kanagawa/roles.conf` and `theme.{lua,conf,css}` from them.
 
 | Role | Hex | Palette name | Used for |
 |---|---|---|---|
@@ -13,12 +13,12 @@ The four chrome roles used across all themed tools in this repo. They're `[roles
 | focus accent | `#2D4F67` | waveBlue2 | active borders, focused window frame, selection bg |
 | dim accent | `#2A2A37` | sumiInk4 | inactive borders |
 
-**Generated from `theme/theme.toml`**: kitty, hyprland, hyprlock, waybar, and the Liquid shell's `Theme.qml`.
-**Inline values** (grep + edit per tool): mako, fuzzel, btop, yazi, television, starship, vivid, bat, nvim.
+**Generated from `theme/theme.toml`**: kitty, hyprland, hyprlock, the Liquid shell's `Theme.qml`, waybar, fuzzel, mako, zathura, satty, starship, vivid, fzf (in `.zshrc`), delta (in `.gitconfig`), psql's prompt, the Claude statusline, bottom, television, bat, yazi, and nvim's own highlights.
+**Not generated**: pspg (colour *names*, so it follows kitty's terminal colors; see the README), herdr (a built-in theme name), btop (not installed anywhere).
 
-To change a role across the generated tools, edit `[roles]` in `theme/theme.toml` and run `theme/retheme`. To change a role across inline tools, `rg <hex> dotfiles/`.
+To change a role, or any color, edit `theme/theme.toml` and run `theme/retheme`.
 
-**By name, not hex**: `theme/theme.toml` holds the whole palette below, the tokens that give each color a job (`accent`, `line`, `danger`, …, the names Quickshell's `Theme.qml` uses) and the roles above. `theme/retheme` writes them into `~/.config/kanagawa/theme.lua` (Hyprland), `theme.conf` (hyprlock), `roles.conf` (kitty), `roles.css` (waybar) and `Theme.qml`, so those configs name colors instead of hex.
+**By name, not hex**: `theme/theme.toml` holds the whole palette below, the tokens that give each color a job (`accent`, `line`, `danger`, …, the names Quickshell's `Theme.qml` uses), the roles above, the terminal's 16 colors and the syntax colors. `theme/retheme` writes them, through `theme/templates/`, into each tool's own format: `~/.config/kanagawa/theme.lua` (Hyprland, nvim), `theme.conf` (hyprlock), `theme.css` (waybar), `roles.conf` (kitty), whole theme files (kitty, television, bat, yazi), and marked blocks inside hand-edited configs.
 
 ## Wave (dark default)
 

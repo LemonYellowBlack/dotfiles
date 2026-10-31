@@ -12,8 +12,3 @@ hash = "187cc58ba7ac3befd49c342129e6f1b6"
 use = "yazi-rs/plugins:full-border"
 rev = "e84f4fe"
 hash = "6fa6a05a81c98dd000fbca3cca6e9682"
-
-[[flavor.deps]]
-use = "dangooddd/kanagawa"
-rev = "04985d1"
-hash = "c69a63981e254a3a06a11c2bf0e6af1d"

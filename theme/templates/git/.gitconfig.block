@@ -1,0 +1,17 @@
+	minus-style = syntax "{{diffDelete}}"
+	minus-emph-style = syntax "{{diffDeleteEmph}}"
+	plus-style = syntax "{{diffAdd}}"
+	plus-emph-style = syntax "{{diffAddEmph}}"
+	line-numbers-minus-style = "{{waveRed}}"
+	line-numbers-plus-style = "{{springGreen}}"
+	line-numbers-zero-style = "{{textDisabled}}"
+	line-numbers-left-style = "{{line}}"
+	line-numbers-right-style = "{{line}}"
+	file-style = "{{crystalBlue}}" bold
+	file-decoration-style = "{{line}}"
+	hunk-header-style = "{{carpYellow}}" bold
+	hunk-header-file-style = "{{crystalBlue}}"
+	hunk-header-line-number-style = "{{textFaint}}"
+	hunk-header-decoration-style = "{{line}}" box
+	commit-decoration-style = "{{dragonBlue}}" box ul
+	blame-palette = "{{sumiInk3}}" "{{sumiInk4}}" "{{sumiInk5}}"

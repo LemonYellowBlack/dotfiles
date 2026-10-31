@@ -1,0 +1,14 @@
+palette = [
+  "{{autumnRed}}ff", # autumnRed
+  "{{surimiOrange}}ff", # surimiOrange
+  "{{carpYellow}}ff", # carpYellow
+  "{{springGreen}}ff", # springGreen
+  "{{crystalBlue}}ff", # crystalBlue
+  "{{oniViolet}}ff", # oniViolet
+  "{{sakuraPink}}ff", # sakuraPink
+  "{{fujiWhite}}ff", # fujiWhite
+]
+custom = [
+  "{{sumiInk3}}", # sumiInk3
+  "{{sumiInk0}}", # sumiInk0
+]

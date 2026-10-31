@@ -1,0 +1,35 @@
+set default-bg              "{{content}}"
+set default-fg              "{{text}}"
+
+set statusbar-bg            "{{chrome}}"
+set statusbar-fg            "{{textAlt}}"
+
+set inputbar-bg             "{{content}}"
+set inputbar-fg             "{{text}}"
+
+set notification-bg         "{{content}}"
+set notification-fg         "{{text}}"
+set notification-error-bg   "{{content}}"
+set notification-error-fg   "{{samuraiRed}}"
+set notification-warning-bg "{{content}}"
+set notification-warning-fg "{{warning}}"
+
+set highlight-color         "{{selection}}"
+set highlight-active-color  "{{crystalBlue}}"
+
+set completion-bg           "{{content}}"
+set completion-fg           "{{text}}"
+set completion-highlight-bg "{{layer}}"
+set completion-highlight-fg "{{crystalBlue}}"
+
+set index-bg                "{{content}}"
+set index-fg                "{{text}}"
+set index-active-bg         "{{layer}}"
+set index-active-fg         "{{crystalBlue}}"
+
+set recolor-lightcolor      "{{content}}"
+set recolor-darkcolor       "{{text}}"
+set recolor                 true
+
+set render-loading-bg       "{{content}}"
+set render-loading-fg       "{{text}}"

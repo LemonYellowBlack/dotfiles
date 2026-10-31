@@ -22,7 +22,7 @@ local t = {
     {{c.name|pad:13}} = "{{c|hexa}}",{{col:35}}-- {{c|src}}
 {% endfor %}
 
-    -- Chrome roles, shared with kitty (roles.conf) and waybar (roles.css).
+    -- Chrome roles, shared with kitty (roles.conf) and waybar (theme.css).
 {% for c in roles %}
     {{c.name|pad:13}} = "{{c|hexa}}",{{col:35}}-- {{c|src}}
 {% endfor %}
