@@ -1,0 +1,13 @@
+    // ── Palette: Kanagawa Wave, named as in kanagawa.nvim. Only the tokens below read these.
+{% for c in palette %}
+    readonly property color {{c.name}}: "{{c|hex}}"
+{% endfor %}
+    // Off-palette.
+{% for c in extras %}
+    readonly property color {{c.name}}: "{{c|hex}}"
+{% endfor %}
+
+    // ── Tokens: the job each color does. theme.toml notes where each one is used.
+{% for c in ui %}
+    readonly property color {{c.name}}: {{c|qml}}
+{% endfor %}

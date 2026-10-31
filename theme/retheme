@@ -1,0 +1,263 @@
+#!/usr/bin/env python3
+"""retheme — rewrite every color file and block generated from theme/theme.toml.
+
+Templates in theme/templates/ sit at the path their output goes to, relative to the dotfiles
+root: theme/templates/kanagawa/.config/kanagawa/theme.lua writes kanagawa/.config/kanagawa/theme.lua.
+A template whose name ends in .block fills only the lines between the `theme:begin` and `theme:end`
+lines of its target, the same path without .block, and the rest of that file stays hand-written.
+
+In a template, {{ name }} is a palette color or token from theme.toml, written as #RRGGBB. A
+filter after | writes it another way:
+    bare   E6C384               hexa   E6C384, or C8C093B3 for a token with an opacity
+    rgb    230,195,132          rgba4  230,195,132, or 200,192,147,0.7 with an opacity
+    ref    the palette name it comes down to
+    src    its value as theme.toml gives it ("oldWhite @ 0.7")
+    qml    the name it points at, or a(name, 0.7) with an opacity: a Theme.qml binding
+    pad:N  left-justified in N columns
+{{ col:N }} pads the line out to column N. Lines from {% for c in TABLE %} to {% endfor %} repeat
+for every color in a theme.toml table, with {{ c.name }} for its name.
+
+usage: theme/retheme               write whatever changed, then reload what reads it
+       theme/retheme --no-reload   write whatever changed, and leave running programs alone
+       theme/retheme --check       write nothing; show what would change, exit 1 if anything would
+"""
+import argparse
+import difflib
+import os
+import re
+import subprocess
+import sys
+import tomllib
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+THEME = ROOT / "theme" / "theme.toml"
+TEMPLATES = ROOT / "theme" / "templates"
+
+# What to reload when a file under one of these paths changes. A program that isn't running is
+# skipped. Quickshell isn't here: it reloads by itself when a file it loaded is rewritten in place,
+# which is how retheme writes, and restarting it as well races that reload.
+RELOAD = [
+    (("hypr/", "kanagawa/.config/kanagawa/theme.lua"), "Hyprland", ["hyprctl", "reload"]),
+    (("kanagawa/.config/kanagawa/roles.conf",), "kitty", ["pkill", "-USR1", "-x", "kitty"]),
+    (("kanagawa/.config/kanagawa/roles.css",), "waybar", ["pkill", "-USR2", "-x", "waybar"]),
+]
+
+VALUE = re.compile(r"^(#[0-9A-Fa-f]{6}|[A-Za-z_]\w*)(?:\s*@\s*([0-9]*\.?[0-9]+))?$")
+TAG = re.compile(r"\{\{\s*(.*?)\s*\}\}")
+FOR = re.compile(r"^\s*\{%\s*for\s+(\w+)\s+in\s+(\w+)\s*%\}\s*$")
+ENDFOR = re.compile(r"^\s*\{%\s*endfor\s*%\}\s*$")
+
+
+class ThemeError(Exception):
+    pass
+
+
+class Color:
+    def __init__(self, name, hex, alpha, ref, via, own_alpha, src):
+        self.name, self.hex, self.alpha = name, hex, alpha
+        self.ref = ref              # the palette name it comes down to
+        self.via = via              # the name it points at directly, or None for a hex value
+        self.own_alpha = own_alpha  # the opacity it sets itself, or None
+        self.src = src
+
+    def channels(self):
+        return [int(self.hex[i:i + 2], 16) for i in (0, 2, 4)]
+
+
+def alpha_byte(alpha):
+    return int(alpha * 255 + 0.5)
+
+
+class Theme:
+    def __init__(self, path):
+        data = tomllib.loads(path.read_text())
+        self.tables, self.raw = {}, {}
+        for table, entries in data.items():
+            if not isinstance(entries, dict):
+                raise ThemeError(f"theme.toml: {table} should be a [table]")
+            self.tables[table] = list(entries)
+            for name, value in entries.items():
+                if name in self.raw:
+                    raise ThemeError(f"theme.toml: {name} is in both [{self.raw[name][0]}] and [{table}]")
+                if name == "rgba":
+                    raise ThemeError("theme.toml: rgba is taken (theme.lua's helper)")
+                self.raw[name] = (table, value)
+        self.cache = {}
+
+    def color(self, name, chain=()):
+        if name in self.cache:
+            return self.cache[name]
+        if name not in self.raw:
+            raise ThemeError(f"no color or token called {name!r}")
+        if name in chain:
+            raise ThemeError("tokens point at each other: " + " → ".join(chain + (name,)))
+        table, value = self.raw[name]
+        m = VALUE.match(str(value).strip())
+        if not m:
+            raise ThemeError(f"theme.toml [{table}] {name} = {value!r}: expected #RRGGBB, a name, or 'name @ opacity'")
+        target, opacity = m.group(1), m.group(2)
+        own = None
+        if opacity is not None:
+            own = float(opacity)
+            if not 0 <= own <= 1:
+                raise ThemeError(f"theme.toml [{table}] {name}: opacity {own} isn't between 0 and 1")
+        if target.startswith("#"):
+            c = Color(name, target[1:].upper(), 1.0 if own is None else own, name, None, own, value)
+        else:
+            inner = self.color(target, chain + (name,))
+            c = Color(name, inner.hex, inner.alpha if own is None else own, inner.ref, target, own, value)
+        self.cache[name] = c
+        return c
+
+
+def fmt(color, kind):
+    translucent = color.alpha < 1
+    if kind == "hex":
+        return "#" + color.hex + (f"{alpha_byte(color.alpha):02X}" if translucent else "")
+    if kind == "bare":
+        return color.hex
+    if kind == "hexa":
+        return color.hex + (f"{alpha_byte(color.alpha):02X}" if translucent else "")
+    if kind == "rgb":
+        return ",".join(map(str, color.channels()))
+    if kind == "rgba4":
+        return ",".join(map(str, color.channels())) + (f",{color.alpha:g}" if translucent else "")
+    if kind == "ref":
+        return color.ref
+    if kind == "src":
+        return color.src
+    if kind == "qml":
+        target = color.via if color.via else f'"#{color.hex}"'
+        return f"a({target}, {color.own_alpha:g})" if color.own_alpha is not None else target
+    raise ThemeError(f"unknown filter {kind!r}")
+
+
+def evaluate(theme, expr, scope):
+    head, *filters = [part.strip() for part in expr.split("|")]
+    if head.endswith(".name") and head[:-5] in scope:
+        value = scope[head[:-5]]
+    else:
+        value = theme.color(scope.get(head, head))
+    for f in filters:
+        kind, _, arg = f.partition(":")
+        if kind == "pad":
+            value = (fmt(value, "hex") if isinstance(value, Color) else value).ljust(int(arg))
+        elif isinstance(value, Color):
+            value = fmt(value, kind)
+        else:
+            raise ThemeError(f"{kind} needs a color, not {value!r}")
+    return fmt(value, "hex") if isinstance(value, Color) else value
+
+
+def render_line(theme, line, scope, where):
+    out, pos = "", 0
+    for m in TAG.finditer(line):
+        out += line[pos:m.start()]
+        expr = m.group(1)
+        try:
+            if expr.startswith("col:"):
+                out += " " * max(1, int(expr[4:]) - len(out))
+            else:
+                out += evaluate(theme, expr, scope)
+        except ThemeError as e:
+            raise ThemeError(f"{where}: {e}") from None
+        pos = m.end()
+    return out + line[pos:]
+
+
+def render(theme, text, where):
+    lines, out, i = text.splitlines(keepends=True), [], 0
+    while i < len(lines):
+        m = FOR.match(lines[i])
+        if not m:
+            out.append(render_line(theme, lines[i], {}, f"{where}:{i + 1}"))
+            i += 1
+            continue
+        var, table = m.groups()
+        if table not in theme.tables:
+            raise ThemeError(f"{where}:{i + 1}: theme.toml has no [{table}]")
+        end = next((j for j in range(i + 1, len(lines)) if ENDFOR.match(lines[j])), None)
+        if end is None:
+            raise ThemeError(f"{where}:{i + 1}: for without endfor")
+        for name in theme.tables[table]:
+            for k in range(i + 1, end):
+                out.append(render_line(theme, lines[k], {var: name}, f"{where}:{k + 1}"))
+        i = end + 1
+    return "".join(out)
+
+
+def fill_block(existing, content, target):
+    lines = existing.splitlines(keepends=True)
+    begin = [i for i, l in enumerate(lines) if "theme:begin" in l]
+    end = [i for i, l in enumerate(lines) if "theme:end" in l]
+    if len(begin) != 1 or len(end) != 1 or end[0] < begin[0]:
+        raise ThemeError(f"{target}: needs one theme:begin line and, after it, one theme:end line")
+    return "".join(lines[:begin[0] + 1]) + content + "".join(lines[end[0]:])
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--check", action="store_true", help="write nothing; exit 1 if anything is out of date")
+    parser.add_argument("--no-reload", action="store_true", help="don't reload running programs after writing")
+    args = parser.parse_args()
+
+    try:
+        theme = Theme(THEME)
+        for name in theme.raw:  # every value, even ones no template uses yet
+            theme.color(name)
+        changed = []
+        for template in sorted(p for p in TEMPLATES.rglob("*") if p.is_file()):
+            rel = template.relative_to(TEMPLATES).as_posix()
+            block = rel.endswith(".block")
+            target_rel = rel[:-len(".block")] if block else rel
+            target = ROOT / target_rel
+            content = render(theme, template.read_text(), f"templates/{rel}")
+            old = target.read_text() if target.exists() else None
+            if block:
+                if old is None:
+                    raise ThemeError(f"{target_rel}: doesn't exist, so templates/{rel} has nowhere to go")
+                new = fill_block(old, content, target_rel)
+            else:
+                new = content
+            if new == old:
+                continue
+            changed.append(target_rel)
+            if args.check:
+                sys.stdout.writelines(difflib.unified_diff(
+                    (old or "").splitlines(keepends=True), new.splitlines(keepends=True),
+                    f"a/{target_rel}", f"b/{target_rel}"))
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                # In place, so anything watching the file sees it change rather than vanish.
+                with open(target, "w") as f:
+                    f.write(new)
+                print(f"wrote {target_rel}")
+    except ThemeError as e:
+        sys.exit(f"retheme: {e}")
+
+    if args.check:
+        if changed:
+            sys.exit(f"retheme: {len(changed)} file(s) out of date with theme.toml")
+        print("retheme: everything matches theme.toml")
+        return
+    if not changed:
+        print("retheme: nothing to change")
+        return
+    if args.no_reload:
+        return
+    for prefixes, name, command in RELOAD:
+        if not any(t.startswith(p) for t in changed for p in prefixes):
+            continue
+        if name == "Hyprland" and not os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"):
+            continue
+        if subprocess.run(command, capture_output=True).returncode == 0:
+            print(f"reloaded {name}")
+            if name == "Hyprland":
+                errors = subprocess.run(["hyprctl", "configerrors"], capture_output=True, text=True).stdout.strip()
+                if errors:
+                    print(f"Hyprland config errors:\n{errors}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()

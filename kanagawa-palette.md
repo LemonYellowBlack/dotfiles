@@ -4,7 +4,7 @@ Reference for the [kanagawa.nvim](https://github.com/rebelot/kanagawa.nvim) them
 
 ## Semantic roles
 
-The four chrome roles used across all themed tools in this repo. Source of truth for the role files at `~/.config/kanagawa/roles.{conf,hypr,css}`.
+The four chrome roles used across all themed tools in this repo. They're `[roles]` in [`theme/theme.toml`](theme/theme.toml), which generates `~/.config/kanagawa/roles.{conf,css}` and `theme.{lua,conf}` from them.
 
 | Role | Hex | Palette name | Used for |
 |---|---|---|---|
@@ -13,12 +13,12 @@ The four chrome roles used across all themed tools in this repo. Source of truth
 | focus accent | `#2D4F67` | waveBlue2 | active borders, focused window frame, selection bg |
 | dim accent | `#2A2A37` | sumiInk4 | inactive borders |
 
-**Shared via include** (edit `~/.config/kanagawa/roles.*` once): kitty, hyprland, waybar.
+**Generated from `theme/theme.toml`**: kitty, hyprland, hyprlock, waybar, and the Liquid shell's `Theme.qml`.
 **Inline values** (grep + edit per tool): mako, fuzzel, btop, yazi, television, starship, vivid, bat, nvim.
 
-To change a role across the shared tools, edit the matching file in the [`kanagawa/`](kanagawa/.config/kanagawa/) stow package. To change a role across inline tools, `rg <hex> dotfiles/`.
+To change a role across the generated tools, edit `[roles]` in `theme/theme.toml` and run `theme/retheme`. To change a role across inline tools, `rg <hex> dotfiles/`.
 
-**By name, not hex**: the same package has the whole palette below as `palette.lua` (Hyprland) and `palette.conf` (hyprlock), under the names Quickshell's `Theme.qml` uses too. `roles.lua`, `hypr/liquid.lua` and `hyprlock.conf` pick colors from them through tokens (`accent`, `line`, `danger`, …), so a retheme points a token at another name.
+**By name, not hex**: `theme/theme.toml` holds the whole palette below, the tokens that give each color a job (`accent`, `line`, `danger`, …, the names Quickshell's `Theme.qml` uses) and the roles above. `theme/retheme` writes them into `~/.config/kanagawa/theme.lua` (Hyprland), `theme.conf` (hyprlock), `roles.conf` (kitty), `roles.css` (waybar) and `Theme.qml`, so those configs name colors instead of hex.
 
 ## Wave (dark default)
 

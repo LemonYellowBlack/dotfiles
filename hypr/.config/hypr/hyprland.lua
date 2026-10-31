@@ -8,8 +8,7 @@
 -- API reference: /usr/share/hypr/stubs/hl.meta.lua, example config at
 -- /usr/share/hypr/hyprland.lua.
 
-local p = require(os.getenv("HOME") .. "/.config/kanagawa/palette.lua")
-local colors = require(os.getenv("HOME") .. "/.config/kanagawa/roles.lua")
+local t = require(os.getenv("HOME") .. "/.config/kanagawa/theme.lua")
 
 local mod = "SUPER"
 
@@ -158,8 +157,8 @@ hl.config({
         no_focus_fallback = true,
 
         col = {
-            active_border   = p.rgba(colors.focus_accent),
-            inactive_border = p.rgba(colors.dim_accent),
+            active_border   = t.rgba(t.focus_accent),
+            inactive_border = t.rgba(t.dim_accent),
         },
     },
 
@@ -170,8 +169,8 @@ hl.config({
             enabled        = false,
             range          = 1,
             render_power   = 1,
-            color          = p.rgba(colors.content, 0.933),
-            color_inactive = p.rgba(colors.content, 0.667),
+            color          = t.rgba(t.content, 0.933),
+            color_inactive = t.rgba(t.content, 0.667),
         },
 
         blur = {

@@ -23,6 +23,15 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 `scripts/` is **not** a Stow package — it holds helper assets (e.g.
 `kanagawa_wallpaper.py`) referenced by scripts in `bin/`. Don't stow it.
 
+`theme/` isn't a Stow package either. `theme/theme.toml` holds the colors: the
+Kanagawa palette by name, the tokens that give each color a job (`accent`,
+`surface`, `line`, …) and the chrome roles. `theme/retheme` writes what's
+generated from it into the packages — `kanagawa/`'s `theme.lua`, `theme.conf`
+and `roles.*`, and the palette and tokens in Quickshell's `Theme.qml` — from the
+templates in `theme/templates/`. Edit `theme.toml`, then run `theme/retheme`;
+`--check` shows anything out of date. The generated files are committed, so a
+machine that only pulls never needs to run it.
+
 ### Per-machine packages
 
 `<pkg>-xps` and `<pkg>-hotdog` hold the files that differ between machines.
