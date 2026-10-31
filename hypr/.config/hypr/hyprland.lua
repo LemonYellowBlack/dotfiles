@@ -192,6 +192,9 @@ hl.config({
     misc = {
         disable_hyprland_logo    = true,
         disable_splash_rendering = true,
+        -- If the shell's lock screen dies, the session stays locked; this lets a new lock take
+        -- over, e.g. from a TTY: hyprctl --instance 0 dispatch 'hl.dsp.exec_cmd("hyprlock")'
+        allow_session_lock_restore = true,
     },
 
     ecosystem = {

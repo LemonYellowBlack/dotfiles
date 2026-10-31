@@ -128,6 +128,12 @@ Stow only creates symlinks; install the underlying programs separately.
   `org.freedesktop.Notifications`, and Quickshell waits while mako holds it. mako isn't enabled
   anywhere; D-Bus starts it on the first notification nobody else is there for, so disabling it
   does nothing. Switch with `systemctl --user mask --now mako`; `unmask` switches back.
+- **The shell is the lock screen.** SUPER L, the power menu, idle and sleep all go through
+  `loginctl lock-session`, and hypridle's `lock_cmd` asks the shell to lock
+  (`qs -c liquid ipc call lock lock`), falling back to hyprlock when the shell isn't running.
+  `qs -c liquid ipc call lock preview` shows it in an ordinary window, with the real password
+  check, that Esc closes. If the shell dies while locked, the session stays locked: from a TTY,
+  `hyprctl --instance 0 dispatch 'hl.dsp.exec_cmd("hyprlock")'` starts hyprlock to unlock with.
 - **The homelab drawer runs `bin/labstatus` on hotdog**, over SSH from the XPS, so hotdog needs
   `bin` stowed and the XPS needs an SSH key it can use without a prompt.
 - **`pspg`'s theme uses colour *names*, not hex — keep it that way.** pspg
