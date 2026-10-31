@@ -15,6 +15,7 @@ fi
 
 REPLACEMENT="    # setlockwp START\n    path = $IMG\n    # setlockwp END"
 
-sed -i "/# setlockwp START/,/# setlockwp END/c\\$REPLACEMENT" "$CONF"
+# --follow-symlinks: hyprlock.conf is a stow link, and plain -i would replace it with a copy.
+sed -i --follow-symlinks "/# setlockwp START/,/# setlockwp END/c\\$REPLACEMENT" "$CONF"
 
 echo "Lock wallpaper set to $(basename "$IMG")"
