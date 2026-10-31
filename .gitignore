@@ -15,3 +15,10 @@ neowall/.config/neowall/state
 
 .claude/settings.local.json
 .claude/worktrees/
+
+# theme/retheme writes these for one machine's palette (theme/hosts/<host>.toml), so they're never
+# shared. They land here because ~/.config/bat, yazi and television are stowed as whole folders;
+# everything else it writes lives outside the dotfiles, in ~/.config/theme/ and the like.
+bat/.config/bat/themes/theme.tmTheme
+yazi/.config/yazi/flavors/theme.yazi/
+television/.config/television/themes/theme.toml

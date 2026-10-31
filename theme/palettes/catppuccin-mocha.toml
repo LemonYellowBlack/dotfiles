@@ -1,0 +1,90 @@
+name   = "Catppuccin Mocha"
+kind   = "dark"
+about  = "Catppuccin's darkest flavor: soft pastels over a deep blue-gray base."
+source = "https://github.com/catppuccin/catppuccin"
+
+# Its colors, by the names it gives them.
+[colors]
+rosewater       = "#F5E0DC"
+flamingo        = "#F2CDCD"
+pink            = "#F5C2E7"
+mauve           = "#CBA6F7"
+red             = "#F38BA8"
+maroon          = "#EBA0AC"
+peach           = "#FAB387"
+yellow          = "#F9E2AF"
+green           = "#A6E3A1"
+teal            = "#94E2D5"
+sky             = "#89DCEB"
+sapphire        = "#74C7EC"
+blue            = "#89B4FA"
+lavender        = "#B4BEFE"
+text            = "#CDD6F4"
+subtext1        = "#BAC2DE"
+subtext0        = "#A6ADC8"
+overlay2        = "#9399B2"
+overlay1        = "#7F849C"
+overlay0        = "#6C7086"
+surface2        = "#585B70"
+surface1        = "#45475A"
+surface0        = "#313244"
+base            = "#1E1E2E"
+mantle          = "#181825"
+crust           = "#11111B"
+
+# Which color fills each shared slot (slots.toml). A hex value is a blend or step the palette
+# itself lacks.
+[slots]
+bg_deep         = "crust"
+bg0             = "mantle"
+bg1             = "mantle"
+bg2             = "base"
+bg3             = "base"
+bg4             = "surface0"
+bg5             = "surface1"
+bg6             = "surface2"
+
+bg_blue         = "#313953"             # blue over base, 18%
+bg_blue_bright  = "#3C4867"             # blue over base, 28%
+bg_blue_dim     = "#282C40"             # blue over base, 9%
+bg_green        = "#323C3F"             # green over base, 15%
+bg_green_bright = "#404F4B"             # green over base, 25%
+bg_red          = "#3E2E40"             # red over base, 15%
+bg_red_bright   = "#53394C"             # red over base, 25%
+bg_yellow       = "#3F3B41"             # yellow over base, 15%
+
+fg              = "text"
+fg_dim          = "subtext1"
+fg_faint        = "overlay1"
+gray            = "overlay0"
+
+red             = "red"
+red_bright      = "maroon"
+red_strong      = "red"
+red_deep        = "red"
+
+orange          = "peach"
+orange_strong   = "peach"
+
+yellow          = "yellow"
+yellow_deep     = "peach"
+yellow_muted    = "yellow"
+yellow_dim      = "rosewater"
+
+green           = "green"
+green_deep      = "green"
+
+aqua            = "teal"
+aqua_deep       = "sky"
+
+blue            = "blue"
+blue_bright     = "sapphire"
+blue_light      = "sky"
+blue_muted      = "overlay2"
+
+violet          = "mauve"
+violet_light    = "lavender"
+violet_muted    = "overlay2"
+lavender        = "subtext0"
+
+pink            = "pink"

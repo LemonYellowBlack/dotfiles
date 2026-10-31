@@ -1,0 +1,92 @@
+name   = "Gruvbox Dark"
+kind   = "dark"
+about  = "Retro groove: warm browns and creams with bright, saturated hues."
+source = "https://github.com/morhetz/gruvbox"
+
+# Its colors, by the names it gives them.
+[colors]
+dark0_hard      = "#1D2021"
+dark0           = "#282828"
+dark0_soft      = "#32302F"
+dark1           = "#3C3836"
+dark2           = "#504945"
+dark3           = "#665C54"
+dark4           = "#7C6F64"
+gray            = "#928374"
+light0          = "#FBF1C7"
+light1          = "#EBDBB2"
+light2          = "#D5C4A1"
+light3          = "#BDAE93"
+light4          = "#A89984"
+bright_red      = "#FB4934"
+bright_green    = "#B8BB26"
+bright_yellow   = "#FABD2F"
+bright_blue     = "#83A598"
+bright_purple   = "#D3869B"
+bright_aqua     = "#8EC07C"
+bright_orange   = "#FE8019"
+neutral_red     = "#CC241D"
+neutral_green   = "#98971A"
+neutral_yellow  = "#D79921"
+neutral_blue    = "#458588"
+neutral_purple  = "#B16286"
+neutral_aqua    = "#689D6A"
+neutral_orange  = "#D65D0E"
+faded_yellow    = "#B57614"
+
+# Which color fills each shared slot (slots.toml). A hex value is a blend or step the palette
+# itself lacks.
+[slots]
+bg_deep         = "#151718"             # dark0_hard, deepened
+bg0             = "dark0_hard"
+bg1             = "dark0_hard"
+bg2             = "dark0"
+bg3             = "dark0"
+bg4             = "dark1"
+bg5             = "dark2"
+bg6             = "dark3"
+
+bg_blue         = "dark1"               # gruvbox has no blue-tinted surface: its selections are dark1/dark2
+bg_blue_bright  = "dark2"
+bg_blue_dim     = "dark0_soft"
+bg_green        = "#3E3E25"             # neutral_green over dark0, 20%
+bg_green_bright = "#4C4C24"             # neutral_green over dark0, 32%
+bg_red          = "#492726"             # neutral_red over dark0, 20%
+bg_red_bright   = "#5C2724"             # neutral_red over dark0, 32%
+bg_yellow       = "#4B3F27"             # neutral_yellow over dark0, 20%
+
+fg              = "light1"
+fg_dim          = "light2"
+fg_faint        = "gray"
+gray            = "dark4"
+
+red             = "bright_red"
+red_bright      = "bright_red"
+red_strong      = "bright_red"
+red_deep        = "neutral_red"
+
+orange          = "bright_orange"
+orange_strong   = "neutral_orange"
+
+yellow          = "bright_yellow"
+yellow_deep     = "neutral_yellow"
+yellow_muted    = "neutral_yellow"
+yellow_dim      = "faded_yellow"
+
+green           = "bright_green"
+green_deep      = "neutral_green"
+
+aqua            = "bright_aqua"
+aqua_deep       = "neutral_aqua"
+
+blue            = "bright_blue"
+blue_bright     = "bright_blue"
+blue_light      = "light4"
+blue_muted      = "neutral_blue"
+
+violet          = "bright_purple"
+violet_light    = "bright_purple"
+violet_muted    = "neutral_purple"
+lavender        = "light4"
+
+pink            = "bright_purple"

@@ -1,72 +1,188 @@
 #!/usr/bin/env python3
-"""retheme — rewrite every color file and block generated from theme/theme.toml.
+"""retheme — color every themed tool on this machine from its palette, variation and overrides.
 
-Templates in theme/templates/ sit at the path their output goes to, relative to the dotfiles
-root: theme/templates/kanagawa/.config/kanagawa/theme.lua writes kanagawa/.config/kanagawa/theme.lua.
-A template whose name ends in .block fills only the lines between the `theme:begin` and `theme:end`
-lines of its target, the same path without .block, and the rest of that file stays hand-written.
-For more than one block in a file, name them: config@volume.block fills the lines between
-`theme:begin:volume` and `theme:end:volume` in config.
+A theme is three layers, each in theme/:
+    palettes/NAME.toml    a set of colors under its own names, and which of them fills each of the
+                          shared slots in slots.toml (bg0, fg, yellow, blue_bright, ...)
+    variations/NAME.toml  tokens, the job each slot does: accent, surface, the terminal's 16, the
+                          syntax colors. Slots only, never a palette's own names, so any variation
+                          fits any palette.
+    hosts/HOST.toml       this machine's palette and variation, and the tokens it picks itself
+Only the host file differs between machines; the rest of theme/ and every config is shared.
 
-In a template, {{ name }} is a palette color or token from theme.toml, written as #RRGGBB. A
-filter after | writes it another way:
+Templates in theme/templates/ sit at the path their output takes under $HOME: templates/.config/
+theme/theme.lua writes ~/.config/theme/theme.lua. Output belongs to this machine and stays out of
+git. Most of it goes to ~/.config/theme/, which configs include; the few files a tool reads only
+from its own directory go there, and .gitignore covers those that land inside the dotfiles.
+~/.config/theme/theme.json, which the shell's Theme.qml watches, is written here, not from a
+template.
+
+In a template, {{ name }} is a slot or token, written #RRGGBB. A filter after | writes it another way:
     bare   E6C384               hexa   E6C384, or C8C093B3 for a token with an opacity
+    argb   #E6C384, or #B3C8C093 (Qt's order)
     rgb    230,195,132          rgba4  230,195,132, or 200,192,147,0.7 with an opacity
     sgr    230;195;132, for a terminal escape (38;2;R;G;B)
-    ref    the palette name it comes down to
-    src    its value as theme.toml gives it ("oldWhite @ 0.7")
-    qml    the name it points at, or a(name, 0.7) with an opacity: a Theme.qml binding
-    css    @name, or alpha(@name, 0.7) with an opacity: a GTK CSS color
-    lower, upper   the text so far in that case
-    pad:N  left-justified in N columns
-{{ col:N }} pads the line out to column N. Lines from {% for c in TABLE %} to {% endfor %} repeat
-for every color in a theme.toml table, with {{ c.name }} for its name.
-
-usage: theme/retheme               write whatever changed, then reload what reads it
-       theme/retheme --no-reload   write whatever changed, and leave running programs alone
-       theme/retheme --reload      reload everything, changed or not: on the other machine after a
-                                   pull, whose files arrive already written
-       theme/retheme --check       write nothing; show what would change, exit 1 if anything would
+    ref    the palette's own name for it (carpYellow)   slot   the slot it comes down to (yellow)
+    src    its value as written ("fg_dim @ 0.7")        css    @name, or alpha(@name, 0.7)
+    lower, upper   the text so far in that case         pad:N  left-justified in N columns
+{{ theme.palette }}, {{ theme.variation }} and {{ theme.host }} name this machine's choices,
+{{ theme.kind }} is dark or light and {{ theme.light }} true or false. {{ col:N }} pads the line out
+to column N. Lines from {% for c in TABLE %} to {% endfor %} repeat for every slot (slots) or every
+token in a variation table (ui, roles, ansi, syntax), with {{ c.name }} for its name.
 """
 import argparse
 import difflib
+import fcntl
+import json
 import os
 import re
+import socket
 import subprocess
 import sys
 import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-THEME = ROOT / "theme" / "theme.toml"
-TEMPLATES = ROOT / "theme" / "templates"
+THEME = ROOT / "theme"
+TEMPLATES = THEME / "templates"
+# RETHEME_HOME and RETHEME_HOST render somewhere else, as some other machine: for trying changes
+# without touching the live configs. Nothing is reloaded then.
+HOME = Path(os.environ.get("RETHEME_HOME") or Path.home())
+HOST = os.environ.get("RETHEME_HOST") or socket.gethostname().split(".")[0]
+LIVE = "RETHEME_HOME" not in os.environ and "RETHEME_HOST" not in os.environ
+TABLES = ("ui", "roles", "ansi", "syntax")
 
-# What to reload when a file under one of these paths changes. A program that isn't running is
-# skipped. Quickshell isn't here: it reloads by itself when a file it loaded is rewritten in place,
-# which is how retheme writes, and restarting it as well races that reload.
+# What to reload when a file under one of these paths (relative to $HOME) changes. A program that
+# isn't running is skipped. The shell isn't here: Theme.qml watches theme.json and recolors itself.
 RELOAD = [
-    (("hypr/", "kanagawa/.config/kanagawa/theme.lua"), "Hyprland", ["hyprctl", "reload"]),
-    (("kanagawa/.config/kanagawa/roles.conf", "kitty/"), "kitty", ["pkill", "-USR1", "-x", "kitty"]),
-    (("kanagawa/.config/kanagawa/theme.css", "waybar/"), "waybar", ["pkill", "-USR2", "-x", "waybar"]),
+    (".config/theme/theme.lua", "Hyprland", ["hyprctl", "reload"]),
+    (".config/theme/kitty.conf", "kitty", ["pkill", "-USR1", "-x", "kitty"]),
+    (".config/theme/theme.css", "waybar", ["pkill", "-USR2", "-x", "waybar"]),
+    (".config/theme/mako", "mako", ["makoctl", "reload"]),
     # Not a reload: bat (and delta, which uses its themes) reads a cache built from them.
-    (("bat/",), "bat's theme cache", ["bat", "cache", "--build"]),
+    (".config/bat/themes/", "bat's theme cache", ["bat", "cache", "--build"]),
 ]
 
+HEX = re.compile(r"^#[0-9A-Fa-f]{6}$")
 VALUE = re.compile(r"^(#[0-9A-Fa-f]{6}|[A-Za-z_]\w*)(?:\s*@\s*([0-9]*\.?[0-9]+))?$")
 TAG = re.compile(r"\{\{\s*(.*?)\s*\}\}")
 FOR = re.compile(r"^\s*\{%\s*for\s+(\w+)\s+in\s+(\w+)\s*%\}\s*$")
 ENDFOR = re.compile(r"^\s*\{%\s*endfor\s*%\}\s*$")
+ENTRY = re.compile(r'^(\w+)\s*=\s*"[^"]*"\s*(?:#\s*(.*))?$')
 
 
 class ThemeError(Exception):
     pass
 
 
+def shown(path):
+    """A path as you'd type it: relative to the dotfiles inside them, else from ~."""
+    path = Path(path)
+    for base, prefix in ((ROOT, ""), (HOME, "~/")):
+        try:
+            return prefix + path.relative_to(base).as_posix()
+        except ValueError:
+            pass
+    return str(path)
+
+
+def read_toml(path):
+    try:
+        return tomllib.loads(path.read_text())
+    except FileNotFoundError:
+        raise ThemeError(f"{shown(path)} doesn't exist") from None
+    except tomllib.TOMLDecodeError as e:
+        raise ThemeError(f"{shown(path)}: {e}") from None
+
+
+def names(kind):
+    return sorted(p.stem for p in (THEME / kind).glob("*.toml"))
+
+
+class Slots:
+    def __init__(self):
+        data = read_toml(THEME / "slots.toml")
+        self.families = {family: list(entries) for family, entries in data.items()}
+        self.order = [s for slots in self.families.values() for s in slots]
+        self.info = {s: d for entries in data.values() for s, d in entries.items()}
+        if len(set(self.order)) != len(self.order):
+            raise ThemeError("theme/slots.toml names a slot twice")
+
+
+class Palette:
+    def __init__(self, name, slots):
+        self.id, self.path = name, THEME / "palettes" / f"{name}.toml"
+        if name not in names("palettes"):
+            raise ThemeError(f"no palette called {name!r}; there are {', '.join(names('palettes'))}")
+        data = read_toml(self.path)
+        where = shown(self.path)
+        self.name, self.kind, self.about = data.get("name", name), data.get("kind", "dark"), data.get("about", "")
+        if self.kind not in ("dark", "light"):
+            raise ThemeError(f"{where}: kind is dark or light, not {self.kind!r}")
+        self.colors = data.get("colors", {})
+        for color, value in self.colors.items():
+            if not isinstance(value, str) or not HEX.match(value):
+                raise ThemeError(f"{where}: [colors] {color} = {value!r} isn't #RRGGBB")
+        filled = data.get("slots", {})
+        missing = [s for s in slots.order if s not in filled]
+        extra = [s for s in filled if s not in slots.info]
+        if missing:
+            raise ThemeError(f"{where}: [slots] leaves out {', '.join(missing)}")
+        if extra:
+            raise ThemeError(f"{where}: [slots] fills {', '.join(extra)}, which slots.toml doesn't have")
+        self.slots = {}  # slot -> (bare hex, the palette's own name for it, or None for a hex value)
+        for slot in slots.order:
+            value = filled[slot]
+            if isinstance(value, str) and HEX.match(value):
+                self.slots[slot] = (value[1:].upper(), None)
+            elif value in self.colors:
+                self.slots[slot] = (self.colors[value][1:].upper(), value)
+            else:
+                raise ThemeError(f"{where}: [slots] {slot} = {value!r} is neither one of its [colors] nor #RRGGBB")
+
+
+class Variation:
+    def __init__(self, name, chain=()):
+        self.id, self.path = name, THEME / "variations" / f"{name}.toml"
+        if name not in names("variations"):
+            raise ThemeError(f"no variation called {name!r}; there are {', '.join(names('variations'))}")
+        if name in chain:
+            raise ThemeError("variations extend each other: " + " → ".join(chain + (name,)))
+        data = read_toml(self.path)
+        self.name, self.description = data.get("name", name), data.get("description", "")
+        self.extends = data.get("extends")
+        parent = Variation(self.extends, chain + (name,)) if self.extends else None
+        self.tables = {t: dict(parent.tables[t]) if parent else {} for t in TABLES}
+        self.notes = dict(parent.notes) if parent else {}
+        self.sections = dict(parent.sections) if parent else {}
+        for key, value in data.items():
+            if key in ("name", "description", "extends"):
+                continue
+            if key not in TABLES or not isinstance(value, dict):
+                raise ThemeError(f"{shown(self.path)}: {key} isn't one of [{'], ['.join(TABLES)}]")
+            self.tables[key].update(value)
+        # The comments are the documentation: a trailing one says what a token is for, and a
+        # comment line in [ui] heads the tokens after it ("# Surfaces, darkest first.").
+        table, section = None, ""
+        for line in self.path.read_text().splitlines():
+            line = line.strip()
+            if m := re.match(r"^\[(\w+)\]$", line):
+                table, section = m.group(1), ""
+            elif table == "ui" and line.startswith("#"):
+                section = re.split(r"[,.;:]", line.lstrip("# "), maxsplit=1)[0]
+            elif table and (m := ENTRY.match(line)):
+                if m.group(2):
+                    self.notes[m.group(1)] = m.group(2)
+                if table == "ui" and m.group(1) not in self.sections:
+                    self.sections[m.group(1)] = section
+
+
 class Color:
-    def __init__(self, name, hex, alpha, ref, via, own_alpha, src):
+    def __init__(self, name, hex, alpha, ref, slot, via, own_alpha, src):
         self.name, self.hex, self.alpha = name, hex, alpha
-        self.ref = ref              # the palette name it comes down to
-        self.via = via              # the name it points at directly, or None for a hex value
+        self.ref = ref              # the palette's own name for it, or its hex
+        self.slot = slot            # the slot it comes down to, or None for a hex value
+        self.via = via              # the name it points at directly, or None
         self.own_alpha = own_alpha  # the opacity it sets itself, or None
         self.src = src
 
@@ -79,55 +195,87 @@ def alpha_byte(alpha):
 
 
 class Theme:
-    def __init__(self, path):
-        data = tomllib.loads(path.read_text())
-        self.tables, self.raw = {}, {}
-        for table, entries in data.items():
-            if not isinstance(entries, dict):
-                raise ThemeError(f"theme.toml: {table} should be a [table]")
-            self.tables[table] = list(entries)
-            for name, value in entries.items():
-                if name in self.raw:
-                    raise ThemeError(f"theme.toml: {name} is in both [{self.raw[name][0]}] and [{table}]")
-                if name == "rgba":
-                    raise ThemeError("theme.toml: rgba is taken (theme.lua's helper)")
-                self.raw[name] = (table, value)
+    def __init__(self, host, palette, variation, overrides, slots):
+        self.host, self.palette, self.variation = host, palette, variation
+        self.overrides = dict(overrides)
+        self.tables = {"slots": list(slots.order)}
+        self.raw = {slot: ("slots", None) for slot in slots.order}
+        for table in TABLES:
+            self.tables[table] = list(variation.tables[table])
+            for token, value in variation.tables[table].items():
+                if token in self.raw:
+                    other = "a slot" if self.raw[token][0] == "slots" else f"in [{self.raw[token][0]}] too"
+                    raise ThemeError(f"variation {variation.id}: [{table}] {token} is {other}")
+                self.raw[token] = (table, value)
+        for token, value in self.overrides.items():
+            if token not in self.raw or self.raw[token][0] == "slots":
+                raise ThemeError(f"theme/hosts/{host}.toml: [overrides] {token}: there's no token by that name")
+            self.raw[token] = (self.raw[token][0], value)
         self.cache = {}
+
+    def where(self, name):
+        if name in self.overrides:
+            return f"theme/hosts/{self.host}.toml [overrides] {name}"
+        return f"variation {self.variation.id} [{self.raw[name][0]}] {name}"
 
     def color(self, name, chain=()):
         if name in self.cache:
             return self.cache[name]
         if name not in self.raw:
-            raise ThemeError(f"no color or token called {name!r}")
+            hint = [s for s, (_, own) in self.palette.slots.items() if own == name]
+            if hint:
+                raise ThemeError(f"{name!r} is {self.palette.name}'s own name for a color; name its slot "
+                                 f"({' or '.join(hint)}) so the choice holds in every palette")
+            raise ThemeError(f"no slot or token called {name!r}")
         if name in chain:
             raise ThemeError("tokens point at each other: " + " → ".join(chain + (name,)))
         table, value = self.raw[name]
-        m = VALUE.match(str(value).strip())
-        if not m:
-            raise ThemeError(f"theme.toml [{table}] {name} = {value!r}: expected #RRGGBB, a name, or 'name @ opacity'")
-        target, opacity = m.group(1), m.group(2)
-        own = None
-        if opacity is not None:
-            own = float(opacity)
-            if not 0 <= own <= 1:
-                raise ThemeError(f"theme.toml [{table}] {name}: opacity {own} isn't between 0 and 1")
-        if target.startswith("#"):
-            c = Color(name, target[1:].upper(), 1.0 if own is None else own, name, None, own, value)
+        if table == "slots":
+            hex, own = self.palette.slots[name]
+            c = Color(name, hex, 1.0, own or "#" + hex, name, None, None, name)
         else:
-            inner = self.color(target, chain + (name,))
-            c = Color(name, inner.hex, inner.alpha if own is None else own, inner.ref, target, own, value)
+            m = VALUE.match(str(value).strip())
+            if not m:
+                raise ThemeError(f"{self.where(name)} = {value!r}: expected a slot, a token, #RRGGBB, "
+                                 "or one of those @ an opacity")
+            target, opacity = m.groups()
+            own = None
+            if opacity is not None:
+                own = float(opacity)
+                if not 0 <= own <= 1:
+                    raise ThemeError(f"{self.where(name)}: opacity {own:g} isn't between 0 and 1")
+            if target.startswith("#"):
+                alpha = 1.0 if own is None else own
+                c = Color(name, target[1:].upper(), alpha, target.upper(), None, None, own, value)
+            else:
+                try:
+                    inner = self.color(target, chain + (name,))
+                except ThemeError as e:
+                    raise ThemeError(f"{self.where(name)}: {e}") from None
+                alpha = inner.alpha if own is None else own
+                c = Color(name, inner.hex, alpha, inner.ref, inner.slot, target, own, value)
         self.cache[name] = c
         return c
+
+    def meta(self, key):
+        values = {"palette": self.palette.name, "variation": self.variation.name, "host": self.host,
+                  "kind": self.palette.kind, "light": str(self.palette.kind == "light").lower()}
+        if key not in values:
+            raise ThemeError(f"theme.{key}: there's {', '.join('theme.' + k for k in values)}")
+        return values[key]
 
 
 def fmt(color, kind):
     translucent = color.alpha < 1
+    alpha = f"{alpha_byte(color.alpha):02X}" if translucent else ""
     if kind == "hex":
-        return "#" + color.hex + (f"{alpha_byte(color.alpha):02X}" if translucent else "")
+        return "#" + color.hex + alpha
     if kind == "bare":
         return color.hex
     if kind == "hexa":
-        return color.hex + (f"{alpha_byte(color.alpha):02X}" if translucent else "")
+        return color.hex + alpha
+    if kind == "argb":
+        return "#" + alpha + color.hex
     if kind == "rgb":
         return ",".join(map(str, color.channels()))
     if kind == "rgba4":
@@ -136,11 +284,10 @@ def fmt(color, kind):
         return ";".join(map(str, color.channels()))
     if kind == "ref":
         return color.ref
+    if kind == "slot":
+        return color.slot or "#" + color.hex
     if kind == "src":
         return color.src
-    if kind == "qml":
-        target = color.via if color.via else f'"#{color.hex}"'
-        return f"a({target}, {color.own_alpha:g})" if color.own_alpha is not None else target
     if kind == "css":
         target = f"@{color.via}" if color.via else f"#{color.hex}"
         return f"alpha({target}, {color.own_alpha:g})" if color.own_alpha is not None else target
@@ -151,6 +298,8 @@ def evaluate(theme, expr, scope):
     head, *filters = [part.strip() for part in expr.split("|")]
     if head.endswith(".name") and head[:-5] in scope:
         value = scope[head[:-5]]
+    elif head.startswith("theme."):
+        value = theme.meta(head[6:])
     else:
         value = theme.color(scope.get(head, head))
     for f in filters:
@@ -191,7 +340,7 @@ def render(theme, text, where):
             continue
         var, table = m.groups()
         if table not in theme.tables:
-            raise ThemeError(f"{where}:{i + 1}: theme.toml has no [{table}]")
+            raise ThemeError(f"{where}:{i + 1}: there's no {table}; there's {', '.join(theme.tables)}")
         end = next((j for j in range(i + 1, len(lines)) if ENDFOR.match(lines[j])), None)
         if end is None:
             raise ThemeError(f"{where}:{i + 1}: for without endfor")
@@ -202,79 +351,114 @@ def render(theme, text, where):
     return "".join(out)
 
 
-def fill_block(existing, content, target, name):
-    suffix = f":{name}" if name else ""
-    marker = lambda edge: re.compile(rf"theme:{edge}{re.escape(suffix)}(?![:\w])")
-    lines = existing.splitlines(keepends=True)
-    begin = [i for i, l in enumerate(lines) if marker("begin").search(l)]
-    end = [i for i, l in enumerate(lines) if marker("end").search(l)]
-    if len(begin) != 1 or len(end) != 1 or end[0] < begin[0]:
-        raise ThemeError(f"{target}: needs one theme:begin{suffix} line and, after it, one theme:end{suffix} line")
-    return "".join(lines[:begin[0] + 1]) + content + "".join(lines[end[0]:])
+def theme_json(theme):
+    colors = {t: fmt(theme.color(t), "argb") for table in ("ui", "roles") for t in theme.tables[table]}
+    return json.dumps({
+        "host": theme.host, "palette": theme.palette.id, "variation": theme.variation.id,
+        "kind": theme.palette.kind, "colors": colors,
+        "slots": {s: fmt(theme.color(s), "argb") for s in theme.tables["slots"]},
+    }, indent=2) + "\n"
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("--check", action="store_true", help="write nothing; exit 1 if anything is out of date")
-    parser.add_argument("--no-reload", action="store_true", help="don't reload running programs after writing")
-    parser.add_argument("--reload", action="store_true", help="reload everything, even if nothing changed")
-    args = parser.parse_args()
+def render_all(theme):
+    """Every output, as {path under $HOME: text}."""
+    out = {}
+    for template in sorted(p for p in TEMPLATES.rglob("*") if p.is_file()):
+        rel = template.relative_to(TEMPLATES).as_posix()
+        out[rel] = render(theme, template.read_text(), f"theme/templates/{rel}")
+    out[".config/theme/theme.json"] = theme_json(theme)
+    return out
 
-    try:
-        theme = Theme(THEME)
-        for name in theme.raw:  # every value, even ones no template uses yet
-            theme.color(name)
-        # Every target's text as it is and as it will be, so a file with several blocks is
-        # compared and written once, with all of them filled.
-        targets = {}
-        for template in sorted(p for p in TEMPLATES.rglob("*") if p.is_file()):
-            rel = template.relative_to(TEMPLATES).as_posix()
-            block = rel.endswith(".block")
-            target_rel, _, block_name = (rel[:-len(".block")] if block else rel).partition("@")
-            content = render(theme, template.read_text(), f"templates/{rel}")
-            if target_rel not in targets:
-                target = ROOT / target_rel
-                text = target.read_text() if target.exists() else None
-                targets[target_rel] = [text, text]
-            if not block:
-                targets[target_rel][1] = content
-            elif targets[target_rel][1] is None:
-                raise ThemeError(f"{target_rel}: doesn't exist, so templates/{rel} has nowhere to go")
-            else:
-                targets[target_rel][1] = fill_block(targets[target_rel][1], content, target_rel, block_name)
-    except ThemeError as e:
-        sys.exit(f"retheme: {e}")
 
+def host_file(host):
+    return THEME / "hosts" / f"{host}.toml"
+
+
+def read_host(host):
+    if host not in names("hosts"):
+        raise ThemeError(f"theme/hosts/{host}.toml doesn't exist; start it from another machine's with "
+                         f"`retheme copy {names('hosts')[0] if names('hosts') else 'HOST'}`")
+    data = read_toml(host_file(host))
+    palette, variation, overrides = data.get("palette"), data.get("variation"), data.get("overrides", {})
+    if not isinstance(palette, str) or not isinstance(variation, str):
+        raise ThemeError(f"theme/hosts/{host}.toml needs palette = \"...\" and variation = \"...\"")
+    if not isinstance(overrides, dict) or not all(isinstance(v, str) for v in overrides.values()):
+        raise ThemeError(f"theme/hosts/{host}.toml: [overrides] holds token = \"value\" lines")
+    return palette, variation, overrides
+
+
+def write_host(host, palette, variation, overrides):
+    lines = [f"# {host}'s theme: the one file in theme/ that isn't shared. theme/retheme and the shell's theme drawer",
+             "# write it; run `retheme status` to see what it comes to.",
+             f'palette   = "{palette}"', f'variation = "{variation}"', "",
+             '# Tokens this machine picks for itself, on top of the variation: token = "slot".', "[overrides]"]
+    lines += [f'{token} = "{value}"' for token, value in overrides.items()]
+    host_file(host).write_text("\n".join(lines) + "\n")
+
+
+def build(host, palette=None, variation=None, overrides=None):
+    """The theme a host would have, with any of its three choices replaced, every value resolved."""
+    slots = Slots()
+    p, v, o = read_host(host)
+    theme = Theme(host, Palette(palette or p, slots), Variation(variation or v),
+                  o if overrides is None else overrides, slots)
+    for name in theme.raw:  # every value, even ones no template reads
+        theme.color(name)
+    return theme
+
+
+def destination(rel):
+    """Where an output goes. A stow package that went away leaves dangling links on the way; they're
+    replaced with real directories and files."""
+    path = HOME
+    for part in Path(rel).parts:
+        path = path / part
+        if path.is_symlink() and not path.exists():
+            path.unlink()
+    return path
+
+
+def guard(path):
+    """Refuse to write into a file git tracks: generated colors belong to one machine."""
+    real = path.resolve()
+    if ROOT in real.parents and subprocess.run(["git", "-C", str(ROOT), "check-ignore", "-q", str(real)]).returncode:
+        raise ThemeError(f"{shown(path)} leads into the dotfiles at {shown(real)}, which .gitignore doesn't "
+                         "cover: unstow whatever links it there, or add it to .gitignore")
+
+
+def apply(theme, check=False, reload=True, reload_all=False):
+    files = render_all(theme)
     changed = []
-    for target_rel, (old, new) in targets.items():
+    for rel, new in files.items():
+        try:
+            old = (HOME / rel).read_text()
+        except (FileNotFoundError, NotADirectoryError):
+            old = None
         if new == old:
             continue
-        changed.append(target_rel)
-        if args.check:
-            sys.stdout.writelines(difflib.unified_diff(
-                (old or "").splitlines(keepends=True), new.splitlines(keepends=True),
-                f"a/{target_rel}", f"b/{target_rel}"))
-        else:
-            target = ROOT / target_rel
-            target.parent.mkdir(parents=True, exist_ok=True)
-            # In place, so anything watching the file sees it change rather than vanish.
-            with open(target, "w") as f:
-                f.write(new)
-            print(f"wrote {target_rel}")
-
-    if args.check:
+        changed.append(rel)
+        if check:
+            sys.stdout.writelines(difflib.unified_diff((old or "").splitlines(keepends=True),
+                                                       new.splitlines(keepends=True), f"a/~/{rel}", f"b/~/{rel}"))
+            continue
+        path = destination(rel)
+        guard(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        # In place, so anything watching the file sees it change rather than vanish.
+        with open(path, "w") as f:
+            f.write(new)
+        print(f"wrote ~/{rel}")
+    if check:
         if changed:
-            sys.exit(f"retheme: {len(changed)} file(s) out of date with theme.toml")
-        print("retheme: everything matches theme.toml")
+            sys.exit(f"retheme: {len(changed)} file(s) out of date with {theme.host}'s theme")
+        print(f"retheme: everything matches {theme.host}'s theme")
         return
     if not changed:
         print("retheme: nothing to change")
-        if not args.reload:
-            return
-    if args.no_reload:
+    if not reload or not LIVE or not (changed or reload_all):
         return
-    for prefixes, name, command in RELOAD:
-        if not args.reload and not any(t.startswith(p) for t in changed for p in prefixes):
+    for prefix, name, command in RELOAD:
+        if not reload_all and not any(rel.startswith(prefix) for rel in changed):
             continue
         if name == "Hyprland" and not os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"):
             continue
@@ -288,6 +472,208 @@ def main():
                 errors = subprocess.run(["hyprctl", "configerrors"], capture_output=True, text=True).stdout.strip()
                 if errors:
                     print(f"Hyprland config errors:\n{errors}", file=sys.stderr)
+
+
+def state(host):
+    """Everything the shell's theme drawer shows, for `retheme json`."""
+    theme = build(host)
+    slots = Slots()
+    palettes = []
+    for name in names("palettes"):
+        try:
+            p = Palette(name, slots)
+        except ThemeError as e:
+            palettes.append({"id": name, "name": name, "error": str(e)})
+            continue
+        palettes.append({"id": name, "name": p.name, "kind": p.kind, "about": p.about,
+                         "slots": {s: "#" + h for s, (h, _) in p.slots.items()},
+                         "names": {s: own or "" for s, (_, own) in p.slots.items()}})
+    variations = []
+    for name in names("variations"):
+        try:
+            v = Variation(name)
+        except ThemeError as e:
+            variations.append({"id": name, "name": name, "error": str(e)})
+            continue
+        # Its accents in this machine's palette, for the drawer to show what picking it would do.
+        try:
+            accents = [fmt(Theme(host, theme.palette, v, {}, slots).color(t), "argb")
+                       for t in ("accentSoft", "accent", "accentAlt", "accentCool") if t in v.tables["ui"]]
+        except ThemeError:
+            accents = []
+        variations.append({"id": name, "name": v.name, "description": v.description, "extends": v.extends or "",
+                           "accents": accents})
+    tokens = []
+    for table in TABLES:
+        for token in theme.tables[table]:
+            c = theme.color(token)
+            tokens.append({"name": token, "table": table, "section": theme.variation.sections.get(token, ""),
+                           "note": theme.variation.notes.get(token, ""), "value": theme.raw[token][1],
+                           "base": theme.variation.tables[table][token], "overridden": token in theme.overrides,
+                           "color": fmt(c, "argb"), "slot": c.slot or "", "ref": c.ref})
+    return {"host": host, "hosts": names("hosts"), "palette": theme.palette.id, "variation": theme.variation.id,
+            "overrides": theme.overrides, "kind": theme.palette.kind,
+            "families": [{"name": f, "slots": s} for f, s in slots.families.items()], "slotInfo": slots.info,
+            "palettes": palettes, "variations": variations, "tokens": tokens}
+
+
+def lint():
+    slots, problems, count = Slots(), [], 0
+    variations = {}
+    for name in names("variations"):
+        try:
+            variations[name] = Variation(name)
+        except ThemeError as e:
+            problems.append(str(e))
+    for table in TABLES:
+        sets = {name: set(v.tables[table]) for name, v in variations.items()}
+        every = set().union(*sets.values()) if sets else set()
+        for name, have in sets.items():
+            if have != every:
+                problems.append(f"variation {name} [{table}] lacks {', '.join(sorted(every - have))}")
+    for p in names("palettes"):
+        try:
+            palette = Palette(p, slots)
+        except ThemeError as e:
+            problems.append(str(e))
+            continue
+        for v in variations.values():
+            try:
+                theme = Theme(HOST, palette, v, {}, slots)
+                for name in theme.raw:
+                    theme.color(name)
+                render_all(theme)
+                count += 1
+            except ThemeError as e:
+                problems.append(f"{p} with {v.id}: {e}")
+    for h in names("hosts"):
+        try:
+            build(h)
+        except ThemeError as e:
+            problems.append(f"host {h}: {e}")
+    if problems:
+        sys.exit("retheme lint:\n  " + "\n  ".join(problems))
+    print(f"retheme lint: {count} palette and variation pairs render, and every host's theme holds")
+
+
+class Lock:
+    """One retheme at a time: the shell's drawer can start them faster than they finish."""
+    def __enter__(self):
+        (HOME / ".config" / "theme").mkdir(parents=True, exist_ok=True)
+        self.file = open(HOME / ".config" / "theme" / ".lock", "w")
+        fcntl.flock(self.file, fcntl.LOCK_EX)
+
+    def __exit__(self, *exc):
+        self.file.close()
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=__doc__.split("\n")[0],
+        epilog="With no command, render this machine's theme, write what changed and reload what reads it.")
+    parser.add_argument("--check", action="store_true", help="write nothing; show what would change, exit 1 if anything would")
+    parser.add_argument("--no-reload", action="store_true", help="leave running programs alone")
+    parser.add_argument("--reload", action="store_true", help="reload everything, changed or not")
+    sub = parser.add_subparsers(dest="command", metavar="command")
+    sub.add_parser("status", help="this machine's palette, variation and overrides")
+    sub.add_parser("json", help="everything the shell's theme drawer shows, as JSON")
+    sub.add_parser("lint", help="render every palette with every variation, writing nothing")
+    edits = {
+        "palette": "use a palette", "variation": "use a variation",
+        "set": "pick a token's color: a slot, another token or #RRGGBB",
+        "unset": "drop overrides, back to the variation's colors",
+        "copy": "take another machine's palette, variation and overrides",
+        "save": "save the variation and overrides as a new variation, and switch to it"}
+    for name, text in edits.items():
+        p = sub.add_parser(name, help=text)
+        if name in ("palette", "variation", "copy"):
+            p.add_argument("name")
+        elif name == "set":
+            p.add_argument("token")
+            p.add_argument("value")
+        elif name == "unset":
+            p.add_argument("tokens", nargs="*")
+            p.add_argument("--all", action="store_true")
+        elif name == "save":
+            p.add_argument("name", help="a file name for it, like dusk")
+            p.add_argument("--description", default="")
+        p.add_argument("--host", default=HOST, help="edit another machine's choice; nothing is rendered")
+        p.add_argument("--no-reload", action="store_true", help="leave running programs alone")
+    args = parser.parse_args()
+
+    try:
+        if args.command is None:
+            theme = build(HOST)
+            with Lock():
+                apply(theme, check=args.check, reload=not args.no_reload, reload_all=args.reload)
+            return
+        if args.command == "status":
+            theme = build(HOST)
+            print(f"{HOST}: {theme.palette.name} ({theme.palette.id}), {theme.variation.name} ({theme.variation.id})")
+            for token, value in theme.overrides.items():
+                print(f"  {token} = {value}  ({fmt(theme.color(token), 'hex')})")
+            return
+        if args.command == "json":
+            json.dump(state(HOST), sys.stdout)
+            print()
+            return
+        if args.command == "lint":
+            lint()
+            return
+
+        host, created = args.host, None
+        palette, variation, overrides = read_host(host)
+        if args.command == "palette":
+            palette = args.name
+        elif args.command == "variation":
+            variation = args.name
+        elif args.command == "set":
+            overrides = dict(overrides)
+            overrides[args.token] = args.value
+            v = Variation(variation)
+            table = next((t for t in TABLES if args.token in v.tables[t]), None)
+            if table and v.tables[table][args.token] == args.value:
+                del overrides[args.token]  # the variation's own pick: no override needed
+        elif args.command == "unset":
+            unknown = [t for t in args.tokens if t not in overrides]
+            if unknown:
+                raise ThemeError(f"{host} doesn't override {', '.join(unknown)}")
+            overrides = {} if args.all else {t: v for t, v in overrides.items() if t not in args.tokens}
+        elif args.command == "copy":
+            palette, variation, overrides = read_host(args.name)
+        elif args.command == "save":
+            name = args.name
+            if not re.match(r"^[a-z0-9][a-z0-9-]*$", name):
+                raise ThemeError("a variation's name is lowercase letters, digits and dashes")
+            if name in names("variations"):
+                raise ThemeError(f"there's already a variation called {name}")
+            base = Variation(variation)
+            lines = [f'name        = "{name.replace("-", " ").title()}"',
+                     f"description = {json.dumps(args.description or f'{base.name}, with the picks {host} made.')}",
+                     f'extends     = "{variation}"', ""]
+            for table in TABLES:
+                picks = [(t, v) for t, v in overrides.items() if t in base.tables[table]]
+                if picks:
+                    lines += [f"[{table}]"] + [f'{t:<13} = "{v}"' for t, v in picks] + [""]
+            created = THEME / "variations" / f"{name}.toml"
+            created.write_text("\n".join(lines).rstrip() + "\n")
+            variation, overrides = name, {}
+        try:
+            theme = build(host, palette, variation, overrides)
+            if host == HOST:
+                render_all(theme)  # a template that can't take it fails here, before anything is saved
+        except ThemeError:
+            if created:
+                created.unlink()
+            raise
+        write_host(host, palette, variation, overrides)
+        if host != HOST:
+            print(f"saved theme/hosts/{host}.toml; run retheme on {host} to apply it")
+            return
+        with Lock():
+            apply(theme, reload=not args.no_reload)
+    except ThemeError as e:
+        sys.exit(f"retheme: {e}")
 
 
 if __name__ == "__main__":

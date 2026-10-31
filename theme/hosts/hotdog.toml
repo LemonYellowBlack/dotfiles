@@ -1,0 +1,7 @@
+# hotdog's theme: the one file in theme/ that isn't shared. theme/retheme and the shell's theme drawer
+# write it; run `retheme status` to see what it comes to.
+palette   = "kanagawa-wave"
+variation = "carp"
+
+# Tokens this machine picks for itself, on top of the variation: token = "slot".
+[overrides]

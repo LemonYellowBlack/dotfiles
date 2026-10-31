@@ -1,1 +1,0 @@
-export FZF_DEFAULT_OPTS="--color=fg:{{text}},bg:-1,hl:{{highlight}},fg+:{{text}},bg+:{{layer}},hl+:{{highlight}},info:{{textFaint}},prompt:{{accent}},pointer:{{accent}},marker:{{success}},spinner:{{accentAlt}},header:{{secondary}},border:{{line}}"

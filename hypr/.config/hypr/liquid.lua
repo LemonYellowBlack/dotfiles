@@ -17,9 +17,13 @@ end)
 ---- COLORS ----
 -----------------
 
--- The palette and tokens come from theme/theme.toml, by way of the generated kanagawa/theme.lua,
--- so t.accent here is the shell's Theme.accent. Retheme in theme.toml and run theme/retheme.
-local t = require(os.getenv("HOME") .. "/.config/kanagawa/theme.lua")
+-- Slots and tokens come from this machine's theme (theme/), by way of the generated
+-- ~/.config/theme/theme.lua, so t.accent here is the shell's Theme.accent. Change them in the
+-- shell's theme drawer or with retheme.
+-- Before the first retheme there is no theme.lua: every color is then flagged, line by line, and
+-- the binds and the rest still load.
+local ok, t = pcall(require, os.getenv("HOME") .. "/.config/theme/theme.lua")
+if not ok then t = { rgba = function() return "rgba(nil)" end } end
 
 -- The focused window's border: Theme.gAccent with crystal blue in front, turning (see below).
 local activeBorder = { colors = { t.rgba(t.accentCool), t.rgba(t.accentSoft), t.rgba(t.accent), t.rgba(t.accentAlt) }, angle = 45 }

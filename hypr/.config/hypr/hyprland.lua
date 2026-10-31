@@ -1,5 +1,5 @@
 -- hyprland.lua — shared base, stowed on every machine
--- Kanagawa (Wave) — see ~/lab/dotfiles/kanagawa-palette.md
+-- Colors: this machine's theme (theme/), by way of the generated ~/.config/theme/theme.lua.
 --
 -- Host-specific settings (monitors, laptop-only binds) live in the
 -- hypr-xps / hypr-hotdog stow packages and are required at the bottom.
@@ -8,7 +8,10 @@
 -- API reference: /usr/share/hypr/stubs/hl.meta.lua, example config at
 -- /usr/share/hypr/hyprland.lua.
 
-local t = require(os.getenv("HOME") .. "/.config/kanagawa/theme.lua")
+-- Before the first retheme there is no theme.lua: every color is then flagged, line by line, and
+-- the binds and the rest still load.
+local ok, t = pcall(require, os.getenv("HOME") .. "/.config/theme/theme.lua")
+if not ok then t = { rgba = function() return "rgba(nil)" end } end
 
 local mod = "SUPER"
 

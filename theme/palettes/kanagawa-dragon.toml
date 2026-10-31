@@ -1,0 +1,107 @@
+name   = "Kanagawa Dragon"
+kind   = "dark"
+about  = "Kanagawa's dark warm variant: ink black, ash and muted, earthy hues."
+source = "https://github.com/rebelot/kanagawa.nvim"
+
+# Its colors, by the names it gives them.
+[colors]
+dragonBlack0    = "#0D0C0C"
+dragonBlack1    = "#12120F"
+dragonBlack2    = "#1D1C19"
+dragonBlack3    = "#181616"
+dragonBlack4    = "#282727"
+dragonBlack5    = "#393836"
+dragonBlack6    = "#625E5A"
+dragonWhite     = "#C5C9C5"
+dragonGreen     = "#87A987"
+dragonGreen2    = "#8A9A7B"
+dragonPink      = "#A292A3"
+dragonOrange    = "#B6927B"
+dragonOrange2   = "#B98D7B"
+dragonGray      = "#A6A69C"
+dragonGray2     = "#9E9B93"
+dragonGray3     = "#7A8382"
+dragonBlue2     = "#8BA4B0"
+dragonViolet    = "#8992A7"
+dragonRed       = "#C4746E"
+dragonAqua      = "#8EA4A2"
+dragonAsh       = "#737C73"
+dragonTeal      = "#949FB5"
+dragonYellow    = "#C4B28A"
+dragonBlue      = "#658594"
+# Wave's, which kanagawa.nvim's dragon theme borrows.
+oldWhite        = "#C8C093"
+waveBlue1       = "#223249"
+waveBlue2       = "#2D4F67"
+winterGreen     = "#2B3328"
+winterYellow    = "#49443C"
+winterRed       = "#43242B"
+winterBlue      = "#252535"
+autumnRed       = "#C34043"
+autumnYellow    = "#DCA561"
+samuraiRed      = "#E82424"
+roninYellow     = "#FF9E3B"
+waveAqua1       = "#6A9589"
+katanaGray      = "#717C7C"
+waveRed         = "#E46876"
+springViolet1   = "#938AA9"
+lightBlue       = "#A3D4D5"
+boatYellow1     = "#938056"
+boatYellow2     = "#C0A36E"
+
+# Which color fills each shared slot (slots.toml). A hex value is a blend or step the palette
+# itself lacks.
+[slots]
+bg_deep         = "#080707"             # dragonBlack0, deepened
+bg0             = "dragonBlack0"
+bg1             = "dragonBlack1"
+bg2             = "dragonBlack2"
+bg3             = "dragonBlack3"
+bg4             = "dragonBlack4"
+bg5             = "dragonBlack5"
+bg6             = "dragonBlack6"
+
+bg_blue         = "waveBlue1"
+bg_blue_bright  = "waveBlue2"
+bg_blue_dim     = "winterBlue"
+bg_green        = "winterGreen"
+bg_green_bright = "#3E5232"             # Wave's winterGreen2
+bg_red          = "winterRed"
+bg_red_bright   = "#5E2E2B"             # Wave's winterRed2
+bg_yellow       = "winterYellow"
+
+fg              = "dragonWhite"
+fg_dim          = "oldWhite"
+fg_faint        = "dragonAsh"
+gray            = "katanaGray"
+
+red             = "dragonRed"
+red_bright      = "waveRed"
+red_strong      = "samuraiRed"
+red_deep        = "autumnRed"
+
+orange          = "dragonOrange"
+orange_strong   = "roninYellow"
+
+yellow          = "dragonYellow"
+yellow_deep     = "autumnYellow"
+yellow_muted    = "boatYellow2"
+yellow_dim      = "boatYellow1"
+
+green           = "dragonGreen"
+green_deep      = "dragonGreen2"
+
+aqua            = "dragonAqua"
+aqua_deep       = "waveAqua1"
+
+blue            = "dragonBlue2"
+blue_bright     = "dragonTeal"
+blue_light      = "lightBlue"
+blue_muted      = "dragonBlue"
+
+violet          = "dragonViolet"
+violet_light    = "dragonGray"
+violet_muted    = "springViolet1"
+lavender        = "dragonGray2"
+
+pink            = "dragonPink"

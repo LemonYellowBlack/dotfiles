@@ -1,0 +1,74 @@
+# The color names every palette fills, so any variation works with any palette.
+#
+# A palette (palettes/*.toml) keeps its colors under its own names and says which of them fills
+# each slot below. Variations (variations/*.toml) and templates (templates/) name only slots and
+# tokens, never a palette's own names, so switching palettes can't leave a name unfilled.
+#
+# The tables are families: the shell's theme drawer lays its swatches out by them, in this order.
+# Each description says what the slot does in Kanagawa Wave, the palette these were cut from; a
+# palette that has no exact match fills the slot with its nearest color.
+
+[surface]
+bg_deep = "below the darkest surface: the shell's island, scrims, shadows"
+bg0     = "the darkest everyday surface: bars, drawers, the shell's frame"
+bg1     = "a step up from bg0"
+bg2     = "a step up from bg1"
+bg3     = "the editor and terminal background"
+bg4     = "raised: pills, cards, gutters"
+bg5     = "raised further: hover, the cursor line"
+bg6     = "lines, borders, whitespace, disabled text"
+
+[tint]
+bg_blue         = "a blue-tinted surface: selections, popups"
+bg_blue_bright  = "a brighter blue tint: search matches, the selected row"
+bg_blue_dim     = "a faint blue tint: diff line backgrounds"
+bg_green        = "a green tint: added lines"
+bg_green_bright = "a brighter green tint: added words"
+bg_red          = "a red tint: deleted lines"
+bg_red_bright   = "a brighter red tint: deleted words"
+bg_yellow       = "a yellow tint: changed lines"
+
+[text]
+fg       = "default text"
+fg_dim   = "secondary text, a paler cream"
+fg_faint = "comments, hints, idle states"
+gray     = "deprecated code"
+
+[red]
+red        = "the everyday red: keywords, danger"
+red_bright = "a hotter red: invalid code, standouts"
+red_strong = "the most saturated red: errors"
+red_deep   = "a darker red: deletions, terminal red"
+
+[orange]
+orange        = "constants, heavy load"
+orange_strong = "warnings"
+
+[yellow]
+yellow       = "the bright yellow: identifiers, the carp accent"
+yellow_deep  = "a deeper amber: changes"
+yellow_muted = "a muted gold: operators, terminal yellow"
+yellow_dim   = "the dullest gold"
+
+[green]
+green      = "strings, success"
+green_deep = "additions, terminal green"
+
+[aqua]
+aqua      = "types"
+aqua_deep = "hints, terminal cyan"
+
+[blue]
+blue        = "functions, the cool accent"
+blue_bright = "specials, links, info"
+blue_light  = "the palest blue"
+blue_muted  = "a grayer blue"
+
+[violet]
+violet       = "storage, terminal magenta"
+violet_light = "parameters"
+violet_muted = "a grayer violet"
+lavender     = "punctuation"
+
+[pink]
+pink = "numbers"

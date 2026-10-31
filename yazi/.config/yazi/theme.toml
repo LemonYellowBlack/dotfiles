@@ -1,2 +1,4 @@
 [flavor]
-dark = "kanagawa"
+# This machine's theme, which theme/retheme writes; light when its palette is.
+dark = "theme"
+light = "theme"

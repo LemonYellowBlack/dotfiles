@@ -2,23 +2,12 @@
 
 Reference for the [kanagawa.nvim](https://github.com/rebelot/kanagawa.nvim) theme.
 
-## Semantic roles
+The dotfiles carry these as `theme/palettes/kanagawa-{wave,dragon,lotus}.toml`, which
+also say which color fills each of the shared slots in `theme/slots.toml`. The README's
+[Theme](README.md#theme) section explains how a palette reaches every tool.
 
-The four chrome roles used across all themed tools in this repo. They're `[roles]` in [`theme/theme.toml`](theme/theme.toml), which generates `~/.config/kanagawa/roles.conf` and `theme.{lua,conf,css}` from them.
-
-| Role | Hex | Palette name | Used for |
-|---|---|---|---|
-| content | `#1F1F28` | sumiInk3 | editor/terminal/notification body, active tab bg |
-| chrome | `#16161D` | sumiInk0 | tab/status bars, inactive tab bg, window dim |
-| focus accent | `#E6C384` | carpYellow, by way of `accent` | active borders, focused window frame |
-| dim accent | `#2A2A37` | sumiInk4 | inactive borders |
-
-**Generated from `theme/theme.toml`**: kitty, hyprland, hyprlock, the Liquid shell's `Theme.qml`, waybar, fuzzel, mako, zathura, satty, starship, vivid, fzf (in `.zshrc`), delta (in `.gitconfig`), psql's prompt, the Claude statusline, bottom, television, bat, yazi, and nvim's own highlights.
-**Not generated**: pspg (colour *names*, so it follows kitty's terminal colors; see the README), herdr (a built-in theme name), btop (not installed anywhere).
-
-To change a role, or any color, edit `theme/theme.toml` and run `theme/retheme`.
-
-**By name, not hex**: `theme/theme.toml` holds the whole palette below, the tokens that give each color a job (`accent`, `line`, `danger`, …, the names Quickshell's `Theme.qml` uses), the roles above, the terminal's 16 colors and the syntax colors. `theme/retheme` writes them, through `theme/templates/`, into each tool's own format: `~/.config/kanagawa/theme.lua` (Hyprland, nvim), `theme.conf` (hyprlock), `theme.css` (waybar), `roles.conf` (kitty), whole theme files (kitty, television, bat, yazi), and marked blocks inside hand-edited configs.
+**Not themed by `retheme`**: pspg (colour *names*, so it follows kitty's terminal colors; see
+the README), herdr (a built-in theme name), btop (not installed anywhere).
 
 ## Wave (dark default)
 

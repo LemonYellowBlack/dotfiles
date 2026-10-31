@@ -1,0 +1,15 @@
+name        = "Classic"
+description = "The shell's first look: crystal blue leads into violet, with aqua for names and carp kept for highlights."
+extends     = "carp"
+
+# Only what differs from carp; everything else comes from it.
+
+[ui]
+textSubtle    = "lavender"        # subtitles, artists, unselected tabs
+textMuted     = "violet_muted"    # captions, hints, section labels
+accent        = "blue"            # focus, active, primary
+accentSoft    = "blue_bright"     # the pale start of accent fills
+accentAlt     = "violet"          # the deep end of accent fills
+accentCool    = "aqua"            # the counterpart: media, suspend, file names in diffs
+secondary     = "aqua"            # host and app names
+warning       = "yellow"

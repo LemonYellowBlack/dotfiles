@@ -1,0 +1,95 @@
+name        = "Carp"
+description = "Off-whites and yellows lead and crystal blue is the cool counterpart; violet stays in code and the terminal."
+
+# Every value is a slot (slots.toml), another token, #RRGGBB, or one of those at an opacity:
+# "fg_dim @ 0.7". Tokens are what the shell (Theme.qml) and every template read.
+
+[ui]
+# Surfaces, darkest first.
+surfaceDeep   = "bg_deep"         # the shell's island, tooltips, scrims
+surface       = "bg0"             # the shell's frame, drawers, bar
+surfaceRaised = "bg3"             # window thumbnails and tags; the lock screen's background
+layer         = "bg4"             # pills, cards, tiles, buttons; the password field
+layerHover    = "bg5"
+line          = "bg6"             # tracks and idle borders, unfocused windows' borders
+selection     = "bg_blue_bright"  # text selection, avatars
+selectionDeep = "bg_blue"         # window previews, the cover-art backdrop
+shadow        = "bg_deep"         # under windows
+
+# Text, brightest first.
+text          = "fg"
+textAlt       = "fg_dim"          # values, notification bodies
+textSubtle    = "yellow_muted"    # subtitles, artists, unselected tabs
+textMuted     = "fg_dim @ 0.7"    # captions, hints, section labels
+textFaint     = "fg_faint"        # idle states, chart axes
+textDisabled  = "bg6"
+textOnAccent  = "bg0"             # text over accent fills and gradients
+caret         = "highlight"       # the terminal's and editors' cursor
+
+# Accents and states.
+accent        = "yellow"          # focus, active, primary
+accentSoft    = "fg_dim"          # the pale start of accent fills
+accentAlt     = "yellow_deep"     # the deep end of accent fills
+accentCool    = "blue"            # the cool counterpart: media, suspend, file names in diffs
+secondary     = "blue"            # host and app names
+info          = "blue_bright"     # weather, fans, streaming
+highlight     = "yellow"          # search matches, cursor, drop targets, lit toggles
+success       = "green"
+warning       = "orange_strong"
+hot           = "orange"          # heavy load, the sun
+danger        = "red"
+dangerDeep    = "red_deep"
+
+[roles]
+# The chrome roles kitty, waybar and Hyprland's fallback border share.
+content       = "surfaceRaised"   # editor, terminal and notification bodies; the active tab
+chrome        = "surface"         # tab and status bars, inactive tabs
+focus_accent  = "accent"          # active borders, the focused window's frame
+dim_accent    = "layer"           # inactive borders
+
+[ansi]
+# The terminal's 16 colors (kitty), plus the two kitty adds after them.
+ansiBlack         = "bg3"
+ansiRed           = "red_deep"
+ansiGreen         = "green_deep"
+ansiYellow        = "yellow_muted"
+ansiBlue          = "blue"
+ansiMagenta       = "violet"
+ansiCyan          = "aqua_deep"
+ansiWhite         = "fg_dim"
+ansiBrightBlack   = "fg_faint"
+ansiBrightRed     = "red_strong"
+ansiBrightGreen   = "green"
+ansiBrightYellow  = "yellow"
+ansiBrightBlue    = "blue_bright"
+ansiBrightMagenta = "violet_muted"
+ansiBrightCyan    = "aqua"
+ansiBrightWhite   = "fg"
+ansi16            = "orange"
+ansi17            = "red_bright"
+
+[syntax]
+# Code highlighting: bat, yazi's previews, delta. Apart from ui, so moving the accent never
+# recolors code.
+comments       = "fg_faint"
+strings        = "green"
+numbers        = "pink"
+constants      = "orange"         # built-in constants
+identifiers    = "yellow"         # variables, user constants, attributes
+interpolation  = "yellow_muted"   # string interpolation
+keywords       = "red"
+storage        = "violet"         # storage, storage types, JSON keys
+types          = "aqua"           # classes and types
+functions      = "blue"
+parameters     = "violet_light"
+specials       = "blue_bright"    # tags, library functions and constants
+punctuation    = "lavender"
+regexps        = "yellow"
+invalid        = "red_bright"     # invalid code, escape characters
+deprecated     = "gray"
+errors         = "red_strong"
+diffAdd        = "bg_green"
+diffAddEmph    = "bg_green_bright"
+diffDelete     = "bg_red"
+diffDeleteEmph = "bg_red_bright"
+diffChange     = "bg_yellow"
