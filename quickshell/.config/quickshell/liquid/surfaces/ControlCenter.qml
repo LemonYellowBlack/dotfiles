@@ -32,6 +32,7 @@ Drawer {
             T { text: Quickshell.env("USER") + "@" + Host.name; font.weight: Font.DemiBold; Layout.fillWidth: true }
             T { text: "up " + Sys.upText() + " · load " + Sys.load1.toFixed(2); font.pixelSize: 11; color: Theme.textMuted; Layout.fillWidth: true }
         }
+        IconBtn { icon: Icons.palette; onClicked: Shell.toggle("colors", "") }
         IconBtn { icon: Icons.camera; onClicked: { Shell.close(); Quickshell.execDetached(["sh", "-c", "sleep 0.4; hyprshot -m region -o ~/Pictures/Screenshots"]); } }
         IconBtn { icon: Icons.lock; onClicked: { Shell.close(); Quickshell.execDetached(["loginctl", "lock-session"]); } }
         IconBtn { icon: Icons.power; iconColor: Theme.danger; onClicked: Shell.toggle("power", "") }

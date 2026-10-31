@@ -86,6 +86,7 @@ hl.bind(mod .. " + Space",      hl.dsp.exec_cmd(shell .. "toggle launcher || fuz
 hl.bind(mod .. " + F1",     hl.dsp.exec_cmd(shell .. "toggle dash || ~/.local/bin/statuspopup"))
 hl.bind(mod .. " + A",      hl.dsp.exec_cmd(shell .. "toggle control"))
 hl.bind(mod .. " + N",      hl.dsp.exec_cmd(shell .. "toggle control"))
+hl.bind(mod .. " + T",      hl.dsp.exec_cmd(shell .. "toggle colors"))
 hl.bind(mod .. " + Tab",    hl.dsp.exec_cmd(shell .. "toggle overview"))
 hl.bind(mod .. " + slash",  hl.dsp.exec_cmd(shell .. "toggle keys"))
 hl.bind(mod .. " + Escape", hl.dsp.exec_cmd(shell .. "toggle power"))

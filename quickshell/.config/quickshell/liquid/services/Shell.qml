@@ -10,7 +10,7 @@ import qs.config
 Singleton {
     id: root
 
-    property string drawer: ""          // control | dash | vitals | homelab | launcher
+    property string drawer: ""          // control | dash | vitals | homelab | launcher | colors
     property string overlay: ""         // overview | power | keys
     property string screen: ""          // the monitor the open surface belongs to
     property string dashTab: "overview"

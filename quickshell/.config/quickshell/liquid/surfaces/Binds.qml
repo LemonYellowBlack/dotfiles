@@ -67,7 +67,7 @@ Item {
                     Layout.preferredWidth: 1
                     Layout.fillWidth: true
                     spacing: 20
-                    Group { title: "shell"; Bind { keys: "SUPER A"; does: "control center"; tag: "new" } Bind { keys: "SUPER N"; does: "notifications"; tag: "new" } Bind { keys: "SUPER F1"; does: "dashboard, was statuspopup"; tag: "shell" } Bind { keys: "SUPER F2"; does: Host.battery ? "battery, was batterypopup" : "control center"; tag: "shell" } Bind { keys: "SUPER /"; does: "this sheet"; tag: "new" } Bind { keys: "SUPER Esc"; does: "power menu"; tag: "new" } Bind { keys: "SUPER Z"; does: "hide or show the bar"; tag: "new" } }
+                    Group { title: "shell"; Bind { keys: "SUPER A"; does: "control center"; tag: "new" } Bind { keys: "SUPER N"; does: "notifications"; tag: "new" } Bind { keys: "SUPER T"; does: "colors: palette, variation, tokens"; tag: "new" } Bind { keys: "SUPER F1"; does: "dashboard, was statuspopup"; tag: "shell" } Bind { keys: "SUPER F2"; does: Host.battery ? "battery, was batterypopup" : "control center"; tag: "shell" } Bind { keys: "SUPER /"; does: "this sheet"; tag: "new" } Bind { keys: "SUPER Esc"; does: "power menu"; tag: "new" } Bind { keys: "SUPER Z"; does: "hide or show the bar"; tag: "new" } }
                     Group {
                         title: "toggles · ⇧ flips, the island confirms"
                         Bind { keys: "SUPER ⇧ F9"; does: "auto-lock"; tag: "shell" }

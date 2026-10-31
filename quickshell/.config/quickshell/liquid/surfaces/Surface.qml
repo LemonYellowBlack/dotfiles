@@ -37,6 +37,7 @@ FocusScope {
         Vitals { open: Shell.drawer === "vitals" && root.mine }
         Homelab { open: Shell.drawer === "homelab" && root.mine }
         Launcher { open: Shell.drawer === "launcher" && root.mine }
+        Colors { open: Shell.drawer === "colors" && root.mine }
     }
 
     // Slides up and fades with the frame's top edge when SUPER Z hides it.
