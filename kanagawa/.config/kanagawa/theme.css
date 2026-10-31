@@ -72,7 +72,7 @@
 @define-color textFaint     @fujiGray;
 @define-color textDisabled  @sumiInk6;
 @define-color textOnAccent  @sumiInk0;
-@define-color caret         @oldWhite;
+@define-color caret         @highlight;
 @define-color accent        @carpYellow;
 @define-color accentSoft    @oldWhite;
 @define-color accentAlt     @autumnYellow;
@@ -89,5 +89,5 @@
 /* Chrome roles, shared with kitty (roles.conf) and Hyprland (theme.lua). */
 @define-color content       @surfaceRaised;
 @define-color chrome        @surface;
-@define-color focus_accent  @selection;
+@define-color focus_accent  @accent;
 @define-color dim_accent    @layer;

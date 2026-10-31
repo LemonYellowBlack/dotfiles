@@ -253,22 +253,22 @@ tx_total_color = "#D27E99"
 
 [styles.battery]
 high_battery_color = "#98BB6C"
-medium_battery_color = "#E6C384"
-low_battery_color = "#E82424"
+medium_battery_color = "#FF9E3B"
+low_battery_color = "#E46876"
 
 [styles.tables]
-headers = {color = "#7E9CD8", bold = true}
+headers = {color = "#E6C384", bold = true}
 
 [styles.graphs]
 graph_color = "#54546D"
 legend_text = {color = "#727169"}
 
 [styles.widgets]
-border_color = "#363646"
-selected_border_color = "#7E9CD8"
+border_color = "#54546D"
+selected_border_color = "#E6C384"
 widget_title = {color = "#DCD7BA"}
 text = {color = "#DCD7BA"}
-selected_text = {color = "#1F1F28", bg_color = "#7E9CD8"}
+selected_text = {color = "#16161D", bg_color = "#E6C384"}
 disabled_text = {color = "#54546D"}
 thread_text = {color = "#98BB6C"}
 # theme:end

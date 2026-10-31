@@ -34,7 +34,7 @@
 	hunk-header-file-style = "#7E9CD8"
 	hunk-header-line-number-style = "#727169"
 	hunk-header-decoration-style = "#54546D" box
-	commit-decoration-style = "#658594" box ul
+	commit-decoration-style = "#7E9CD8" box ul
 	blame-palette = "#1F1F28" "#2A2A37" "#363646"
 	# theme:end
 [merge]

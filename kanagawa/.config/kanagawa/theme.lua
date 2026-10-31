@@ -73,7 +73,7 @@ local t = {
     textFaint     = "727169",      -- fujiGray
     textDisabled  = "54546D",      -- sumiInk6
     textOnAccent  = "16161D",      -- sumiInk0
-    caret         = "C8C093",      -- oldWhite
+    caret         = "E6C384",      -- highlight
     accent        = "E6C384",      -- carpYellow
     accentSoft    = "C8C093",      -- oldWhite
     accentAlt     = "DCA561",      -- autumnYellow
@@ -90,7 +90,7 @@ local t = {
     -- Chrome roles, shared with kitty (roles.conf) and waybar (theme.css).
     content       = "1F1F28",      -- surfaceRaised
     chrome        = "16161D",      -- surface
-    focus_accent  = "2D4F67",      -- selection
+    focus_accent  = "E6C384",      -- accent
     dim_accent    = "2A2A37",      -- layer
 }
 

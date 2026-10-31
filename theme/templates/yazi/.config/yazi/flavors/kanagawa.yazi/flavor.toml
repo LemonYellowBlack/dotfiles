@@ -5,10 +5,10 @@
 [mgr]
 marker_copied = { fg = "{{springGreen}}", bg = "{{springGreen}}" }
 marker_cut = { fg = "{{waveRed}}", bg = "{{waveRed}}" }
-marker_marked = { fg = "{{oniViolet}}", bg = "{{oniViolet}}" }
+marker_marked = { fg = "{{accentCool}}", bg = "{{accentCool}}" }
 marker_selected = { fg = "{{surimiOrange}}", bg = "{{surimiOrange}}" }
 
-cwd = { fg = "{{carpYellow}}" }
+cwd = { fg = "{{accent}}" }
 
 find_keyword = { fg = "{{surimiOrange}}", bg = "{{sumiInk3}}" }
 find_position = {}
@@ -26,20 +26,20 @@ current = { reversed = true }
 preview = { reversed = true }
 
 [tabs]
-active = { fg = "{{sumiInk3}}", bg = "{{crystalBlue}}" }
-inactive = { fg = "{{crystalBlue}}", bg = "{{layer}}" }
+active = { fg = "{{sumiInk3}}", bg = "{{accent}}" }
+inactive = { fg = "{{textSubtle}}", bg = "{{layer}}" }
 
 sep_inner = { open = "", close = "" }
 sep_outer = { open = "", close = "" }
 
 
 [mode]
-normal_main = { fg = "{{sumiInk3}}", bg = "{{crystalBlue}}" }
-normal_alt = { fg = "{{crystalBlue}}", bg = "{{layer}}" }
-select_main = { fg = "{{sumiInk3}}", bg = "{{oniViolet}}" }
-select_alt = { fg = "{{oniViolet}}", bg = "{{layer}}" }
-unset_main = { fg = "{{sumiInk3}}", bg = "{{carpYellow}}" }
-unset_alt = { fg = "{{carpYellow}}", bg = "{{layer}}" }
+normal_main = { fg = "{{sumiInk3}}", bg = "{{accent}}" }
+normal_alt = { fg = "{{accent}}", bg = "{{layer}}" }
+select_main = { fg = "{{sumiInk3}}", bg = "{{accentAlt}}" }
+select_alt = { fg = "{{accentAlt}}", bg = "{{layer}}" }
+unset_main = { fg = "{{sumiInk3}}", bg = "{{accentCool}}" }
+unset_alt = { fg = "{{accentCool}}", bg = "{{layer}}" }
 
 
 [status]
@@ -47,7 +47,7 @@ sep_left = { open = "", close = "" }
 sep_right = { open = "", close = "" }
 overall = { fg = "{{textAlt}}", bg = "{{chrome}}" }
 
-progress_label = { fg = "{{crystalBlue}}", bold = true }
+progress_label = { fg = "{{accent}}", bold = true }
 progress_normal = { fg = "{{sumiInk4}}", bg = "{{sumiInk3}}" }
 progress_error = { fg = "{{sumiInk4}}", bg = "{{sumiInk3}}" }
 
@@ -55,29 +55,29 @@ perm_type = { fg = "{{springGreen}}" }
 perm_read = { fg = "{{carpYellow}}" }
 perm_write = { fg = "{{peachRed}}" }
 perm_exec = { fg = "{{waveAqua2}}" }
-perm_sep = { fg = "{{oniViolet}}" }
+perm_sep = { fg = "{{textFaint}}" }
 
 
 [pick]
-border = { fg = "{{crystalBlue}}" }
-active = { fg = "{{oniViolet}}", bold = true }
+border = { fg = "{{accent}}" }
+active = { fg = "{{accentAlt}}", bold = true }
 inactive = {}
 
 [input]
-border = { fg = "{{crystalBlue}}" }
+border = { fg = "{{accent}}" }
 title = {}
 value = {}
 selected = { reversed = true }
 
 [completion]
-border = { fg = "{{crystalBlue}}" }
+border = { fg = "{{accent}}" }
 active = { reversed = true }
 inactive = {}
 
 [tasks]
-border = { fg = "{{crystalBlue}}" }
+border = { fg = "{{accent}}" }
 title = {}
-hovered = { fg = "{{oniViolet}}" }
+hovered = { fg = "{{accentAlt}}" }
 
 [which]
 cols = 2
@@ -85,20 +85,20 @@ separator = " - "
 separator_style = { fg = "{{textFaint}}" }
 mask = { bg = "{{sumiInk0}}" }
 rest = { fg = "{{textFaint}}" }
-cand = { fg = "{{crystalBlue}}" }
+cand = { fg = "{{accent}}" }
 desc = { fg = "{{textDisabled}}" }
 
 [help]
-on = { fg = "{{waveAqua2}}" }
-run = { fg = "{{oniViolet}}" }
+on = { fg = "{{secondary}}" }
+run = { fg = "{{accentAlt}}" }
 desc = {}
 hovered = { reversed = true, bold = true }
 footer = { fg = "{{sumiInk3}}", bg = "{{fujiWhite}}" }
 
 [notify]
-title_info = { fg = "{{springGreen}}" }
-title_warn = { fg = "{{carpYellow}}" }
-title_error = { fg = "{{samuraiRed}}" }
+title_info = { fg = "{{success}}" }
+title_warn = { fg = "{{warning}}" }
+title_error = { fg = "{{danger}}" }
 
 [filetype]
 rules = [

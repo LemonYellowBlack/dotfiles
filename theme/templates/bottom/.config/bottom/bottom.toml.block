@@ -18,21 +18,21 @@ tx_total_color = "{{sakuraPink}}"
 
 [styles.battery]
 high_battery_color = "{{success}}"
-medium_battery_color = "{{carpYellow}}"
-low_battery_color = "{{samuraiRed}}"
+medium_battery_color = "{{warning}}"
+low_battery_color = "{{danger}}"
 
 [styles.tables]
-headers = {color = "{{crystalBlue}}", bold = true}
+headers = {color = "{{accent}}", bold = true}
 
 [styles.graphs]
 graph_color = "{{line}}"
 legend_text = {color = "{{textFaint}}"}
 
 [styles.widgets]
-border_color = "{{sumiInk5}}"
-selected_border_color = "{{crystalBlue}}"
+border_color = "{{line}}"
+selected_border_color = "{{accent}}"
 widget_title = {color = "{{text}}"}
 text = {color = "{{text}}"}
-selected_text = {color = "{{sumiInk3}}", bg_color = "{{crystalBlue}}"}
+selected_text = {color = "{{textOnAccent}}", bg_color = "{{accent}}"}
 disabled_text = {color = "{{textDisabled}}"}
 thread_text = {color = "{{springGreen}}"}

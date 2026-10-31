@@ -10,7 +10,7 @@ The four chrome roles used across all themed tools in this repo. They're `[roles
 |---|---|---|---|
 | content | `#1F1F28` | sumiInk3 | editor/terminal/notification body, active tab bg |
 | chrome | `#16161D` | sumiInk0 | tab/status bars, inactive tab bg, window dim |
-| focus accent | `#2D4F67` | waveBlue2 | active borders, focused window frame, selection bg |
+| focus accent | `#E6C384` | carpYellow, by way of `accent` | active borders, focused window frame |
 | dim accent | `#2A2A37` | sumiInk4 | inactive borders |
 
 **Generated from `theme/theme.toml`**: kitty, hyprland, hyprlock, the Liquid shell's `Theme.qml`, waybar, fuzzel, mako, zathura, satty, starship, vivid, fzf (in `.zshrc`), delta (in `.gitconfig`), psql's prompt, the Claude statusline, bottom, television, bat, yazi, and nvim's own highlights.

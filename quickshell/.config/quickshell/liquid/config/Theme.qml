@@ -75,7 +75,7 @@ Singleton {
     readonly property color textFaint: fujiGray
     readonly property color textDisabled: sumiInk6
     readonly property color textOnAccent: sumiInk0
-    readonly property color caret: oldWhite
+    readonly property color caret: highlight
     readonly property color accent: carpYellow
     readonly property color accentSoft: oldWhite
     readonly property color accentAlt: autumnYellow

@@ -82,13 +82,13 @@ textMuted     = "oldWhite @ 0.7"  # captions, hints, section labels
 textFaint     = "fujiGray"        # idle states, chart axes
 textDisabled  = "sumiInk6"
 textOnAccent  = "sumiInk0"        # text over accent fills and gradients
-caret         = "oldWhite"        # the terminal's and editors' cursor
+caret         = "highlight"       # the terminal's and editors' cursor
 
 # Accents and states.
 accent        = "carpYellow"      # focus, active, primary
 accentSoft    = "oldWhite"        # the pale start of accent fills
 accentAlt     = "autumnYellow"    # the deep end of accent fills
-accentCool    = "crystalBlue"     # the cool counterpart: media, suspend, the lock screen's ring
+accentCool    = "crystalBlue"     # the cool counterpart: media, suspend, file names in diffs
 secondary     = "crystalBlue"     # host and app names
 info          = "springBlue"      # weather, fans, streaming
 highlight     = "carpYellow"      # search matches, cursor, drop targets, lit toggles
@@ -101,7 +101,7 @@ dangerDeep    = "autumnRed"
 [roles]
 content       = "surfaceRaised"   # editor, terminal and notification bodies; the active tab
 chrome        = "surface"         # tab and status bars, inactive tabs
-focus_accent  = "selection"       # active borders, the focused window's frame
+focus_accent  = "accent"          # active borders, the focused window's frame
 dim_accent    = "layer"           # inactive borders
 
 [ansi]
