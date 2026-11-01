@@ -20,6 +20,11 @@ hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"), { loc
 
 -- Lid
 hl.bind("switch:Lid Switch", hl.dsp.exec_cmd("~/.local/bin/lock-if-enabled"), { locked = true })
+-- Panel off while the lid is shut. Without this, a lid closed under caffeine (which inhibits the
+-- suspend and stops hypridle) leaves the backlight on and the shell rendering into a panel pressed
+-- against the keyboard deck. Only eDP-1 goes dark, so an external monitor keeps working.
+hl.bind("switch:on:Lid Switch",  hl.dsp.dpms({ action = "off", monitor = "eDP-1" }), { locked = true })
+hl.bind("switch:off:Lid Switch", hl.dsp.dpms({ action = "on",  monitor = "eDP-1" }), { locked = true })
 
 -- Audio — EasyEffects DSP to compensate for the tiny built-in speakers.
 -- First line runs the background processor; second re-applies the preset each
