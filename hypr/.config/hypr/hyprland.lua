@@ -133,6 +133,15 @@ hl.window_rule({
     suppress_event = "fullscreen maximize",
 })
 
+-- kitty 0.49 asks to be maximized when it opens, so each new terminal covered the workspace
+-- instead of tiling in next to the others. Ignore the request; SUPER + F still fullscreens it.
+hl.window_rule({
+    name  = "kitty-no-maximize",
+    match = { class = "kitty" },
+
+    suppress_event = "maximize",
+})
+
 hl.layer_rule({
     name  = "no-blur-waybar",
     match = { namespace = "waybar" },
