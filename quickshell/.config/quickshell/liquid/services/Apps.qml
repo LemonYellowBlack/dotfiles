@@ -56,6 +56,8 @@ Singleton {
         { name: "Touchpad", desc: "touchpad-toggle", hint: "SUPER ⇧ F10", icon: Icons.pad, host: Host.touchpad, run: () => { done(); Toggles.toggle("touch"); } },
         { name: "dGPU", desc: Host.gpuName + " · gpu-toggle", hint: "SUPER ⇧ F11", icon: Icons.gpu, host: Host.gpu === "prime", run: () => { done(); Toggles.toggle("gpu"); } },
         { name: "Sunshine", desc: "let Moonlight stream this desktop", hint: "", icon: Icons.stream, host: Host.sunshine, run: () => { done(); Toggles.toggle("sunshine"); } },
+        ...Stream.apps.map(a => ({ name: "Stream " + Host.labName + " · " + a.label, desc: "moonlight stream " + Host.labName + " \"" + a.app + "\"",
+                                    hint: "", icon: Icons.stream, host: Stream.available, run: () => { done(); Stream.start(a.app); } })),
         { name: "Night light", desc: "pause or resume gammastep", hint: "", icon: Icons.moon, run: () => { done(); Toggles.toggle("night"); } },
         { name: "Do not disturb", desc: "hold notification popups", hint: "", icon: Icons.bellOff, run: () => { done(); Toggles.toggle("dnd"); } },
         { name: "Screenshot region", desc: "hyprshot -m region", hint: "SUPER Print", icon: Icons.crop, run: () => { done(); sh("sleep 0.3; hyprshot -m region -o ~/Pictures/Screenshots"); } },

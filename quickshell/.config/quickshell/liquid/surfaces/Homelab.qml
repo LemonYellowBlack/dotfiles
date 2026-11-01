@@ -46,6 +46,34 @@ Drawer {
         T { visible: root.gpu !== null; text: root.gpu ? root.gpu.name.replace("NVIDIA GeForce ", "") : ""; font.pixelSize: 11; color: Theme.textAlt }
     }
 
+    // Moonlight into the box. A stopped Sunshine is started over SSH first, so every pill works.
+    RowLayout {
+        visible: Stream.available && Lab.ok
+        Layout.fillWidth: true
+        spacing: 6
+        Icon { path: Icons.stream; size: 14; stroke: 2; color: Stream.sunshine === "running" ? Theme.accent : Theme.textMuted }
+        T {
+            Layout.fillWidth: true
+            text: Stream.pending ? "starting " + Stream.pending + "…" : "sunshine · " + (Stream.sunshine || "not in labstatus")
+            font.pixelSize: 11; color: Theme.textMuted
+        }
+        Repeater {
+            model: Stream.apps
+            Rectangle {
+                required property var modelData
+                readonly property bool busy: Stream.pending === modelData.app
+                implicitWidth: pill.implicitWidth + 20; implicitHeight: 24; radius: 12
+                color: busy ? Theme.a(Theme.accent, 0.3) : (press.containsMouse ? Theme.a(Theme.accent, 0.22) : Theme.a(Theme.layer, 0.6))
+                Behavior on color { ColorAnimation { duration: 180 } }
+                T { id: pill; anchors.centerIn: parent; text: modelData.label; font.pixelSize: 11; color: press.containsMouse || busy ? Theme.text : Theme.textSubtle }
+                MouseArea {
+                    id: press; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                    onClicked: { Stream.start(modelData.app); Shell.close(); }
+                }
+            }
+        }
+    }
+
     Card {
         visible: root.gpu !== null
         Layout.fillWidth: true
