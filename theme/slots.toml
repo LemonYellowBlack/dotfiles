@@ -35,7 +35,7 @@ fg_faint = "comments, hints, idle states"
 gray     = "deprecated code"
 
 [red]
-red        = "the everyday red: keywords, danger"
+red        = "the everyday red: danger"
 red_bright = "a hotter red: invalid code, standouts"
 red_strong = "the most saturated red: errors"
 red_deep   = "a darker red: deletions, terminal red"
@@ -47,11 +47,11 @@ orange_strong = "warnings"
 [yellow]
 yellow       = "the bright yellow: identifiers, the carp accent"
 yellow_deep  = "a deeper amber: changes"
-yellow_muted = "a muted gold: operators, terminal yellow"
+yellow_muted = "a muted gold: subtitles, string interpolation, terminal yellow"
 yellow_dim   = "the dullest gold"
 
 [green]
-green      = "strings, success"
+green      = "keywords, success"
 green_deep = "additions, terminal green"
 
 [aqua]

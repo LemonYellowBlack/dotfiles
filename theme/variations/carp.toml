@@ -81,7 +81,7 @@ numbers        = "pink"
 constants      = "yellow_deep"    # built-in constants, ALL_CAPS names, booleans
 identifiers    = "yellow"         # members, fields, attributes; user constants
 interpolation  = "yellow_muted"   # string interpolation
-keywords       = "red"            # keywords and statements: if, for, while
+keywords       = "green"          # keywords and statements: if, for, while
 storage        = "violet"         # def, class, let, fn, types as keywords; JSON keys
 controlFlow    = "keywords"       # return, raise, throw
 operators      = "keywords"       # + == and, and/or/not as words
