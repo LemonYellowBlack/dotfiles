@@ -30,7 +30,7 @@ Drawer {
         Rectangle {
             implicitWidth: 10; implicitHeight: 10; radius: 5
             color: Lab.ok ? (Lab.down > 0 ? Theme.warning : Theme.success) : (Lab.error ? Theme.danger : Theme.textFaint)
-            SequentialAnimation on opacity { running: Lab.ok; loops: Animation.Infinite; NumberAnimation { to: 0.35; duration: 1100 } NumberAnimation { to: 1; duration: 1100 } }
+            SequentialAnimation on opacity { running: root.shown && Lab.ok; loops: Animation.Infinite; NumberAnimation { to: 0.35; duration: 1100 } NumberAnimation { to: 1; duration: 1100 } }
         }
         ColumnLayout {
             Layout.fillWidth: true
@@ -115,7 +115,7 @@ Drawer {
                         Rectangle {
                             implicitWidth: 7; implicitHeight: 7; radius: 3.5
                             color: modelData.ok ? Theme.success : (modelData.idle ? Theme.textFaint : (modelData.warn ? Theme.warning : Theme.danger))
-                            SequentialAnimation on opacity { running: modelData.ok; loops: Animation.Infinite; PauseAnimation { duration: (index * 170) % 1400 } NumberAnimation { to: 0.35; duration: 1100 } NumberAnimation { to: 1; duration: 1100 } }
+                            SequentialAnimation on opacity { running: root.shown && modelData.ok; loops: Animation.Infinite; PauseAnimation { duration: (index * 170) % 1400 } NumberAnimation { to: 0.35; duration: 1100 } NumberAnimation { to: 1; duration: 1100 } }
                         }
                         T { text: modelData.name; font.pixelSize: 11; Layout.fillWidth: true }
                     }

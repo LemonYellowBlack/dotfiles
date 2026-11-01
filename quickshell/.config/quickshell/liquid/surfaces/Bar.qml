@@ -100,7 +100,7 @@ Item {
             pad: 8
             active: root.on("vitals")
             onClicked: root.hang("vitals", vitals)
-            Ring { implicitWidth: 22; implicitHeight: 22; thickness: 3; glow: false; value: (Sys.temp - 30) / 70; colors: Theme.tempColors(Sys.temp) }
+            Ring { implicitWidth: 22; implicitHeight: 22; thickness: 3; glow: false; animated: false; value: (Sys.temp - 30) / 70; colors: Theme.tempColors(Sys.temp) }
             T { text: Math.round(Sys.temp) + "°"; Layout.rightMargin: 4 }
         }
 
@@ -111,7 +111,6 @@ Item {
             Rectangle {
                 implicitWidth: 8; implicitHeight: 8; radius: 4
                 color: Lab.ok ? (Lab.down > 0 ? Theme.warning : Theme.success) : (Lab.error ? Theme.danger : Theme.textFaint)
-                SequentialAnimation on opacity { running: Lab.ok; loops: Animation.Infinite; NumberAnimation { to: 0.4; duration: 1100 } NumberAnimation { to: 1; duration: 1100 } }
             }
             T { text: Host.labName; color: Theme.textAlt }
         }

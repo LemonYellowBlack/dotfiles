@@ -74,9 +74,10 @@ Drawer {
             Layout.preferredHeight: 40
             spacing: 6
             Repeater {
-                model: Sys.threads
+                model: Sys.threads.length       // a count, so new samples don't rebuild the bars
                 Rectangle {
-                    required property real modelData
+                    required property int index
+                    readonly property real modelData: Sys.threads[index] || 0
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     radius: 6
@@ -88,7 +89,7 @@ Drawer {
                         height: Math.max(3, parent.height * modelData)
                         radius: 6
                         gradient: Gradient { GradientStop { position: 0; color: Theme.accentAlt } GradientStop { position: 1; color: Theme.accent } }
-                        Behavior on height { NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
+                        Behavior on height { enabled: root.shown; NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
                     }
                 }
             }
@@ -110,7 +111,7 @@ Drawer {
                 spacing: 10
                 Icon {
                     path: Icons.fan; size: 18; color: Theme.info; opacity: parent.rpm ? 1 : 0.5
-                    RotationAnimation on rotation { running: parent.rpm > 0; loops: Animation.Infinite; from: 0; to: 360; duration: parent.rpm < 2600 ? 1200 : (parent.rpm < 3200 ? 800 : 500) }
+                    RotationAnimation on rotation { running: root.shown && parent.rpm > 0; loops: Animation.Infinite; from: 0; to: 360; duration: parent.rpm < 2600 ? 1200 : (parent.rpm < 3200 ? 800 : 500) }
                 }
                 T { text: modelData.label; color: Theme.textMuted; font.pixelSize: 12; Layout.preferredWidth: 130 }
                 Meter { Layout.fillWidth: true; value: parent.rpm / 5100; colors: Theme.gAccent }

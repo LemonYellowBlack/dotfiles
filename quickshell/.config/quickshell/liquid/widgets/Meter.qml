@@ -10,7 +10,7 @@ Rectangle {
     implicitHeight: 6
     radius: height / 2
     color: Theme.track
-    Behavior on shown { NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
+    Behavior on shown { enabled: root.visible; NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
     Component.onCompleted: shown = Qt.binding(() => Math.max(0, Math.min(1, root.value)))
     Rectangle {
         width: Math.max(parent.height, parent.width * root.shown)
