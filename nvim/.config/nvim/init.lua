@@ -75,6 +75,9 @@ vim.pack.add({
   "https://github.com/windwp/nvim-ts-autotag",
   "https://github.com/brenoprata10/nvim-highlight-colors",
   "https://github.com/coder/claudecode.nvim",
+  "https://github.com/mfussenegger/nvim-dap",
+  "https://github.com/igorlfs/nvim-dap-view",
+  "https://github.com/mfussenegger/nvim-dap-python",
 })
 
 ----------------------------------------------------------------------
@@ -464,6 +467,50 @@ vim.keymap.set("n", "<leader>gg", function() lazygit:toggle() end,
   { desc = "Lazygit" })
 
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
+----------------------------------------------------------------------
+-- nvim-dap — step debugging
+----------------------------------------------------------------------
+local dap = require("dap")
+
+-- Panel opens when a session starts and closes when it ends.
+require("dap-view").setup({
+  auto_toggle = true,
+  winbar = { default_section = "scopes" },
+})
+
+-- Python: debugpy runs via `uv run --with debugpy`, so nothing to install.
+-- The debuggee uses $VIRTUAL_ENV, $CONDA_PREFIX, or ./.venv / ./venv if present.
+require("dap-python").setup("uv")
+
+vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DiagnosticError" })
+vim.fn.sign_define("DapBreakpointCondition", { text = "◆", texthl = "DiagnosticWarn" })
+vim.fn.sign_define("DapStopped", { text = "▶", texthl = "DiagnosticOk", linehl = "CursorLine" })
+
+vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: start/continue" })
+vim.keymap.set("n", "<F10>", dap.step_over, { desc = "Debug: step over" })
+vim.keymap.set("n", "<F11>", dap.step_into, { desc = "Debug: step into" })
+vim.keymap.set("n", "<F12>", dap.step_out, { desc = "Debug: step out" })
+vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "Debug: toggle breakpoint" })
+vim.keymap.set("n", "<leader>dB", function()
+  dap.set_breakpoint(vim.fn.input("Condition: "))
+end, { desc = "Debug: conditional breakpoint" })
+vim.keymap.set("n", "<leader>dc", dap.run_to_cursor, { desc = "Debug: run to cursor" })
+vim.keymap.set("n", "<leader>dl", dap.run_last, { desc = "Debug: rerun last" })
+vim.keymap.set("n", "<leader>dq", dap.terminate, { desc = "Debug: stop" })
+vim.keymap.set("n", "<leader>dv", "<cmd>DapViewToggle<cr>", { desc = "Debug: toggle panel" })
+vim.keymap.set({ "n", "v" }, "<leader>dw", "<cmd>DapViewWatch<cr>", { desc = "Debug: watch expression" })
+
+-- Language-specific: debug the test under the cursor.
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  callback = function(ev)
+    local dp = require("dap-python")
+    vim.keymap.set("n", "<leader>dt", dp.test_method, { buffer = ev.buf, desc = "Debug: test method" })
+    vim.keymap.set("n", "<leader>dT", dp.test_class, { buffer = ev.buf, desc = "Debug: test class" })
+    vim.keymap.set("v", "<leader>ds", dp.debug_selection, { buffer = ev.buf, desc = "Debug: run selection" })
+  end,
+})
 
 ----------------------------------------------------------------------
 -- claudecode.nvim — Claude Code IDE integration
