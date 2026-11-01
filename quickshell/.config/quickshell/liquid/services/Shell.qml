@@ -66,5 +66,8 @@ Singleton {
         function close(): void { root.close(); }
         function tab(name: string): void { root.open("dash", name); }
         function toggleBar(): void { root.barHidden = !root.barHidden; }
+        // Re-read the config: for edits the shell missed (an editor that saves by replacing the
+        // file, a git pull). Windows and notifications carry over.
+        function reload(): void { Quickshell.reload(false); }
     }
 }
