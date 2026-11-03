@@ -61,6 +61,7 @@ Singleton {
         { name: "Night light", desc: "pause or resume gammastep", hint: "", icon: Icons.moon, run: () => { done(); Toggles.toggle("night"); } },
         { name: "Do not disturb", desc: "hold notification popups", hint: "", icon: Icons.bellOff, run: () => { done(); Toggles.toggle("dnd"); } },
         { name: "Screenshot region", desc: "hyprshot -m region", hint: "SUPER Print", icon: Icons.crop, run: () => { done(); sh("sleep 0.3; hyprshot -m region -o ~/Pictures/Screenshots"); } },
+        { name: "Annotate screenshot", desc: "hyprshot -m region | satty", hint: "SUPER ALT Print", icon: Icons.crop, run: () => { done(); sh("sleep 0.3; hyprshot -m region --raw | satty --filename -"); } },
         { name: "Clipboard history", desc: "cliphist", hint: ":", icon: Icons.clip, run: () => setQuery(":") },
         { name: "Calculator", desc: "type an expression", hint: "=", icon: Icons.hash, run: () => setQuery("=") },
         { name: "Exit node…", desc: "Mullvad through Tailscale", hint: "vpn", icon: Icons.shield, host: Host.exitNode, run: () => setQuery("vpn ") },

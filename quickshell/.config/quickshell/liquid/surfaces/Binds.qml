@@ -82,7 +82,7 @@ Item {
                     Layout.fillWidth: true
                     spacing: 20
                     Group { title: "hardware"; Bind { keys: "vol_keys"; does: "volume, in the island"; tag: "shell" } Bind { keys: "mic_mute"; does: "mic, in the island"; tag: "shell" } Bind { visible: Host.backlight !== ""; keys: "brightness"; does: "brightness, in the island"; tag: "shell" } Bind { visible: Host.battery; keys: "lid_close"; does: "lock-if-enabled" } }
-                    Group { title: "screenshots · hyprshot"; Bind { keys: "Print"; does: "whole output" } Bind { keys: "SUPER Print"; does: "region" } Bind { keys: "SUPER ⇧ Print"; does: "window" } }
+                    Group { title: "screenshots · hyprshot"; Bind { keys: "Print"; does: "whole output" } Bind { keys: "SUPER Print"; does: "region" } Bind { keys: "SUPER ⇧ Print"; does: "window" } Bind { keys: "SUPER ALT Print"; does: "region, then draw on it" } }
                     Group { title: "session"; Bind { keys: "SUPER L"; does: "lock now" } Bind { keys: "CTRL SUPER ⇧ Del"; does: "power off" } }
                 }
             }

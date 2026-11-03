@@ -86,6 +86,8 @@ hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("~/.local/bin/volnotify micmute"
 hl.bind("Print",                    hl.dsp.exec_cmd("hyprshot -m output -o ~/Pictures/Screenshots"))
 hl.bind(mod .. " + Print",          hl.dsp.exec_cmd("hyprshot -m region -o ~/Pictures/Screenshots"))
 hl.bind(mod .. " + SHIFT + Print",  hl.dsp.exec_cmd("hyprshot -m window -o ~/Pictures/Screenshots"))
+-- Region straight into satty to draw on; Enter saves beside the others and copies (theme/templates/.config/satty).
+hl.bind(mod .. " + ALT + Print",    hl.dsp.exec_cmd("hyprshot -m region --raw | satty --filename -"))
 
 -- Resize mode
 hl.bind(mod .. " + R", hl.dsp.submap("resize"))
@@ -140,6 +142,15 @@ hl.window_rule({
     match = { class = "kitty" },
 
     suppress_event = "maximize",
+})
+
+-- satty is a one-off annotation window; tiling it squeezes the screenshot.
+hl.window_rule({
+    name  = "satty-float",
+    match = { class = "com.gabm.satty" },
+
+    float  = true,
+    center = true,
 })
 
 hl.layer_rule({
