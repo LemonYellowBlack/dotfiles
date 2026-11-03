@@ -41,3 +41,17 @@ There is no build or test suite. Reload what you touched:
 
 Subject `<package or area>: <lowercase summary>` (`theme: …`, `quickshell: …`, `hypr-xps: …`);
 the body says why.
+
+## Shipping from a worktree
+
+Sessions usually start in a worktree (the `claude` wrapper in `zsh/.zshrc`), but the live config is
+the main checkout at `~/dotfiles`, so nothing is testable until it lands on `main`. When the user
+asks to test, try, ship or apply a change, do it without handing back commands:
+
+1. Commit in the worktree.
+2. `ExitWorktree` with `keep` (git can't reach the main checkout from inside the worktree).
+3. In `~/dotfiles`: stop and ask if it isn't clean on `main`; otherwise `git merge --ff-only
+   <worktree branch>`. If `main` has moved, rebase the branch onto `main` first.
+4. Reload what you touched (see Checking a change) and verify it took.
+
+Don't push to a remote unless asked.
