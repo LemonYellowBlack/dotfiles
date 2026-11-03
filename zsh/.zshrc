@@ -128,6 +128,27 @@ tag() {
     esac
 }
 
+# Start interactive Claude Code sessions in their own git worktree (claude --worktree)
+# when launched from a repo's main checkout. Passes straight through for resumes,
+# -p/--print, --bg, explicit -w, subcommands, already-linked worktrees, and
+# outside git. CLAUDE_NO_WT=1 claude  → plain session in the main checkout.
+claude() {
+  local a
+  for a in "$@"; do
+    case $a in -w|--worktree*|-c|--continue|-r|--resume*|-p|--print|--bg|--background)
+      command claude "$@"; return ;;
+    esac
+  done
+  case $1 in agents|attach|mcp|plugin|doctor|update|setup-token) command claude "$@"; return ;; esac
+  if git rev-parse --is-inside-work-tree &>/dev/null \
+     && [[ $(git rev-parse --path-format=absolute --git-dir) == $(git rev-parse --path-format=absolute --git-common-dir) ]] \
+     && [[ -z $CLAUDE_NO_WT ]]; then
+    command claude --worktree "$@"
+  else
+    command claude "$@"
+  fi
+}
+
 # Rust/cargo binaries (tree-sitter CLI, etc.) — needed by nvim-treesitter to build parsers
 export PATH="$HOME/.cargo/bin:$PATH"
 
