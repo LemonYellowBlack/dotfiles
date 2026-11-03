@@ -1,0 +1,43 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+Read README.md first: it covers layout, the theme system, install and gotchas. This file only adds
+what changes how you work here.
+
+## This is the live config
+
+Stowed files are symlinks, so editing the repo edits the running system. `hypr` is folded, so
+anything a tool writes into `~/.config/hypr` shows up in `git status`. Read the README's Gotchas
+before changing how any package is stowed.
+
+## Where an edit goes
+
+- Shared behavior goes in the shared package; `<pkg>-xps` / `<pkg>-hotdog` hold only host facts.
+  In the shell, describe hardware in `Host.qml` rather than branching on hostname.
+- Colors: edit `theme/` (palettes, variations, templates), never generated output or `~/.config`.
+  Variations name slots from `theme/slots.toml`, never a palette's own color names. Template
+  syntax is in the docstring at the top of `theme/retheme`.
+- Hyprland config is Lua, not hyprlang. Don't write `hyprland.conf` syntax.
+- Color direction: lean away from purple; off-whites and yellows lead, crystal blue is the cool
+  counterpart.
+
+## Checking a change
+
+There is no build or test suite. Reload what you touched:
+
+- theme: `retheme lint` (every palette × variation), then `retheme`, or render somewhere
+  harmless with `RETHEME_HOME`/`RETHEME_HOST`
+- Hyprland: `hyprctl reload`
+- Liquid shell: `qs -c liquid ipc call shell reload`
+
+## Don't
+
+- Lock the real session to test the lock screen; use `qs -c liquid ipc call lock preview`.
+- Commit generated theme output, or a `theme/hosts/<host>.toml` change unless the pick is meant
+  to stick.
+
+## Commits
+
+Subject `<package or area>: <lowercase summary>` (`theme: …`, `quickshell: …`, `hypr-xps: …`);
+the body says why.

@@ -74,6 +74,7 @@ retheme set accent blue    # this machine only; `retheme unset accent` undoes it
 retheme copy hotdog        # take the other machine's picks
 retheme save dusk          # keep the current picks as a new variation
 retheme lint               # render every palette with every variation
+RETHEME_HOME=/tmp/t RETHEME_HOST=hotdog retheme   # render elsewhere, as another machine; reloads nothing
 ```
 
 The Liquid shell's colors drawer (`SUPER T`, or the palette button in the
@@ -114,6 +115,8 @@ Stow only creates symlinks; install the underlying programs separately.
 - **`hypr` is folded** — `~/.config/hypr` is a single directory symlink into
   this repo, so any file a tool auto-generates there lands in git. Re-stow with
   `stow --restow --no-folding hypr` if that becomes a problem.
+- **Hyprland's config is Lua**, not hyprlang (`hyprland.conf` is deprecated since 0.55). The API
+  stubs are at `/usr/share/hypr/stubs/hl.meta.lua`; `hyprctl reload` applies an edit.
 - **`neowall` must use `--no-folding` too**, same reason as herdr: neowall
   writes a runtime `state` file into `~/.config/neowall/` beside
   `config.vibe` and `shaders/`. On a machine with no `~/.config/neowall` yet,
@@ -124,6 +127,8 @@ Stow only creates symlinks; install the underlying programs separately.
   package adds `Host.qml` to the same `~/.config/quickshell/liquid/` directory, which only works
   while it's a real directory. Start the shell with `qs -c liquid`; `hypr/liquid.lua` (required
   from `hyprland.lua`) starts it with Hyprland, sets the look it's drawn for and binds its keys.
+  `qs -c liquid ipc call shell reload` re-reads the config after edits the shell missed (an
+  editor that saves by replacing the file, a `git pull`).
 - **The shell is the notification daemon.** mako and Quickshell both want
   `org.freedesktop.Notifications`, and Quickshell waits while mako holds it. mako isn't enabled
   anywhere; D-Bus starts it on the first notification nobody else is there for, so disabling it
