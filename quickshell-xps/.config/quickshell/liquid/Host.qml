@@ -18,7 +18,7 @@ Singleton {
     readonly property bool battery: true
     readonly property bool ecoOnBattery: true              // drop Hyprland blur and the border animation when unplugged
     readonly property string backlight: "intel_backlight"
-    readonly property string profilePath: "/sys/firmware/acpi/platform_profile"   // TLP owns it; shown read-only
+    readonly property string profilePath: "/sys/firmware/acpi/platform_profile"   // TLP sets it on plug/unplug; clicks override until then
 
     // GTX 1650: unloaded by default, loaded by gpu-toggle or the game wrapper.
     readonly property string gpu: "prime"

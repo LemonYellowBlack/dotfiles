@@ -2,7 +2,7 @@ import QtQuick
 import qs.config
 
 // Segmented choice with a knob that springs between options. `readOnly` shows state without
-// taking clicks (the platform profile belongs to TLP).
+// taking clicks.
 Rectangle {
     id: root
     property var options: []

@@ -1,0 +1,16 @@
+#!/bin/bash
+# Set the ACPI platform profile until TLP next applies its own on a plug or unplug.
+# Usage: sudo platform-profile <profile>   (choices: /sys/firmware/acpi/platform_profile_choices)
+
+set -euo pipefail
+
+sys=/sys/firmware/acpi
+if [[ $EUID -ne 0 ]]; then
+    echo "error: must run as root (sudo platform-profile)" >&2
+    exit 1
+fi
+if [[ $# -ne 1 ]] || ! tr ' ' '\n' < "$sys/platform_profile_choices" | grep -qx -- "$1"; then
+    echo "usage: platform-profile {$(tr ' ' '|' < "$sys/platform_profile_choices")}" >&2
+    exit 2
+fi
+echo "$1" > "$sys/platform_profile"

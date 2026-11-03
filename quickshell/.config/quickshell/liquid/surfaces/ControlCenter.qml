@@ -101,8 +101,8 @@ Drawer {
         visible: Power.profile !== ""
         Layout.fillWidth: true
         spacing: 8
-        Label { Layout.fillWidth: true; text: "platform profile"; note: "TLP sets this" }
-        Seg { Layout.fillWidth: true; options: ["cool", "quiet", "balanced", "performance"]; current: Power.profile; readOnly: true }
+        Label { Layout.fillWidth: true; text: "platform profile"; note: "TLP resets on plug/unplug" }
+        Seg { Layout.fillWidth: true; options: ["cool", "quiet", "balanced", "performance"]; current: Power.profile; onPicked: v => Power.setProfile(v) }
     }
 
     Card {

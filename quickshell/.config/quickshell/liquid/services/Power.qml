@@ -88,13 +88,25 @@ Singleton {
         bctl.running = true;
     }
 
-    // TLP owns the platform profile; the shell only shows it.
+    // TLP sets the platform profile on every plug and unplug; a pick here holds until the next one.
+    // Writing it needs root, through the platform-profile helper and a NOPASSWD sudoers rule.
     property string profile: ""
     FileView {
+        id: profileFile
         path: Host.profilePath
         watchChanges: true
         onFileChanged: reload()
         onLoaded: root.profile = text().trim()
+    }
+    Process {
+        id: profileSet
+        onExited: profileFile.reload()
+    }
+    function setProfile(p) {
+        if (p === profile || profileSet.running) return;
+        profile = p;
+        profileSet.command = ["sudo", "-n", Quickshell.env("HOME") + "/.local/bin/platform-profile", p];
+        profileSet.running = true;
     }
 
     // Eco: no blur and a still border while on battery. Values must match hypr/liquid.lua.
