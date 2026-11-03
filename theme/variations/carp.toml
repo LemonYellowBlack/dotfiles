@@ -81,13 +81,13 @@ numbers        = "pink"
 constants      = "yellow_deep"    # built-in constants, ALL_CAPS names, booleans
 identifiers    = "yellow"         # members, fields, attributes; user constants
 interpolation  = "yellow_muted"   # string interpolation
-keywords       = "green"          # keywords and statements: if, for, while
+keywords       = "blue"          # keywords and statements: if, for, while
 storage        = "violet"         # def, class, let, fn, types as keywords; JSON keys
 controlFlow    = "keywords"       # return, raise, throw
 operators      = "keywords"       # + == and, and/or/not as words
 preproc        = "keywords"       # imports, includes, macros, decorators
 builtins       = "identifiers"    # self, this and other built-in variables
-types          = "aqua"           # classes and types
+types          = "aqua_deep"           # classes and types
 functions      = "blue"
 parameters     = "violet_light"
 specials       = "blue_bright"    # tags, library functions and constants, constructors
