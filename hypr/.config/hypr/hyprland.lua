@@ -165,6 +165,10 @@ hl.config({
         gaps_out    = 0,
         border_size = 1,
 
+        -- Drag a window edge to resize it
+        resize_on_border        = true,
+        extend_border_grab_area = 15,
+
         -- Stop at the edge instead of wrapping to the opposite pane.
         no_focus_fallback = true,
 
