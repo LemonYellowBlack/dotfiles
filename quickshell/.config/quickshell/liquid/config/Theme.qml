@@ -11,9 +11,11 @@ import Quickshell.Io
 // barH and edge are also the exclusive zones the shell reserves, and hypr/liquid.lua's gaps_out
 // sits inside them, so change them together.
 Singleton {
+    // Whose ~/.config to read: the greeter runs as its own user with LIQUID_HOME pointing here.
+    readonly property string home: Quickshell.env("LIQUID_HOME") || Quickshell.env("HOME")
     FileView {
         id: file
-        path: Quickshell.env("HOME") + "/.config/theme/theme.json"
+        path: home + "/.config/theme/theme.json"
         blockLoading: true
         watchChanges: true
         onFileChanged: reload()

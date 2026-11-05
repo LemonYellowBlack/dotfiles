@@ -5,13 +5,15 @@ import qs.surfaces
 
 // Liquid: a frame around the screen that drawers grow out of, an island in the bar, the lock
 // screen, and one Host.qml per machine (quickshell-xps, quickshell-hotdog) saying what hardware
-// there is. Run with `qs -c liquid`; Hyprland side in hypr/liquid.lua.
+// there is. Run with `qs -c liquid`; Hyprland side in hypr/liquid.lua. greeter.qml, beside this,
+// is the login screen made of the same parts (boot/ in the dotfiles).
 ShellRoot {
     Variants {
         model: Quickshell.screens
         ScreenShell {}
     }
     Locker {}
+    Outro {}
     // Singletons start on first use; the notification server and the eco switch must not wait.
     Component.onCompleted: { Notifs.count; Power.eco; Toggles.refresh(); }
 }

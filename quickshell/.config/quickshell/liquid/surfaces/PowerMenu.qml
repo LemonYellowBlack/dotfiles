@@ -8,7 +8,8 @@ import qs.services
 import qs.widgets
 
 // Lock and suspend take a click; log out, reboot and shut down want a one-second hold, drawn as a
-// ring filling around the button. Let go early and nothing happens.
+// ring filling around the button. Let go early and nothing happens. Those three leave through the
+// outro (surfaces/Outro.qml), which goes to black before they run.
 Item {
     id: root
     property bool firmware: false
@@ -19,10 +20,12 @@ Item {
     readonly property var actions: [
         { id: "lock", name: "Lock", hint: "L · click", icon: Icons.lock, colors: Theme.gAccent, hold: false, run: () => { Shell.close(); Quickshell.execDetached(["loginctl", "lock-session"]); } },
         { id: "suspend", name: "Suspend", hint: "S · click", icon: Icons.moon, colors: Theme.gAccentCool, hold: false, run: () => { Shell.close(); Quickshell.execDetached(["systemctl", "suspend"]); } },
-        { id: "logout", name: "Log out", hint: "O · hold 1 s", icon: Icons.logout, colors: Theme.gWarm, hold: true, run: () => root.logout() },
+        { id: "logout", name: "Log out", hint: "O · hold 1 s", icon: Icons.logout, colors: Theme.gWarm, hold: true, run: () => Shell.leave("logout", root.logout) },
         { id: "reboot", name: "Reboot", hint: "R · hold 1 s", icon: Icons.reboot, colors: Theme.gHot, hold: true,
-          run: () => Quickshell.execDetached(root.firmware ? ["systemctl", "reboot", "--firmware-setup"] : ["systemctl", "reboot"]) },
-        { id: "poweroff", name: "Shut down", hint: "P · hold 1 s", icon: Icons.power, colors: Theme.gDanger, hold: true, run: () => Quickshell.execDetached(["systemctl", "poweroff"]) }
+          run: () => root.firmware
+              ? Shell.leave("firmware", () => Quickshell.execDetached(["systemctl", "reboot", "--firmware-setup"]))
+              : Shell.leave("reboot", () => Quickshell.execDetached(["systemctl", "reboot"])) },
+        { id: "poweroff", name: "Shut down", hint: "P · hold 1 s", icon: Icons.power, colors: Theme.gDanger, hold: true, run: () => Shell.leave("poweroff", () => Quickshell.execDetached(["systemctl", "poweroff"])) }
     ]
 
     ColumnLayout {

@@ -11,11 +11,22 @@ import qs.widgets
 // frame blur away, from a capture taken just before locking; over them sit the clock and the
 // password capsule, with what's playing, the weather and the notification count along the
 // bottom. services/Lock.qml holds the password and talks to PAM; this draws it and takes keys.
+// The greeter (greeter.qml) shows this too, with services/Greeter.qml as `ctl`, the wallpaper as
+// the shot, and the frame growing in rather than already there.
 FocusScope {
     id: root
     property var ctl: Lock
     property var shot: null             // this screen's grab from just before locking
+    property int fillMode: Image.Stretch
     property int notes: 0
+    property string user: Quickshell.env("USER")
+    property string idleText: "locked since " + Qt.formatTime(ctl.since, "HH:mm")
+    property string promptText: "type to unlock"
+    property bool sound: true           // the volume in the status chip; the greeter has no audio
+    property bool growFrame: false      // the frame rides on `shown` instead of being there already
+    property bool autoShow: true        // come up as soon as it's made; otherwise show() does it
+    property Component barExtra: null   // something more at the bar's right end
+    function show() { shown = 1; input.forceActiveFocus(); }
 
     property date now: new Date()
     Timer { interval: 1000; repeat: true; running: true; onTriggered: root.now = new Date() }
@@ -28,7 +39,7 @@ FocusScope {
     readonly property bool leaving: phase === "done"
     readonly property color tone: failed ? Theme.danger : (checking ? Theme.info : (ctl.caps ? Theme.warning : Theme.textSubtle))
     readonly property string islandText: failed ? ctl.message + (ctl.fails > 1 ? " · " + ctl.fails : "")
-        : (checking ? "checking…" : (ctl.caps ? "caps lock is on" : (ctl.previewing ? "preview · esc closes" : "locked since " + Qt.formatTime(ctl.since, "HH:mm"))))
+        : (checking ? "checking…" : (ctl.caps ? "caps lock is on" : (ctl.previewing ? "preview · esc closes" : idleText)))
     readonly property string islandIcon: failed ? Icons.x : (checking ? Icons.key : (ctl.caps ? Icons.keyboard : Icons.lock))
 
     // The accent gradient at t (0..1), for the dots.
@@ -43,7 +54,7 @@ FocusScope {
     property real shown: 0
     Behavior on shown { NumberAnimation { duration: root.leaving ? 380 : 520; easing.type: Easing.OutCubic } }
     onLeavingChanged: if (leaving) shown = 0
-    Component.onCompleted: { shown = 1; input.forceActiveFocus(); }
+    Component.onCompleted: { if (autoShow) shown = 1; input.forceActiveFocus(); }
 
     // A click anywhere puts the keys back in the password field.
     MouseArea { anchors.fill: parent; onClicked: input.forceActiveFocus() }
@@ -54,6 +65,7 @@ FocusScope {
         id: still
         anchors.fill: parent
         source: root.shot ? root.shot.url : ""
+        fillMode: root.fillMode
         visible: false
     }
     MultiEffect {
@@ -67,7 +79,7 @@ FocusScope {
     }
     Rectangle { anchors.fill: parent; color: Theme.surfaceDeep; opacity: 0.35 * root.shown }
 
-    Frame { anchors.fill: parent; barTop: Theme.barH }
+    Frame { anchors.fill: parent; barTop: Theme.barH; grown: root.growFrame ? root.shown : 1 }
 
     component Chip: Rectangle {
         default property alias content: row.data
@@ -94,7 +106,7 @@ FocusScope {
             }
             Chip {
                 Icon { path: Icons.lock; size: 14; stroke: 2; color: Theme.accent }
-                T { text: Quickshell.env("USER"); color: Theme.textSubtle }
+                T { text: root.user; color: Theme.textSubtle }
             }
         }
 
@@ -123,10 +135,11 @@ FocusScope {
             anchors.rightMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 6
+            Loader { active: root.barExtra !== null; visible: active; sourceComponent: root.barExtra }
             Chip {
                 Icon { path: Net.wifiOn && Net.ssid ? Icons.wifi : Icons.wifiOff; size: 15; stroke: 2 }
-                Icon { path: Audio.muted ? Icons.volX : Icons.vol; size: 15; stroke: 2 }
-                T { text: Audio.muted ? "mute" : Math.round(Audio.volume * 100) + "%" }
+                Icon { visible: root.sound; path: root.sound && Audio.muted ? Icons.volX : Icons.vol; size: 15; stroke: 2 }
+                T { visible: root.sound; text: !root.sound ? "" : (Audio.muted ? "mute" : Math.round(Audio.volume * 100) + "%") }
                 BatteryGlyph { visible: Power.hasBattery }
                 T { visible: Power.hasBattery; text: Math.round(Power.level * 100) + "%" }
             }
@@ -199,7 +212,7 @@ FocusScope {
                 T {
                     anchors.centerIn: parent
                     visible: root.ctl.typed === 0
-                    text: root.failed ? "try again" : "type to unlock"
+                    text: root.failed ? "try again" : root.promptText
                     color: Theme.textFaint
                 }
                 property real pulse: 0

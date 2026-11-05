@@ -59,6 +59,51 @@ Singleton {
 
     Timer { id: islandTimer; onTriggered: root.island = null }
 
+    // ── Arriving and leaving. A session's first shell grows the frame in from the screen's edges,
+    // as the greeter did before it (`intro` 0 → 1); a restart of the shell later on doesn't. One
+    // flag file per Hyprland instance tells them apart.
+    property real intro: 1
+    Behavior on intro { NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
+    FileView {
+        id: introSeen
+        path: Quickshell.env("XDG_RUNTIME_DIR") + "/liquid-intro-" + Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE")
+        blockLoading: true
+    }
+    Timer { id: introGo; interval: 350; onTriggered: root.intro = 1 }
+    Component.onCompleted: {
+        if (Quickshell.env("LIQUID_PREVIEW") === "1" || introSeen.loaded) return;
+        intro = 0;
+        introSeen.setText("seen\n");
+        introGo.restart();
+    }
+
+    // Logging out, restarting and shutting down play surfaces/Outro.qml first: the desktop clears
+    // to the wallpaper, the frame lets go, and the screen goes to black, which is where the boot
+    // splash and the greeter take over. `run` happens once it's dark, whatever the animation did.
+    // kind: logout | reboot | firmware | poweroff, or preview to watch it and come back.
+    property string leaving: ""
+    property var leaveRun: null
+    readonly property int leaveMs: 1250
+    readonly property int previewBackMs: 800
+    function leave(kind, run) {
+        if (leaving !== "") return;
+        leaveRun = run || null;
+        leaving = kind;             // before close(): the outro keeps the wallpaper the menu loaded
+        close();
+        leaveTimer.restart();
+    }
+    Timer {
+        id: leaveTimer
+        interval: root.leaveMs
+        onTriggered: {
+            const run = root.leaveRun;
+            root.leaveRun = null;
+            if (root.leaving === "preview") previewBack.restart();
+            else if (run) run();
+        }
+    }
+    Timer { id: previewBack; interval: root.previewBackMs; onTriggered: root.leaving = "" }
+
     IpcHandler {
         target: "shell"
         function toggle(name: string): void { root.toggle(name, ""); }
@@ -66,6 +111,17 @@ Singleton {
         function close(): void { root.close(); }
         function tab(name: string): void { root.open("dash", name); }
         function toggleBar(): void { root.barHidden = !root.barHidden; }
+        // `leave preview` plays the outro and comes back; the rest really log out, restart or
+        // shut down, after it.
+        function leave(kind: string): void {
+            const run = {
+                logout: () => Hyprland.dispatch(Hyprland.usingLua ? "hl.dsp.exit()" : "exit"),
+                reboot: () => Quickshell.execDetached(["systemctl", "reboot"]),
+                firmware: () => Quickshell.execDetached(["systemctl", "reboot", "--firmware-setup"]),
+                poweroff: () => Quickshell.execDetached(["systemctl", "poweroff"])
+            }[kind];
+            if (run || kind === "preview") root.leave(kind, run);
+        }
         // Re-read the config: for edits the shell missed (an editor that saves by replacing the
         // file, a git pull). Windows and notifications carry over.
         function reload(): void { Quickshell.reload(false); }
