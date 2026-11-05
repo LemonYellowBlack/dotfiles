@@ -22,8 +22,13 @@ EOF
 
 die() { print -u2 "vpn: $*"; exit 1 }
 
-# tailscale needs root unless this user is the tailscale operator
-ts_set() { tailscale set "$@" 2>/dev/null || sudo tailscale set "$@" }
+# tailscale needs root unless this user is the tailscale operator. With no terminal (the shell's
+# tile, a bind) sudo can't ask for a password, so say how to fix it instead of failing quietly.
+ts_set() {
+  tailscale set "$@" 2>/dev/null && return
+  [[ -t 0 ]] || die "not tailscale's operator: run sudo tailscale set --operator=$USER once"
+  sudo tailscale set "$@"
+}
 
 show_status() {
   tailscale status --json | jq -r '

@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Networking
 import qs
+import qs.config
 
 // Wi-Fi from NetworkManager, and the Tailscale exit node the vpn script picks.
 Singleton {
@@ -30,7 +31,12 @@ Singleton {
 
     Process {
         id: vpn
-        onExited: { root.exitBusy = false; status.running = true; }
+        stderr: StdioCollector { id: vpnErr }
+        onExited: code => {
+            root.exitBusy = false;
+            status.running = true;
+            if (code !== 0) Shell.msg(Icons.shield, (vpnErr.text.trim().split("\n").pop() || "vpn failed").replace(/^vpn: /, ""), Theme.danger);
+        }
     }
     // city or country as the vpn script takes them; "off" turns the exit node off
     function useExit(where) {

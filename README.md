@@ -137,6 +137,9 @@ theme/retheme              # colors; on a new machine, `theme/retheme copy xps` 
 
 Stow only creates symlinks; install the underlying programs separately.
 
+On a host with the exit node tile (`Host.exitNode`), make yourself Tailscale's operator once so
+the shell can switch exit nodes without sudo: `sudo tailscale set --operator=$USER`.
+
 ## Gotchas
 
 - **`bin` must use `--no-folding`.** `~/.local/bin` is a standard install
