@@ -1,0 +1,460 @@
+#!/usr/bin/env python3
+"""render — draw the Liquid boot splash, a Plymouth script theme, from this machine's wallpaper.
+
+    boot/plymouth/render OUT_DIR [--wallpaper FILE] [--size WxH] [--scale N]
+
+Writes everything /usr/share/plymouth/themes/liquid holds into OUT_DIR: liquid.plymouth,
+liquid.script (the layout worked out here, then liquid.script from this directory) and the images
+below. boot/install runs this as you and copies the result into place; run it alone to see what
+it would draw.
+
+    wallpaper.png  what neowall shows (~/.config/neowall/config.vibe), at the panel's size
+    logo.png       the firmware's boot logo (ACPI BGRT) as a mask, placed where the firmware drew
+                   it, so the splash's first frame is the firmware's last
+    glint-N.png    each bright star in the wallpaper, brighter; the script breathes them
+    meteor-N.png   a streak like galaxy.glsl's meteors, one heading each way
+    island-*.png   the bar's island saying "shutting down" or "restarting"
+    capsule.png, dot.png  the lock screen's password capsule, for a disk that asks for one
+
+Colors come from ~/.config/theme/theme.json as it is now. Neither a retheme nor a new wallpaper
+reaches the splash by itself: run boot/install again.
+
+Needs python-numpy, python-pillow, python-cairo, python-gobject (Pango) and librsvg.
+"""
+import argparse
+import json
+import os
+import random
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+import numpy as np
+from PIL import Image, ImageFilter
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent.parent
+ICONS = ROOT / "quickshell/.config/quickshell/liquid/config/Icons.qml"
+THEME_QML = ROOT / "quickshell/.config/quickshell/liquid/config/Theme.qml"
+DEST = "/usr/share/plymouth/themes/liquid"
+
+# What the splash falls back to when theme.json is missing: Kanagawa Wave with carp, the default.
+DEFAULTS = {
+    "surfaceDeep": "#0D0D12", "surface": "#16161D", "text": "#DCD7BA", "textSubtle": "#C0A36E",
+    "textFaint": "#727169", "accent": "#E6C384", "accentCool": "#7E9CD8",
+}
+
+
+def color(hexs):
+    """#RRGGBB or #AARRGGBB (Qt's order, as theme.json writes a token with an opacity) → floats."""
+    h = hexs.lstrip("#")
+    a = 1.0
+    if len(h) == 8:
+        a, h = int(h[:2], 16) / 255, h[2:]
+    return (int(h[0:2], 16) / 255, int(h[2:4], 16) / 255, int(h[4:6], 16) / 255, a)
+
+
+def tokens(home):
+    try:
+        found = json.loads((home / ".config/theme/theme.json").read_text())["colors"]
+    except (OSError, ValueError, KeyError):
+        print("render: no ~/.config/theme/theme.json, so the splash takes Kanagawa's colors", file=sys.stderr)
+        found = {}
+    return {k: color(found.get(k, v)) for k, v in DEFAULTS.items()}
+
+
+def theme_ints():
+    """barH, edge and friends from the shell's Theme.qml, so the island sits where the bar's does."""
+    found = dict(re.findall(r"readonly property int (\w+): (\d+)", THEME_QML.read_text()))
+    return {k: int(v) for k, v in found.items()}
+
+
+def icon_path(name):
+    m = re.search(r'readonly property string %s: "([^"]+)"' % name, ICONS.read_text())
+    return m.group(1) if m else ""
+
+
+# ── what the desktop looks like
+
+def neowall_wallpaper(home):
+    """The image neowall shows and how it fits it, from the first path and mode in config.vibe."""
+    conf = home / ".config/neowall/config.vibe"
+    path = mode = None
+    try:
+        lines = conf.read_text().splitlines()
+    except OSError:
+        return None, None
+    for line in lines:
+        line = line.split("#", 1)[0].strip()
+        m = re.match(r"(path|mode)\s+(.+)$", line)
+        if not m:
+            continue
+        if m.group(1) == "path" and path is None:
+            value = m.group(2).strip()
+            path = home / value[2:] if value.startswith("~/") else Path(value)
+        if m.group(1) == "mode" and mode is None:
+            mode = m.group(2).strip()
+    return path, mode or "fill"
+
+
+def panel_size():
+    """The preferred mode of the built-in panel, or of the first connected screen."""
+    found = []
+    for status in sorted(Path("/sys/class/drm").glob("card*-*/status")):
+        try:
+            if status.read_text().strip() != "connected":
+                continue
+            mode = (status.parent / "modes").read_text().split("\n", 1)[0]
+        except OSError:
+            continue
+        m = re.match(r"(\d+)x(\d+)", mode)
+        if m:
+            found.append(("eDP" not in status.parent.name, int(m.group(1)), int(m.group(2))))
+    return min(found)[1:] if found else None
+
+
+def host_scale(home):
+    """The scale hypr's host.lua gives the monitor, which is the scale the shell is drawn at."""
+    try:
+        m = re.search(r"hl\.monitor\(\{[^}]*?scale\s*=\s*([0-9.]+)", (home / ".config/hypr/host.lua").read_text())
+        return float(m.group(1)) if m else None
+    except OSError:
+        return None
+
+
+def fit(img, mode, w, h, fill):
+    """The wallpaper on a w×h screen as neowall fits it."""
+    img = img.convert("RGB")
+    iw, ih = img.size
+    if mode == "stretch":
+        return img.resize((w, h), Image.LANCZOS) if (iw, ih) != (w, h) else img
+    canvas = Image.new("RGB", (w, h), fill)
+    if mode == "tile":
+        for y in range(0, h, ih):
+            for x in range(0, w, iw):
+                canvas.paste(img, (x, y))
+        return canvas
+    if mode == "center":
+        canvas.paste(img, ((w - iw) // 2, (h - ih) // 2))
+        return canvas
+    k = (max if mode != "fit" else min)(w / iw, h / ih)
+    sw, sh = round(iw * k), round(ih * k)
+    scaled = img.resize((sw, sh), Image.LANCZOS)
+    canvas.paste(scaled, ((w - sw) // 2, (h - sh) // 2))
+    return canvas
+
+
+# ── the firmware logo
+
+def firmware_logo():
+    """The BGRT logo as white-on-clear (alpha from its brightness) and where it was drawn."""
+    bgrt = Path("/sys/firmware/acpi/bgrt")
+    try:
+        if int((bgrt / "status").read_text()) & 1 == 0:
+            return None
+        x, y = int((bgrt / "xoffset").read_text()), int((bgrt / "yoffset").read_text())
+        img = Image.open(bgrt / "image")
+        img.load()
+    except (OSError, ValueError):
+        return None
+    rgb = np.asarray(img.convert("RGB"), dtype=np.float32)
+    alpha = rgb.max(axis=2)
+    # Unpremultiply against black: a logo drawn on black at this alpha is the firmware's picture.
+    col = np.where(alpha[..., None] > 0, rgb * 255.0 / np.maximum(alpha[..., None], 1), 0)
+    rgba = np.dstack([np.clip(col, 0, 255), alpha]).astype(np.uint8)
+    return Image.fromarray(rgba, "RGBA"), x, y
+
+
+# ── the stars that breathe
+
+def luminance(a):
+    return a @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
+
+
+def bright_stars(wp, limit=14):
+    """Stars with four-point spikes: a peak that stays brighter out along both axes than along the
+    diagonals. galaxy.glsl's breathing stars all pass; dust and cloud knots don't."""
+    lum = luminance(np.asarray(wp, dtype=np.float32) / 255.0)
+    h, w = lum.shape
+    found = []
+    ys, xs = np.nonzero(lum > 0.5)
+    for y, x in zip(ys, xs):
+        if y < 40 or x < 40 or y >= h - 40 or x >= w - 40 or lum[y, x] < lum[y - 3:y + 4, x - 3:x + 4].max():
+            continue
+        arms = np.mean([lum[y, x + d] + lum[y, x - d] + lum[y + d, x] + lum[y - d, x] for d in range(12, 31, 3)]) / 4
+        diag = np.mean([lum[y + d, x + d] + lum[y - d, x - d] + lum[y + d, x - d] + lum[y - d, x + d] for d in range(9, 22, 3)]) / 4
+        if arms - diag > 0.035:
+            found.append((arms - diag, int(x), int(y)))
+    stars = []
+    for score, x, y in sorted(found, reverse=True):
+        # A spike's own pixels look like a star too: drop anything on an accepted star's arms.
+        if any((abs(x - sx) < 8 and abs(y - sy) < 160) or (abs(y - sy) < 8 and abs(x - sx) < 160)
+               or (x - sx) ** 2 + (y - sy) ** 2 < 900 for _, sx, sy in stars):
+            continue
+        stars.append((score, x, y))
+    return [(x, y) for _, x, y in stars[:limit]]
+
+
+def glint(wp, x, y, radius=128, gain=1.3):
+    """The star at (x, y) with its own light made brighter, over the wallpaper as it is there, and
+    clear wherever the star isn't. At opacity o over the wallpaper it gives D + o·gain·(star), so
+    the star itself brightens and nothing around it changes."""
+    box = (max(0, x - radius), max(0, y - radius), min(wp.width, x + radius), min(wp.height, y + radius))
+    crop = wp.crop(box)
+    # The sky without the star: an opening wipes out anything thinner than the window.
+    bg = crop.filter(ImageFilter.MinFilter(11)).filter(ImageFilter.MaxFilter(11)).filter(ImageFilter.GaussianBlur(2))
+    d = np.asarray(crop, dtype=np.float32) / 255.0
+    e = np.clip(d - np.asarray(bg, dtype=np.float32) / 255.0, 0, None)
+    # Only the star's own light: its core and halo, and its four spikes out along the axes. The
+    # faint stars around it stay as they are, or the whole square would twinkle with it.
+    gy, gx = np.mgrid[box[1]:box[3], box[0]:box[2]].astype(np.float32)
+    dx, dy = np.abs(gx - x), np.abs(gy - y)
+    core = np.exp(-(dx * dx + dy * dy) / (2 * 14.0 ** 2))
+    arms = (np.exp(-dy * dy / 8.0) + np.exp(-dx * dx / 8.0)) * np.exp(-np.minimum(dx, dy) / 40.0)
+    e *= np.clip(core + arms, 0, 1)[..., None]
+    el = luminance(e)
+    s = np.clip(d + gain * e, 0, 1)
+    a = np.clip((el - 0.003) / 0.03, 0, 1)
+    a = a * a * (3 - 2 * a)
+    rgba = np.dstack([s * 255, a * 255]).astype(np.uint8)
+    return Image.fromarray(rgba, "RGBA"), box[0], box[1]
+
+
+# ── meteors
+
+def meteor(height, angle_deg, head, tail):
+    """galaxy.glsl's meteor: a thin line, its tail trailing 0.18 screen heights behind the head and
+    cooling from white to blue. Returns the sprite and where in it the head is."""
+    a = np.radians(angle_deg)
+    d = np.array([np.cos(a), np.sin(a)])                 # the way it flies, screen space (y down)
+    length = 0.18 * height
+    margin = 14
+    p0 = np.array([0.0, 0.0])
+    p1 = -d * length
+    lo = np.minimum(p0, p1) - margin
+    hi = np.maximum(p0, p1) + margin
+    w, h = int(np.ceil(hi[0] - lo[0])), int(np.ceil(hi[1] - lo[1]))
+    gy, gx = np.mgrid[0:h, 0:w].astype(np.float32)
+    rx, ry = gx + lo[0], gy + lo[1]
+    along = np.clip(rx * d[0] + ry * d[1], -length, 0)        # 0 at the head, -length at the tail
+    dist = np.hypot(rx - d[0] * along, ry - d[1] * along) / height
+    t = 1 + along / length                                    # 1 at the head
+    line = np.exp(-dist * dist * 4.0e5) * t
+    headglow = np.exp(-(rx * rx + ry * ry) / (2 * (0.0028 * height) ** 2)) * 0.55
+    i = np.clip(line * 0.95 + headglow, 0, 1)
+    col = np.array(tail)[None, None, :3] * (1 - t[..., None]) + np.array(head)[None, None, :3] * t[..., None]
+    rgba = np.dstack([col * 255, i * 255]).astype(np.uint8)
+    return Image.fromarray(rgba, "RGBA"), -lo[0], -lo[1]
+
+
+# ── the island and the capsule, drawn as the shell draws them
+
+def cairo_libs():
+    import cairo
+    import gi
+    gi.require_version("Pango", "1.0")
+    gi.require_version("PangoCairo", "1.0")
+    from gi.repository import Pango, PangoCairo
+    return cairo, Pango, PangoCairo
+
+
+def svg_icon(path, px, rgba, stroke):
+    """One of Icons.qml's 24×24 Lucide paths, stroked as widgets/Icon.qml strokes it."""
+    import cairo
+    r, g, b, a = rgba
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">'
+           '<path d="%s" fill="none" stroke="rgb(%d,%d,%d)" stroke-opacity="%.3f" stroke-width="%.2f" '
+           'stroke-linecap="round" stroke-linejoin="round"/></svg>') % (path, r * 255, g * 255, b * 255, a, stroke)
+    with tempfile.TemporaryDirectory() as tmp:
+        src, out = Path(tmp) / "i.svg", Path(tmp) / "i.png"
+        src.write_text(svg)
+        subprocess.run(["rsvg-convert", "-w", str(px), "-h", str(px), "-o", str(out), str(src)], check=True)
+        return cairo.ImageSurface.create_from_png(str(out))
+
+
+def rounded(ctx, x, y, w, h, r):
+    import math
+    ctx.new_sub_path()
+    ctx.arc(x + w - r, y + r, r, -math.pi / 2, 0)
+    ctx.arc(x + w - r, y + h - r, r, 0, math.pi / 2)
+    ctx.arc(x + r, y + h - r, r, math.pi / 2, math.pi)
+    ctx.arc(x + r, y + r, r, math.pi, 3 * math.pi / 2)
+    ctx.close_path()
+
+
+def island(text, icon, s, c, out):
+    """The lock screen's island: a 30 px pill of surfaceDeep, an accent hairline, an icon, words."""
+    cairo, Pango, PangoCairo = cairo_libs()
+    probe = cairo.Context(cairo.ImageSurface(cairo.FORMAT_ARGB32, 1, 1))
+    layout = PangoCairo.create_layout(probe)
+    desc = Pango.FontDescription.from_string("Maple Mono NF")
+    desc.set_absolute_size(13 * s * Pango.SCALE)
+    layout.set_font_description(desc)
+    layout.set_text(text, -1)
+    tw, th = layout.get_pixel_size()
+    ih = round(15 * s)
+    gap = round(10 * s)
+    h = round(30 * s)
+    w = ih + gap + tw + round(34 * s)
+    surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
+    ctx = cairo.Context(surf)
+    rounded(ctx, 0.5 * s, 0.5 * s, w - s, h - s, (h - s) / 2)
+    ctx.set_source_rgba(*c["surfaceDeep"][:3], 1)
+    ctx.fill_preserve()
+    ctx.set_source_rgba(*c["accent"][:3], 0.18)
+    ctx.set_line_width(s)
+    ctx.stroke()
+    x = (w - (ih + gap + tw)) / 2
+    ctx.set_source_surface(svg_icon(icon_path(icon), ih, c["accent"], 2), round(x), round((h - ih) / 2))
+    ctx.paint()
+    ctx.move_to(round(x + ih + gap), round((h - th) / 2))
+    ctx.set_source_rgba(*c["textSubtle"][:3], 1)
+    layout = PangoCairo.create_layout(ctx)
+    layout.set_font_description(desc)
+    layout.set_text(text, -1)
+    PangoCairo.show_layout(ctx, layout)
+    surf.write_to_png(str(out))
+    return w, h
+
+
+def capsule(s, c, out_capsule, out_dot):
+    """The lock screen's password capsule (300×48, lock icon at the left) and one of its dots."""
+    cairo, _, _ = cairo_libs()
+    w, h = round(300 * s), round(48 * s)
+    surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
+    ctx = cairo.Context(surf)
+    rounded(ctx, 0.5 * s, 0.5 * s, w - s, h - s, (h - s) / 2)
+    ctx.set_source_rgba(*c["surfaceDeep"][:3], 0.82)
+    ctx.fill_preserve()
+    ctx.set_source_rgba(*c["accent"][:3], 0.22)
+    ctx.set_line_width(s)
+    ctx.stroke()
+    ic = round(16 * s)
+    ctx.set_source_surface(svg_icon(icon_path("lock"), ic, c["accent"], 2), round(18 * s), round((h - ic) / 2))
+    ctx.paint()
+    surf.write_to_png(str(out_capsule))
+    d = round(9 * s)
+    dot = cairo.ImageSurface(cairo.FORMAT_ARGB32, d, d)
+    ctx = cairo.Context(dot)
+    ctx.arc(d / 2, d / 2, d / 2, 0, 6.2832)
+    ctx.set_source_rgba(*c["accent"][:3], 1)
+    ctx.fill()
+    dot.write_to_png(str(out_dot))
+    return w, h, d
+
+
+# ── the script
+
+def num(v):
+    return ("%.4f" % v).rstrip("0").rstrip(".") if isinstance(v, float) else str(v)
+
+
+def rgb(c):
+    return "%s, %s, %s" % tuple(num(round(x, 4)) for x in c[:3])
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("out", type=Path)
+    ap.add_argument("--wallpaper", type=Path, help="default: the path in ~/.config/neowall/config.vibe")
+    ap.add_argument("--mode", help="stretch, fill, fit, center or tile; default: config.vibe's")
+    ap.add_argument("--size", help="WxH; default: the built-in panel's mode")
+    ap.add_argument("--scale", type=float, help="the shell's scale; default: hypr's host.lua")
+    ap.add_argument("--dest", default=DEST, help="where the theme will live (its ImageDir)")
+    args = ap.parse_args()
+
+    home = Path.home()
+    c = tokens(home)
+    ints = theme_ints()
+
+    wall, mode = neowall_wallpaper(home)
+    wall = args.wallpaper or wall
+    mode = args.mode or mode or "fill"
+    if args.size:
+        w, h = map(int, args.size.lower().split("x"))
+    else:
+        w, h = panel_size() or (3840, 2160)
+    s = args.scale or host_scale(home) or max(1, round(h / 1080))
+
+    out = args.out
+    out.mkdir(parents=True, exist_ok=True)
+    for old in out.glob("*.png"):
+        old.unlink()
+
+    ink = tuple(round(x * 255) for x in c["surface"][:3])
+    if wall and wall.is_file():
+        wp = fit(Image.open(wall), mode, w, h, ink)
+    else:
+        print("render: no wallpaper image (%s), so the splash is plain surface" % wall, file=sys.stderr)
+        wp = Image.new("RGB", (w, h), ink)
+    wp.save(out / "wallpaper.png", compress_level=6)
+
+    lines = []
+    put = lines.append
+    put("# Generated by boot/plymouth/render for a %dx%d screen at scale %s from %s." % (w, h, num(s), wall))
+    put("# The layout it found; liquid.script's own code follows.")
+    put("L.w = %d; L.h = %d; L.s = %s;" % (w, h, num(float(s))))
+    put("L.island_y = %d;" % round(5 * s))
+    put("L.bar_h = %d;" % round(ints.get("barH", 40) * s))
+
+    logo = firmware_logo()
+    if logo:
+        img, lx, ly = logo
+        img.save(out / "logo.png")
+        put("L.logo = 1; L.logo_x = %d; L.logo_y = %d;" % (lx, ly))
+    else:
+        put("L.logo = 0;")
+
+    rng = random.Random(7)
+    stars = bright_stars(wp)
+    put("L.stars = %d;" % len(stars))
+    for i, (x, y) in enumerate(stars):
+        img, gx, gy = glint(wp, x, y)
+        img.save(out / ("glint-%d.png" % i))
+        # Each breathes on its own: 3 to 6 s a breath, starting somewhere in it.
+        put("L.star[%d].x = %d; L.star[%d].y = %d; L.star[%d].period = %s; L.star[%d].phase = %s;"
+            % (i, gx, i, gy, i, num(round(rng.uniform(3.0, 6.0), 2)), i, num(round(rng.uniform(0, 6.283), 3))))
+
+    put("L.meteors = 2;")
+    for i, ang in enumerate((152.0, 33.0)):
+        img, hx, hy = meteor(h, ang, c["text"], c["accentCool"])
+        img.save(out / ("meteor-%d.png" % i))
+        put("L.meteor[%d].hx = %s; L.meteor[%d].hy = %s; L.meteor[%d].dx = %s; L.meteor[%d].dy = %s;"
+            % (i, num(round(hx, 1)), i, num(round(hy, 1)), i, num(round(np.cos(np.radians(ang)), 4)),
+               i, num(round(np.sin(np.radians(ang)), 4))))
+
+    try:
+        for name, text, icon in (("shutdown", "shutting down", "power"), ("reboot", "restarting", "reboot")):
+            island(text, icon, s, c, out / ("island-%s.png" % name))
+        capsule(s, c, out / "capsule.png", out / "dot.png")
+        put("L.islands = 1;")
+    except Exception as e:  # noqa: BLE001 — the pills are a nicety; the splash works without them
+        print("render: can't draw the island and capsule (%s); the splash goes without" % e, file=sys.stderr)
+        put("L.islands = 0;")
+
+    # The shell's 13 px text, in the points Plymouth's fonts are sized in (96 dpi).
+    font_pt = round(13 * s * 72 / 96 + 0.5)
+    put("L.text = [%s]; L.faint = [%s];" % (rgb(c["text"]), rgb(c["textFaint"])))
+    put("L.font = \"Maple Mono NF %d\";" % font_pt)
+    put("L.dot_gap = %d; L.capsule_pad = %d;" % (round(7 * s), round(18 * s)))
+    put("")
+
+    (out / "liquid.script").write_text("\n".join(lines) + "\n" + (HERE / "liquid.script").read_text())
+    (out / "liquid.plymouth").write_text(
+        "[Plymouth Theme]\n"
+        "Name=Liquid\n"
+        "Description=The Liquid shell's wallpaper, from the firmware's logo to the greeter\n"
+        "ModuleName=script\n"
+        "Font=Maple Mono NF %d\n"
+        "MonospaceFont=Maple Mono NF %d\n"
+        "\n"
+        "[script]\n"
+        "ImageDir=%s\n"
+        "ScriptFile=%s/liquid.script\n" % (font_pt, round(font_pt * 0.85), args.dest, args.dest))
+    print("render: %dx%d at scale %s, %d stars, logo %s → %s" % (w, h, num(s), len(stars), "yes" if logo else "no", out))
+
+
+if __name__ == "__main__":
+    main()

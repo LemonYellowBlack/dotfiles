@@ -1,0 +1,19 @@
+#!/bin/sh
+# greetd's greeter command (boot/install points /etc/greetd/config.toml here): a Hyprland of its
+# own (hyprland.lua, beside this) running the Liquid shell's greeter.qml, as greetd's greeter user.
+# greetd's config sets LIQUID_HOME, whose shell and theme to read, and LIQUID_USER, who logs in.
+#
+# The greeter user's home is /, so what Quickshell and Hyprland would keep under it goes to its
+# runtime directory, which logind empties when the greeter's session ends.
+here=$(dirname "$(readlink -f "$0")")
+: "${LIQUID_HOME:?set in /etc/greetd/config.toml}"
+: "${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
+
+export XDG_CACHE_HOME="$XDG_RUNTIME_DIR/cache"
+export XDG_STATE_HOME="$XDG_RUNTIME_DIR/state"
+export XDG_DATA_HOME="$XDG_RUNTIME_DIR/data"
+export XDG_CONFIG_HOME="$XDG_RUNTIME_DIR/config"
+mkdir -p "$XDG_CACHE_HOME" "$XDG_STATE_HOME" "$XDG_DATA_HOME" "$XDG_CONFIG_HOME"
+
+export LIQUID_GREETER="$LIQUID_HOME/.config/quickshell/liquid/greeter.qml"
+exec Hyprland --config "$here/hyprland.lua" >"$XDG_RUNTIME_DIR/greeter.log" 2>&1

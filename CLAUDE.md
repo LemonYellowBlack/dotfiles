@@ -30,10 +30,15 @@ There is no build or test suite. Reload what you touched:
   harmless with `RETHEME_HOME`/`RETHEME_HOST`
 - Hyprland: `hyprctl reload`
 - Liquid shell: `qs -c liquid ipc call shell reload`
+- Boot splash: `boot/plymouth/render <dir>` renders it as you; installing it (`boot/install theme`)
+  needs the user's sudo. The greeter previews with `qs -p ~/.config/quickshell/liquid/greeter.qml`;
+  the outro with `qs -c liquid ipc call shell leave preview`.
 
 ## Don't
 
 - Lock the real session to test the lock screen; use `qs -c liquid ipc call lock preview`.
+- Start or restart `greetd` from a session: it takes tty1, and the session on it goes with it.
+  `shell leave` with anything but `preview` really logs out, restarts or shuts down.
 - Commit generated theme output, or a `theme/hosts/<host>.toml` change unless the pick is meant
   to stick.
 

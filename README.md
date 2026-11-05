@@ -22,7 +22,8 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 | Claude Code | `claude` (→ `~/.claude/statusline-command.sh`) |
 
 `scripts/` is **not** a Stow package — it holds helper assets (e.g.
-`kanagawa_wallpaper.py`) referenced by scripts in `bin/`. Don't stow it.
+`kanagawa_wallpaper.py`) referenced by scripts in `bin/`. Don't stow it. Nor are
+`theme/` (below) and `boot/` (the boot splash and greeter, see [Boot](#boot)).
 
 ### Per-machine packages
 
@@ -81,6 +82,42 @@ The Liquid shell's colors drawer (`SUPER T`, or the palette button in the
 control center) does the same with swatches. A pick rewrites `theme/hosts/<host>.toml`: commit it to
 keep it. After a pull, run `retheme` to render whatever changed. A new machine
 needs its host file first: `retheme copy xps`.
+
+## Boot
+
+From power on to the desktop and back is one picture, the wallpaper:
+
+1. The firmware's logo. Plymouth's first frame (`boot/plymouth/`) draws the same logo in the same
+   place, then fades it into the wallpaper. Its bright stars breathe and now and then a meteor
+   crosses, like `galaxy.glsl`'s.
+2. Just before the greeter starts, the splash fades to black (a `plymouth-quit` drop-in in
+   `boot/systemd/`).
+3. The greeter (`greeter.qml` in the shell, run by greetd in a Hyprland of its own from
+   `boot/greeter/`) comes in from black: first the wallpaper, then the lock screen's blur, the frame
+   growing in from the edges, and the clock. It logs in through greetd, and its power button can
+   suspend, restart or shut down.
+4. The session's first shell grows its frame in again over neowall's wallpaper.
+5. Log out, restart or shut down from the power menu, and the outro (`surfaces/OutroView.qml`)
+   clears the windows to the wallpaper, lets the frame go and fades to black. Plymouth's shutdown
+   screen then comes up dim with the bar's island saying "shutting down" or "restarting".
+
+`boot/install` sets it all up and needs root once. It keeps a copy of every file it changes as
+`FILE.liquid-orig`:
+
+```sh
+sudo ~/dotfiles/boot/install          # plymouth + greetd, the splash, the hook, kernel line, greeter
+sudo ~/dotfiles/boot/install theme    # re-render the splash after a new wallpaper or palette
+sudo ~/dotfiles/boot/install undo     # back to the text login on tty1 and no splash
+boot/plymouth/render /tmp/splash      # see what the splash would be drawn from, as yourself
+qs -p ~/.config/quickshell/liquid/greeter.qml   # the greeter as a preview: checks nothing, Esc closes
+qs -c liquid ipc call shell leave preview      # the outro, played back without leaving
+```
+
+The splash is rendered from the wallpaper and theme as they are when it runs. A retheme or a new
+wallpaper doesn't reach it until `install theme`. The greeter reads the live config, so it follows
+both. It runs as greetd's `greeter` user, so it relies on your home, `~/.config` and the wallpaper
+being world-readable, as they are now. If it ever won't come up, Ctrl+Alt+F2 gives a text login
+to run `undo` from. The kernel line hides the console cursor everywhere, the TTYs too.
 
 ## Install
 

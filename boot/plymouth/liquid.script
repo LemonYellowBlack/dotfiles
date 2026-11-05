@@ -1,0 +1,286 @@
+#---------------------------------------------------------------------------------------------------
+# liquid.script — the Liquid boot splash. boot/plymouth/render writes the layout (L, above) from the
+# wallpaper and the firmware's logo, then appends this.
+#
+# Booting, the firmware's logo stays exactly where the firmware drew it, then gives way to the
+# wallpaper. Its bright stars breathe and now and then a meteor crosses. Just before the greeter
+# starts, plymouth-quit's drop-in (boot/systemd) sends "liquid:fade" and it all goes to black,
+# which is where the greeter comes in from. Shutting down or restarting, the wallpaper comes up dim
+# out of the black the shell's outro left, with the bar's island saying which.
+#
+# Plymouth redraws only what changed, but changing the wallpaper's opacity redraws all of it, and
+# at 4K that is a software blend of eight million pixels a frame: only the fades do it. Everything
+# else is a few small sprites. Times are seconds on the clock below.
+#---------------------------------------------------------------------------------------------------
+
+fps = 30;
+Plymouth.SetRefreshRate(fps);
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+mode = Plymouth.GetMode();
+booting = mode == "boot" || mode == "resume";
+leaving = mode == "shutdown" || mode == "reboot";
+
+fun clamp01(v) {
+  if (v < 0) return 0;
+  if (v > 1) return 1;
+  return v;
+}
+fun smooth(v) {
+  local.x = clamp01(v);
+  return x * x * (3 - 2 * x);
+}
+# 0 before a, 1 after b, eased between.
+fun ramp(t, a, b) {
+  return smooth((t - a) / (b - a));
+}
+
+# The clock: frames counted, pulled towards the real time the progress updates carry, so a slow
+# frame (a fade at 4K) doesn't slow the animation down.
+t = 0;
+real0 = -1;
+real = -1;
+fun progress_callback(duration, progress) {
+  if (real0 < 0) global.real0 = duration;
+  global.real = duration - real0;
+}
+Plymouth.SetBootProgressFunction(progress_callback);
+fun tick() {
+  global.t += 1 / fps;
+  if (real >= 0) {
+    local.d = real - t;
+    if (d > 0.5 || d < -0.5) global.t = real;
+    else if (d > 0) global.t += d * 0.2;
+  }
+}
+
+#---------------------------------------------------------------------------------------------------
+# The sprites. Positions come from the layout; ox, oy centre it on a screen of another size.
+
+sky.sprite = Sprite(Image("wallpaper.png"));
+sky.sprite.SetZ(0);
+sky.sprite.SetOpacity(0);
+
+if (L.logo && booting) {
+  logo.sprite = Sprite(Image("logo.png"));
+  logo.sprite.SetZ(10);
+}
+
+for (i = 0; i < L.stars; i++) {
+  star[i].sprite = Sprite(Image("glint-" + i + ".png"));
+  star[i].sprite.SetZ(2);
+  star[i].sprite.SetOpacity(0);
+}
+
+for (i = 0; i < L.meteors; i++) {
+  meteor[i].sprite = Sprite(Image("meteor-" + i + ".png"));
+  meteor[i].sprite.SetZ(3);
+  meteor[i].sprite.SetOpacity(0);
+  meteor[i].start = -100;
+}
+
+if (L.islands && leaving) {
+  if (mode == "reboot") island.sprite = Sprite(Image("island-reboot.png"));
+  else island.sprite = Sprite(Image("island-shutdown.png"));
+  island.sprite.SetZ(20);
+  island.sprite.SetOpacity(0);
+}
+
+message.sprite = Sprite();
+message.sprite.SetZ(20);
+
+fun place() {
+  global.ox = Window.GetX() + Math.Int((Window.GetWidth() - L.w) / 2);
+  global.oy = Window.GetY() + Math.Int((Window.GetHeight() - L.h) / 2);
+  sky.sprite.SetX(ox);
+  sky.sprite.SetY(oy);
+  if (logo.sprite) {
+    logo.sprite.SetX(ox + L.logo_x);
+    logo.sprite.SetY(oy + L.logo_y);
+  }
+  for (local.i = 0; i < L.stars; i++) {
+    star[i].sprite.SetX(ox + L.star[i].x);
+    star[i].sprite.SetY(oy + L.star[i].y);
+  }
+  if (island.sprite) {
+    island.sprite.SetX(ox + Math.Int((L.w - island.sprite.GetImage().GetWidth()) / 2));
+    island.sprite.SetY(oy + L.island_y);
+  }
+  place_message();
+  place_prompt();
+}
+Plymouth.SetDisplayHotplugFunction(place);
+
+#---------------------------------------------------------------------------------------------------
+# The timeline.
+#
+# Boot: the logo holds a moment (the firmware's picture, unchanged), then the sky fades in under it
+# as it fades out. Leaving: the sky comes up to 55% out of black, the island after it.
+
+if (booting) {
+  sky_in = 0.35;
+  sky_full = 1.45;
+  sky_level = 1;
+} else {
+  sky_in = 0;
+  sky_full = 0.7;
+  sky_level = 0.55;
+}
+fade_from = -1;       # when "liquid:fade" came; the splash goes to black over the next 0.35 s
+next_meteor = sky_full + 1.1;
+
+fun level_at(t) {
+  local.out = 1;
+  if (fade_from >= 0) out = 1 - ramp(t, fade_from, fade_from + 0.35);
+  return out;
+}
+
+fun launch_meteor(i) {
+  # Somewhere in the upper sky, heading down across it; galaxy.glsl's meteors go half a screen
+  # height in 0.7 s and are gone in 0.9.
+  meteor[i].start = t;
+  meteor[i].x0 = ox + L.w * (0.2 + 0.6 * Math.Random());
+  meteor[i].y0 = oy + L.h * (0.06 + 0.3 * Math.Random());
+}
+
+fun draw_meteor(i, level) {
+  local.age = t - meteor[i].start;
+  if (age < 0 || age > 0.9) {
+    meteor[i].sprite.SetOpacity(0);
+    return;
+  }
+  local.run = 0.5 * L.h * smooth(age / 0.7);
+  local.fade = ramp(age, 0, 0.08) * (1 - ramp(age, 0.55, 0.9));
+  meteor[i].sprite.SetX(Math.Int(meteor[i].x0 + L.meteor[i].dx * run - L.meteor[i].hx));
+  meteor[i].sprite.SetY(Math.Int(meteor[i].y0 + L.meteor[i].dy * run - L.meteor[i].hy));
+  meteor[i].sprite.SetOpacity(fade * level);
+}
+
+fun refresh_callback() {
+  tick();
+  local.level = level_at(t);
+
+  # The sky. Exactly 1 once it's in, so Plymouth copies it instead of blending it. (A local
+  # can't share a global's name here: the script looks names up locals first.)
+  local.sky_o = sky_level * ramp(t, sky_in, sky_full) * level;
+  sky.sprite.SetOpacity(sky_o);
+
+  if (logo.sprite) logo.sprite.SetOpacity(1 - ramp(t, sky_in, sky_in + 0.7));
+
+  # The stars breathe once the sky is in: each brightens and settles on its own period.
+  local.glow = ramp(t, sky_full, sky_full + 1.2) * level;
+  if (leaving) glow *= 0.6;
+  for (local.i = 0; i < L.stars; i++) {
+    local.b = 0.5 - 0.5 * Math.Cos(6.2832 * t / L.star[i].period + L.star[i].phase);
+    star[i].sprite.SetOpacity(glow * b * 0.85);
+  }
+
+  # A meteor now and then, alternating directions.
+  if (t >= next_meteor && fade_from < 0) {
+    global.meteor_i = (meteor_i + 1) % L.meteors;
+    launch_meteor(meteor_i);
+    global.next_meteor = t + 7 + 6 * Math.Random();
+  }
+  for (local.j = 0; j < L.meteors; j++) draw_meteor(j, level);
+
+  if (island.sprite) island.sprite.SetOpacity(ramp(t, 0.3, 0.9) * level);
+  message.sprite.SetOpacity(level * message.shown);
+  if (prompt.on) set_prompt_opacity(level);
+}
+meteor_i = 0;
+Plymouth.SetRefreshFunction(refresh_callback);
+
+fun status_callback(status) {
+  if (status == "liquid:fade" && fade_from < 0) global.fade_from = t;
+}
+Plymouth.SetUpdateStatusFunction(status_callback);
+
+#---------------------------------------------------------------------------------------------------
+# Messages (an fsck, a stop job that's slow), in faint text under where the island sits.
+
+fun place_message() {
+  if (!message.image) return;
+  message.sprite.SetX(ox + Math.Int((L.w - message.image.GetWidth()) / 2));
+  message.sprite.SetY(oy + L.island_y + L.bar_h);
+}
+message.shown = 0;
+fun message_callback(text) {
+  global.message.image = Image.Text(text, L.faint[0], L.faint[1], L.faint[2], 1, L.font);
+  message.sprite.SetImage(message.image);
+  global.message.shown = 1;
+  place_message();
+}
+fun hide_message_callback(text) {
+  global.message.shown = 0;
+}
+Plymouth.SetDisplayMessageFunction(message_callback);
+Plymouth.SetHideMessageFunction(hide_message_callback);
+
+#---------------------------------------------------------------------------------------------------
+# A password, should a disk ever ask: the lock screen's capsule, its dots, and the question above.
+
+prompt.on = 0;
+fun place_prompt() {
+  if (!prompt.capsule) return;
+  local.w = prompt.capsule.GetImage().GetWidth();
+  local.h = prompt.capsule.GetImage().GetHeight();
+  global.prompt.x = ox + Math.Int((L.w - w) / 2);
+  global.prompt.y = oy + Math.Int((L.h - h) / 2);
+  prompt.capsule.SetX(prompt.x);
+  prompt.capsule.SetY(prompt.y);
+  if (prompt.label.GetImage()) {
+    prompt.label.SetX(ox + Math.Int((L.w - prompt.label.GetImage().GetWidth()) / 2));
+    prompt.label.SetY(prompt.y - prompt.label.GetImage().GetHeight() - L.capsule_pad);
+  }
+}
+fun set_prompt_opacity(o) {
+  prompt.capsule.SetOpacity(o * prompt.on);
+  prompt.label.SetOpacity(o * prompt.on);
+  for (local.i = 0; prompt.dot[i]; i++) {
+    if (i < prompt.bullets) prompt.dot[i].SetOpacity(o * prompt.on);
+    else prompt.dot[i].SetOpacity(0);
+  }
+}
+fun show_prompt(text, bullets) {
+  if (!L.islands) return;
+  if (!prompt.capsule) {
+    global.prompt.capsule = Sprite(Image("capsule.png"));
+    prompt.capsule.SetZ(30);
+    global.prompt.label = Sprite();
+    prompt.label.SetZ(30);
+    global.prompt.dot_image = Image("dot.png");
+  }
+  prompt.label.SetImage(Image.Text(text, L.text[0], L.text[1], L.text[2], 1, L.font));
+  global.prompt.on = 1;
+  global.prompt.bullets = bullets;
+  place_prompt();
+  # Dots from the middle out, as the lock screen lays them.
+  local.n = Math.Min(bullets, 18);
+  local.d = prompt.dot_image.GetWidth();
+  local.row = n * d + (n - 1) * L.dot_gap;
+  for (local.i = 0; i < 18; i++) {
+    if (!prompt.dot[i]) {
+      global.prompt.dot[i] = Sprite(prompt.dot_image);
+      prompt.dot[i].SetZ(31);
+    }
+    prompt.dot[i].SetX(ox + Math.Int((L.w - row) / 2) + i * (d + L.dot_gap));
+    prompt.dot[i].SetY(prompt.y + Math.Int((prompt.capsule.GetImage().GetHeight() - d) / 2));
+  }
+  set_prompt_opacity(level_at(t));
+}
+fun password_callback(text, bullets) {
+  show_prompt(text, bullets);
+}
+fun question_callback(text, entry) {
+  show_prompt(text + "  " + entry, 0);
+}
+fun normal_callback() {
+  global.prompt.on = 0;
+  if (prompt.capsule) set_prompt_opacity(0);
+}
+Plymouth.SetDisplayPasswordFunction(password_callback);
+Plymouth.SetDisplayQuestionFunction(question_callback);
+Plymouth.SetDisplayNormalFunction(normal_callback);
+
+place();
