@@ -125,6 +125,10 @@ for _, group in ipairs(transparent_groups) do
   vim.api.nvim_set_hl(0, group, hl)
 end
 
+-- .tf is always Terraform. Neovim's content sniffing falls back to TinyFugue
+-- ("tf") for an empty buffer, so a brand-new main.tf got no LSP/treesitter.
+vim.filetype.add({ extension = { tf = "terraform" } })
+
 ----------------------------------------------------------------------
 -- Treesitter — parsers only
 -- Parsers install themselves from the list below
