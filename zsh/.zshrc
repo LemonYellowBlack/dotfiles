@@ -32,9 +32,17 @@ alias vltget='vltopen && vltkeys && vltclose'
 alias tor='torbrowser-launcher'
 alias pwroff='shutdown now'
 
+# Work AWS is opt-in: the default profile is the personal account, and work
+# credentials only exist between `work` (signs in if needed) and `workdone`.
 function work() {
-    aws ec2 start-instances --region us-east-1 --instance-ids i-0eb6a4da2cf5ec290
-    aws ssm start-session --region us-east-1 --target i-0eb6a4da2cf5ec290
+    aws sts get-caller-identity --profile work &>/dev/null \
+        || aws login --profile work || return
+    aws ec2 start-instances --region us-east-1 --instance-ids i-0eb6a4da2cf5ec290 --profile work
+    aws ssm start-session --region us-east-1 --target i-0eb6a4da2cf5ec290 --profile work
+}
+
+function workdone() {
+    aws logout --profile work && echo "work AWS credentials cleared"
 }
 
 # Yazi shell wrapper (cd on quit)
