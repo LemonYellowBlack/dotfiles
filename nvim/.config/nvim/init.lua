@@ -133,6 +133,7 @@ local ts_langs = {
   "odin", "go", "c", "cpp", "yaml", "json", "bash",
   "python", "toml", "sql", "dockerfile", "java",
   "javascript", "typescript", "tsx", "css", "scss", "html",
+  "terraform", "hcl",
 }
 local ts_installed = require("nvim-treesitter.config").get_installed("parsers")
 local ts_missing = vim.tbl_filter(function(lang)
@@ -148,6 +149,7 @@ vim.api.nvim_create_autocmd("FileType", {
     "python", "toml", "sql", "dockerfile", "java",
     "javascript", "javascriptreact", "typescript", "typescriptreact",
     "css", "scss", "html",
+    "terraform", "terraform-vars", "hcl",   -- .tfvars uses the terraform parser
   },
   callback = function()
     pcall(vim.treesitter.start)
@@ -155,12 +157,14 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 ----------------------------------------------------------------------
--- Web filetypes use 2-space indent (Prettier's default). 
+-- Web filetypes use 2-space indent (Prettier's default), as does
+-- Terraform/HCL (what `terraform fmt` enforces).
 ----------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
   pattern = {
     "javascript", "javascriptreact", "typescript", "typescriptreact",
     "json", "jsonc", "css", "scss", "html", "yaml",
+    "terraform", "terraform-vars", "hcl",
   },
   callback = function()
     vim.opt_local.shiftwidth = 2
@@ -246,16 +250,20 @@ vim.lsp.config("tailwindcss", {})
 
 local servers = { "gopls", "clangd", "ols", "basedpyright", "ruff", "marksman", "jdtls" }
 
--- Web servers are enabled only when their binary is actually on PATH, so a
+-- Optional servers are enabled only when their binary is actually on PATH, so a
 -- missing install is a no-op rather than a silent failed attach. vtsls wins
 -- over ts_ls when both are present; enabling both would double-attach.
-local web_servers = {
+local optional_servers = {
   vtsls       = "vtsls",
   ts_ls       = "typescript-language-server",
   eslint      = "vscode-eslint-language-server",
   tailwindcss = "tailwindcss-language-server",
+  -- Terraform: terraform-ls (completion, hover, validation; formats via
+  -- `terraform fmt` through the format-on-save below) and tflint's linter.
+  terraformls = "terraform-ls",
+  tflint      = "tflint",
 }
-for server, binary in pairs(web_servers) do
+for server, binary in pairs(optional_servers) do
   if vim.fn.executable(binary) == 1 then
     if not (server == "ts_ls" and vim.fn.executable("vtsls") == 1) then
       table.insert(servers, server)
