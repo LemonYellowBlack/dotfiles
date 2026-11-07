@@ -89,7 +89,8 @@ Singleton {
     }
 
     // TLP sets the platform profile on every plug and unplug; a pick here holds until the next one.
-    // Writing it needs root, through the platform-profile helper and a NOPASSWD sudoers rule.
+    // Writing it needs root, through the platform-profile helper and a NOPASSWD sudoers rule. The
+    // helper is root's own copy in /usr/local/sbin, put there by sbin/install in the dotfiles.
     property string profile: ""
     FileView {
         id: profileFile
@@ -105,7 +106,7 @@ Singleton {
     function setProfile(p) {
         if (p === profile || profileSet.running) return;
         profile = p;
-        profileSet.command = ["sudo", "-n", Quickshell.env("HOME") + "/.local/bin/platform-profile", p];
+        profileSet.command = ["sudo", "-n", "/usr/local/sbin/platform-profile", p];
         profileSet.running = true;
     }
 

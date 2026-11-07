@@ -4,6 +4,6 @@
 # Run a command on the dGPU via PRIME offload
 alias prime='__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia'
 
-# disable/enable nvidia drivers, dodges secure_path issue with sudo and bin
-gpu-off() { sudo /home/robbie/.local/bin/gpu-off "$@"; }
-gpu-on()  { sudo /home/robbie/.local/bin/gpu-on  "$@"; }
+# disable/enable nvidia drivers, without typing sudo: root's own copies (sbin/ in the dotfiles)
+gpu-off() { sudo /usr/local/sbin/gpu-off "$@"; }
+gpu-on()  { sudo /usr/local/sbin/gpu-on  "$@"; }

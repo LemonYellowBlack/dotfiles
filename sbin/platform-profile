@@ -1,6 +1,7 @@
 #!/bin/bash
 # Set the ACPI platform profile until TLP next applies its own on a plug or unplug.
 # Usage: sudo platform-profile <profile>   (choices: /sys/firmware/acpi/platform_profile_choices)
+# Runs from /usr/local/sbin, root's own copy: edit it here, then `sudo sbin/install`.
 
 set -euo pipefail
 

@@ -23,7 +23,8 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 
 `scripts/` is **not** a Stow package — it holds helper assets (e.g.
 `kanagawa_wallpaper.py`) referenced by scripts in `bin/`. Don't stow it. Nor are
-`theme/` (below) and `boot/` (the boot splash and greeter, see [Boot](#boot)).
+`theme/` (below), `boot/` (the boot splash and greeter, see [Boot](#boot)) and `sbin/` (what
+sudo runs without a password, see [Gotchas](#gotchas)).
 
 ### Per-machine packages
 
@@ -140,8 +141,18 @@ Stow only creates symlinks; install the underlying programs separately.
 On a host with the exit node tile (`Host.exitNode`), make yourself Tailscale's operator once so
 the shell can switch exit nodes without sudo: `sudo tailscale set --operator=$USER`.
 
+On the XPS, `sudo sbin/install` puts `gpu-on`, `gpu-off` and `platform-profile` in
+`/usr/local/sbin` for the GPU and profile toggles. It only moves NOPASSWD rules that already exist;
+on a new machine, add them with `sudo visudo -f /etc/sudoers.d/dotfiles`:
+`yourname ALL=(root) NOPASSWD: /usr/local/sbin/gpu-on, /usr/local/sbin/gpu-off, /usr/local/sbin/platform-profile`.
+
 ## Gotchas
 
+- **What sudo runs without a password lives in `sbin/`, never `bin/`.** Everything in this repo
+  can be changed by you without root, so a NOPASSWD rule naming a file here (or its link in
+  `~/.local/bin`) lets anything running as you become root. `sbin/install` copies the helpers to
+  `/usr/local/sbin`, owned by root, and the rules name those copies. After editing one, run
+  `sudo sbin/install` again; until then root keeps running the old copy.
 - **`bin` must use `--no-folding`.** `~/.local/bin` is a standard install
   target (`pip --user`, `cargo`, `pipx`, `go install`). Without `--no-folding`,
   Stow collapses it into a single directory symlink and those installers would

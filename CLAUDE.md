@@ -19,6 +19,9 @@ before changing how any package is stowed.
   Variations name slots from `theme/slots.toml`, never a palette's own color names. Template
   syntax is in the docstring at the top of `theme/retheme`.
 - Hyprland config is Lua, not hyprlang. Don't write `hyprland.conf` syntax.
+- Anything sudo runs without a password goes in `sbin/` and is called by its `/usr/local/sbin`
+  path; it reaches root only through the user running `sudo sbin/install`. Never point a sudoers
+  rule at the repo or `~/.local/bin`.
 - Color direction: lean away from purple; off-whites and yellows lead, crystal blue is the cool
   counterpart.
 

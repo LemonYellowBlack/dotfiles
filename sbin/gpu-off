@@ -1,6 +1,7 @@
 #!/bin/bash
 # Unload NVIDIA modules to save power.
 # Usage: sudo gpu-off
+# Runs from /usr/local/sbin, root's own copy: edit it here, then `sudo sbin/install`.
 #
 # Will fail if any process is using the GPU (check nvidia-smi first).
 

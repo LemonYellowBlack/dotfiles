@@ -1,6 +1,7 @@
 #!/bin/bash
 # Load NVIDIA modules and verify the dGPU is available.
 # Usage: sudo gpu-on
+# Runs from /usr/local/sbin, root's own copy: edit it here, then `sudo sbin/install`.
 
 set -euo pipefail
 

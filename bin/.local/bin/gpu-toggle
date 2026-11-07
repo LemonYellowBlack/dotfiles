@@ -3,7 +3,7 @@
 # Bound to SUPER+SHIFT+N in Hyprland.
 
 if lsmod | grep -q '^nvidia '; then
-    if output=$(sudo /home/robbie/.local/bin/gpu-off 2>&1); then
+    if output=$(sudo /usr/local/sbin/gpu-off 2>&1); then
         notify-send -t 3000 -h string:x-canonical-private-synchronous:gpu-toggle \
             "󰍹 GPU Off" "NVIDIA modules unloaded"
     else
@@ -11,7 +11,7 @@ if lsmod | grep -q '^nvidia '; then
             "󰍹 GPU Off Failed" "$output"
     fi
 else
-    if output=$(sudo /home/robbie/.local/bin/gpu-on 2>&1); then
+    if output=$(sudo /usr/local/sbin/gpu-on 2>&1); then
         notify-send -t 3000 -h string:x-canonical-private-synchronous:gpu-toggle \
             "󰍺 GPU On" "NVIDIA modules loaded"
     else
