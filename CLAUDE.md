@@ -34,8 +34,11 @@ There is no build or test suite. Reload what you touched:
 - Hyprland: `hyprctl reload`
 - Liquid shell: `qs -c liquid ipc call shell reload`
 - Boot splash: `boot/plymouth/render <dir>` renders it as you; installing it (`boot/install theme`)
-  needs the user's sudo. The greeter previews with `qs -p ~/.config/quickshell/liquid/greeter.qml`;
-  the outro with `qs -c liquid ipc call shell leave preview`.
+  needs the user's sudo. `SUDO=pkexec boot/plymouth/try [boot|shutdown]` plays the installed one
+  in a window after one password dialog and reports script errors. The window shows the middle
+  quarter of the 4K layout. Take screenshots with grim while it runs.
+  The greeter previews with `qs -p ~/.config/quickshell/liquid/greeter.qml`; the outro with
+  `qs -c liquid ipc call shell leave preview`.
 
 ## Don't
 

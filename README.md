@@ -110,6 +110,7 @@ sudo ~/dotfiles/boot/install          # plymouth + greetd, the splash, the hook,
 sudo ~/dotfiles/boot/install theme    # re-render the splash after a new wallpaper or palette
 sudo ~/dotfiles/boot/install undo     # back to the text login on tty1 and no splash
 boot/plymouth/render /tmp/splash      # see what the splash would be drawn from, as yourself
+~/dotfiles/boot/plymouth/try shutdown # play the installed splash in a window (asks for root)
 qs -p ~/.config/quickshell/liquid/greeter.qml   # the greeter as a preview: checks nothing, Esc closes
 qs -c liquid ipc call shell leave preview      # the outro, played back without leaving
 ```

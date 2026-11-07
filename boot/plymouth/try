@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# try — play the installed Plymouth splash in a window over the desktop, without rebooting.
+#
+#   ~/dotfiles/boot/plymouth/try [boot|shutdown|reboot] [seconds]
+#
+# Run it as yourself: plymouthd takes orders only from root, so it asks for that itself (sudo, or
+# SUDO=pkexec for a password dialog instead). With DISPLAY set, plymouthd draws through its x11
+# renderer into a window the X screen's size. XWayland lets in only your own user, so root is let
+# in for the run and shut out again after. On the XPS, XWayland's screen is the panel at scale 2,
+# so the window shows the middle quarter of the splash, doubled. Booting, it sends "liquid:fade"
+# before quitting, as plymouth-quit's drop-in does. A mistake in the script shows up at the end as
+# a Parser or Execution error.
+set -euo pipefail
+
+mode=boot
+secs=8
+
+# X's host list, changed by ChangeHosts over X's own socket (no xhost here): insert or delete
+# "localuser:root" (server-interpreted, family 5).
+xhost_root() {
+    python3 - "${DISPLAY#*:}" "$1" <<'EOF'
+import socket, struct, sys
+num, op = sys.argv[1].split(".")[0], sys.argv[2]
+s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+s.connect("/tmp/.X11-unix/X" + num)
+s.sendall(struct.pack("<BxHHHHxx", 0x6C, 11, 0, 0, 0))
+head = s.recv(8, socket.MSG_WAITALL)
+if head[0] != 1:
+    sys.exit("try: X refused the connection")
+s.recv(struct.unpack("<H", head[6:8])[0] * 4, socket.MSG_WAITALL)
+addr = b"localuser\x00root"
+body = struct.pack("<BxH", 5, len(addr)) + addr + b"\x00" * (-len(addr) % 4)
+s.sendall(struct.pack("<BBH", 109, 0 if op == "add" else 1, 1 + len(body) // 4) + body)
+s.sendall(struct.pack("<BxH", 43, 1))                     # GetInputFocus: wait for the answer
+reply = s.recv(32, socket.MSG_WAITALL)
+if reply[0] == 0:
+    sys.exit("try: X wouldn't change its host list (error %d)" % reply[1])
+EOF
+}
+
+if [ "${1:-}" = --root ]; then
+    mode=${2:-boot}
+    secs=${3:-8}
+    [ "$(id -u)" = 0 ] || { echo "try: --root is the part that runs as root" >&2; exit 1; }
+    if pgrep -x plymouthd >/dev/null; then echo "try: a plymouthd is already running" >&2; exit 1; fi
+    log=$(mktemp -t plymouth-try.XXXXXX)
+    plymouthd --no-daemon --mode="$mode" --kernel-command-line="quiet splash" \
+        --pid-file="$log.pid" --debug --debug-file="$log.debug" 2>"$log" &
+    daemon=$!
+    trap 'plymouth quit 2>/dev/null || true; wait "$daemon" 2>/dev/null || true' EXIT
+    for _ in $(seq 50); do plymouth --ping 2>/dev/null && break; sleep 0.1; done
+    plymouth show-splash
+    sleep "$secs"
+    if [ "$mode" = boot ]; then
+        plymouth update --status=liquid:fade
+        sleep 0.6
+    fi
+    plymouth quit
+    wait "$daemon" || true
+    trap - EXIT
+    chmod 644 "$log" "$log.debug" 2>/dev/null || true
+    if grep -q 'no displays available' "$log.debug"; then
+        echo "try: plymouthd found nowhere to draw (no X display?), so the script never ran. Log: $log.debug"
+        exit 1
+    elif grep -hE 'Parser error|Execution error' "$log" "$log.debug"; then
+        echo "try: the script has errors, above. Log: $log.debug"
+        exit 1
+    fi
+    echo "try: the script ran without errors. Log: $log.debug"
+    exit 0
+fi
+
+mode=${1:-boot}
+secs=${2:-8}
+[ "$(id -u)" != 0 ] || { echo "try: run it as yourself; it asks for root when it needs it" >&2; exit 1; }
+: "${DISPLAY:?try: needs DISPLAY, from inside the session}"
+xhost_root add
+trap 'xhost_root remove' EXIT
+${SUDO:-sudo} env DISPLAY="$DISPLAY" "$(readlink -f "$0")" --root "$mode" "$secs"
