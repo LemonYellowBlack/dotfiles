@@ -23,8 +23,8 @@ Each top-level dir is a Stow package whose tree mirrors `$HOME`, e.g.
 
 `scripts/` is **not** a Stow package — it holds helper assets (e.g.
 `kanagawa_wallpaper.py`) referenced by scripts in `bin/`. Don't stow it. Nor are
-`theme/` (below), `boot/` (the boot splash and greeter, see [Boot](#boot)) and `sbin/` (what
-sudo runs without a password, see [Gotchas](#gotchas)).
+`theme/` (below), `boot/` (the boot splash and greeter, see [Boot](#boot)), `zen/` (the browser's
+prefs, see [Zen](#zen)) and `sbin/` (what sudo runs without a password, see [Gotchas](#gotchas)).
 
 ### Per-machine packages
 
@@ -121,6 +121,27 @@ both. It runs as greetd's `greeter` user, so it relies on your home, `~/.config`
 being world-readable, as they are now. If it ever won't come up, Ctrl+Alt+F2 gives a text login
 to run `undo` from. The kernel line hides the console cursor everywhere, the TTYs too.
 
+## Zen
+
+Zen keeps its settings in a profile folder with a random name (`~/.config/zen/ezewh6oe.Default
+(release)`) that differs per machine, so it can't be a Stow package. `zen/link` finds the default
+profile from `installs.ini` and links three files into it, and nothing else of the profile (cookies,
+history, logins, `prefs.js`) comes near the repo:
+
+- `user.js` → `zen/user.js`: telemetry off, and Zen told to read the two stylesheets below.
+- `chrome/userChrome.css` and `chrome/userContent.css` → `~/.config/theme/zen/`, rendered by
+  `retheme` from `theme/templates/.config/theme/zen/`. They paint the space behind a page, and
+  `about:blank`, in the `content` token, so there's no white flash between page loads.
+
+```sh
+~/dotfiles/zen/link        # after retheme; safe to run again, keeps what was there as FILE.dotfiles-orig
+~/dotfiles/zen/link undo   # remove the links, put the originals back
+```
+
+Zen reads all three only at startup: restart it after a `retheme` or an edit to `user.js`. A pref
+in `user.js` wins over `about:config` at every start, and taking a line out doesn't undo it; reset
+it in `about:config` too. `chrome/zen-themes.css` belongs to Zen Mods and stays out of the repo.
+
 ## Install
 
 ```sh
@@ -135,6 +156,7 @@ host=xps   # or hotdog
 stow hypr-$host zsh-$host
 stow --no-folding neowall-$host quickshell-$host
 theme/retheme              # colors; on a new machine, `theme/retheme copy xps` first
+zen/link                   # Zen's prefs and theme into its profile (start Zen once first)
 ```
 
 Stow only creates symlinks; install the underlying programs separately.
