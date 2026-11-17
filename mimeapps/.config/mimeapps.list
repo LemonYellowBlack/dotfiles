@@ -19,6 +19,16 @@ application/vnd.ms-word.document.macroEnabled.12=ai.storyteller.wordcraft.deskto
 application/vnd.ms-word.template.macroEnabled.12=ai.storyteller.wordcraft.desktop
 application/msword-template=ai.storyteller.wordcraft.desktop
 application/pdf=ai.storyteller.pdfcraft.desktop
+image/png=imv.desktop
+image/jpeg=imv.desktop
+image/gif=imv.desktop
+image/webp=imv.desktop
+image/bmp=imv.desktop
+image/tiff=imv.desktop
+image/avif=imv.desktop
+image/heif=imv.desktop
+image/jxl=imv.desktop
+image/qoi=imv.desktop
 
 [Added Associations]
 x-scheme-handler/http=zen.desktop;
