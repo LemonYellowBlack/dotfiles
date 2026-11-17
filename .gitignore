@@ -2,6 +2,10 @@ scripts/wallpapers/
 ssh/.ssh/config
 bin/.local/bin/claude
 bin/.local/bin/moshi*
+# Craft app launchers (links into ~/Applications, installed per machine). They land here on
+# hosts where ~/.local/bin is the folded bin package.
+bin/.local/bin/*craft
+bin/.local/bin/*craft-cli
 
 # herdr writes runtime state beside its config; belt-and-braces if the
 # package is ever stowed without --no-folding (see README gotcha).
