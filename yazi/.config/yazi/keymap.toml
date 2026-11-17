@@ -2,3 +2,9 @@
 on   = [ "<Enter>" ]
 run  = "plugin smart-enter"
 desc = "Enter directory or open file"
+
+# Drag selected files (or the hovered one) out of yazi; window closes after one drop.
+[[mgr.prepend_keymap]]
+on   = "<C-n>"
+run  = "shell --orphan -- ripdrag -x -a -n %s"
+desc = "Drag files out with ripdrag"
