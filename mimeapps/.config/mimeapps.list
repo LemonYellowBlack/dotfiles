@@ -18,6 +18,7 @@ application/vnd.openxmlformats-officedocument.wordprocessingml.template=ai.story
 application/vnd.ms-word.document.macroEnabled.12=ai.storyteller.wordcraft.desktop
 application/vnd.ms-word.template.macroEnabled.12=ai.storyteller.wordcraft.desktop
 application/msword-template=ai.storyteller.wordcraft.desktop
+application/pdf=ai.storyteller.pdfcraft.desktop
 
 [Added Associations]
 x-scheme-handler/http=zen.desktop;
