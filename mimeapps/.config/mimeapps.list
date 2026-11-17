@@ -12,6 +12,12 @@ application/x-extension-xht=zen.desktop
 x-scheme-handler/claude-cli=claude-code-url-handler.desktop
 x-scheme-handler/claude=com.anthropic.claude-desktop.desktop
 x-scheme-handler/excalidraw=excalidraw-desktop-handler.desktop
+application/vnd.openxmlformats-officedocument.wordprocessingml.document=ai.storyteller.wordcraft.desktop
+application/msword=ai.storyteller.wordcraft.desktop
+application/vnd.openxmlformats-officedocument.wordprocessingml.template=ai.storyteller.wordcraft.desktop
+application/vnd.ms-word.document.macroEnabled.12=ai.storyteller.wordcraft.desktop
+application/vnd.ms-word.template.macroEnabled.12=ai.storyteller.wordcraft.desktop
+application/msword-template=ai.storyteller.wordcraft.desktop
 
 [Added Associations]
 x-scheme-handler/http=zen.desktop;
